@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "643187558532",
+    "project_id": "mottu-5257a",
+    "storage_bucket": "mottu-5257a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643187558532:android:da45c6e20624ad9cf61ad1",
+        "android_client_info": {
+          "package_name": "com.mateussiqueira.pokeapi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ1AqOrgrcStExJdtlGsGlvJIX_paGWXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
