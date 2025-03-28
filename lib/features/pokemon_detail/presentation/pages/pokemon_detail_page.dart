@@ -10,13 +10,13 @@ class PokemonDetailPage extends StatelessWidget {
   const PokemonDetailPage({super.key, required this.pokemon});
 
   void _onTypePressed(String type) {
-    final controller = Get.find<RelatedPokemonsController>();
+    final controller = Get.put(RelatedPokemonsController(Get.find()));
     controller.loadPokemonsByType(type);
     Get.toNamed('/related-pokemons');
   }
 
   void _onAbilityPressed(String ability) {
-    final controller = Get.find<RelatedPokemonsController>();
+    final controller = Get.put(RelatedPokemonsController(Get.find()));
     controller.loadPokemonsByAbility(ability);
     Get.toNamed('/related-pokemons');
   }
@@ -26,6 +26,10 @@ class PokemonDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(pokemon.name),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(

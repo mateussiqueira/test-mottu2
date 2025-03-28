@@ -17,14 +17,14 @@ class Pokemon extends Equatable {
     required this.id,
     required this.name,
     required this.imageUrl,
-    this.types = const [],
-    this.stats = const [],
-    this.abilities = const [],
-    this.moves = const [],
-    this.evolutionChain = const [],
-    this.locations = const [],
-    this.height = 0,
-    this.weight = 0,
+    required this.types,
+    required this.stats,
+    required this.abilities,
+    required this.moves,
+    required this.evolutionChain,
+    required this.locations,
+    required this.height,
+    required this.weight,
   });
 
   @override
@@ -39,6 +39,6 @@ class Pokemon extends Equatable {
         evolutionChain,
         locations,
         height,
-        weight
+        weight,
       ];
 }

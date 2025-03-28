@@ -76,11 +76,12 @@ class PokemonListController extends GetxController {
       isLoading.value = true;
       error.value = '';
 
-      final pokemon = await _repository.getPokemonByName(query.toLowerCase());
-      pokemons.value = [pokemon];
+      final result = await _repository.searchPokemons(query.toLowerCase());
+      pokemons.value = result;
       hasMore.value = false;
     } catch (e) {
-      error.value = e.toString();
+      error.value = 'Erro ao buscar Pokémon. Tente novamente.';
+      pokemons.value = [];
     } finally {
       isLoading.value = false;
     }

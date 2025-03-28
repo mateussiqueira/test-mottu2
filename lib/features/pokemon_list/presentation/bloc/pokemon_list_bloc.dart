@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,16 +68,19 @@ class PokemonListLoaded extends PokemonListState {
   final bool hasMore;
   final String? filterType;
   final String? filterAbility;
+  final String? searchQuery;
 
   const PokemonListLoaded({
     required this.pokemons,
     this.hasMore = true,
     this.filterType,
     this.filterAbility,
+    this.searchQuery,
   });
 
   @override
-  List<Object?> get props => [pokemons, hasMore, filterType, filterAbility];
+  List<Object?> get props =>
+      [pokemons, hasMore, filterType, filterAbility, searchQuery];
 }
 
 class PokemonListError extends PokemonListState {
@@ -87,17 +92,24 @@ class PokemonListError extends PokemonListState {
   List<Object?> get props => [message];
 }
 
-// Bloc
+// BLoC
 class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
   final PokemonRepository repository;
   int _currentOffset = 0;
   static const int _limit = 20;
+  Timer? _debounceTimer;
 
   PokemonListBloc({required this.repository}) : super(PokemonListInitial()) {
     on<LoadPokemons>(_onLoadPokemons);
     on<SearchPokemon>(_onSearchPokemon);
     on<LoadPokemonsByType>(_onLoadPokemonsByType);
     on<LoadPokemonsByAbility>(_onLoadPokemonsByAbility);
+  }
+
+  @override
+  Future<void> close() {
+    _debounceTimer?.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadPokemons(
@@ -129,17 +141,32 @@ class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
     SearchPokemon event,
     Emitter<PokemonListState> emit,
   ) async {
-    try {
-      if (state is PokemonListLoading) return;
+    // Cancela o timer anterior se existir
+    _debounceTimer?.cancel();
 
-      emit(PokemonListLoading());
-
-      final pokemon =
-          await repository.getPokemonByName(event.query.toLowerCase());
-      emit(PokemonListLoaded(pokemons: [pokemon], hasMore: false));
-    } catch (e) {
-      emit(PokemonListError(e.toString()));
+    // Se a query estiver vazia, volta para a lista normal
+    if (event.query.isEmpty) {
+      add(const LoadPokemons());
+      return;
     }
+
+    // Cria um novo timer para debounce
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        if (state is PokemonListLoading) return;
+
+        emit(PokemonListLoading());
+
+        final pokemons = await repository.searchPokemons(event.query);
+        emit(PokemonListLoaded(
+          pokemons: pokemons,
+          hasMore: false,
+          searchQuery: event.query,
+        ));
+      } catch (e) {
+        emit(PokemonListError(e.toString()));
+      }
+    });
   }
 
   Future<void> _onLoadPokemonsByType(

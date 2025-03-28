@@ -1,40 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/pokemon_list_bloc.dart';
-import '../widgets/pokemon_search_delegate.dart';
+import '../bloc/related_pokemons_bloc.dart';
 
-class PokemonListPage extends StatelessWidget {
-  const PokemonListPage({super.key});
+class RelatedPokemonsPage extends StatelessWidget {
+  const RelatedPokemonsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pokédex'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: PokemonSearchDelegate(
-                  context.read<PokemonListBloc>(),
-                ),
-              );
-            },
-          ),
-        ],
+        title: BlocBuilder<RelatedPokemonsBloc, RelatedPokemonsState>(
+          builder: (context, state) {
+            if (state is RelatedPokemonsLoaded) {
+              if (state.filterType != null) {
+                return Text('${state.filterType!.toUpperCase()} POKÉMON');
+              }
+              if (state.filterAbility != null) {
+                return Text('${state.filterAbility!.toUpperCase()} POKÉMON');
+              }
+            }
+            return const Text('POKÉMON RELACIONADOS');
+          },
+        ),
       ),
-      body: BlocBuilder<PokemonListBloc, PokemonListState>(
+      body: BlocBuilder<RelatedPokemonsBloc, RelatedPokemonsState>(
         builder: (context, state) {
-          if (state is PokemonListLoading) {
+          if (state is RelatedPokemonsLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          if (state is PokemonListError) {
+          if (state is RelatedPokemonsError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -55,7 +53,27 @@ class PokemonListPage extends StatelessWidget {
             );
           }
 
-          if (state is PokemonListLoaded) {
+          if (state is RelatedPokemonsLoaded) {
+            if (state.pokemons.isEmpty) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.search_off,
+                      size: 60,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Nenhum Pokémon encontrado',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

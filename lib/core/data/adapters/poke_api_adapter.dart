@@ -5,11 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/pokemon.dart';
 import '../../domain/repositories/pokemon_repository.dart';
+import '../models/pokemon_model.dart';
 
 class PokeApiAdapter implements PokemonRepository {
+  final http.Client client;
   static const String _baseUrl = 'https://pokeapi.co/api/v2';
   static const String _cacheKey = 'pokemon_cache';
   static const Duration _cacheDuration = Duration(hours: 1);
+
+  PokeApiAdapter({http.Client? client}) : client = client ?? http.Client();
 
   @override
   Future<List<Pokemon>> getPokemons({int limit = 20, int offset = 0}) async {
@@ -19,17 +23,31 @@ class PokeApiAdapter implements PokemonRepository {
       return _parsePokemonList(cachedData);
     }
 
-    final response = await http.get(
-      Uri.parse('$_baseUrl/pokemon?limit=$limit&offset=$offset'),
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('$_baseUrl/pokemon?limit=$limit&offset=$offset'),
+      );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      await _cacheData(cacheKey, data);
-      return _parsePokemonList(data);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        await _cacheData(cacheKey, data);
+        final List<dynamic> results = data['results'];
+        final List<Pokemon> pokemons = [];
+
+        for (var result in results) {
+          final urlParts = result['url'].split('/');
+          final id = int.parse(urlParts[urlParts.length - 2]);
+          final pokemon = await getPokemonById(id);
+          pokemons.add(pokemon);
+        }
+
+        return pokemons;
+      }
+
+      throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Falha ao buscar Pokémon: $e');
     }
-
-    throw Exception('Failed to load pokemons');
   }
 
   @override
@@ -40,7 +58,7 @@ class PokeApiAdapter implements PokemonRepository {
       return _parsePokemon(cachedData);
     }
 
-    final response = await http.get(
+    final response = await client.get(
       Uri.parse('$_baseUrl/pokemon/$name'),
     );
 
@@ -61,17 +79,32 @@ class PokeApiAdapter implements PokemonRepository {
       return _parsePokemonList(cachedData);
     }
 
-    final response = await http.get(
-      Uri.parse('$_baseUrl/type/$type'),
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('$_baseUrl/type/$type'),
+      );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      await _cacheData(cacheKey, data);
-      return _parsePokemonList(data);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        await _cacheData(cacheKey, data);
+        final List<dynamic> pokemonList = data['pokemon'];
+        final List<Pokemon> pokemons = [];
+
+        for (var pokemon in pokemonList) {
+          final urlParts = pokemon['pokemon']['url'].split('/');
+          final id = int.parse(urlParts[urlParts.length - 2]);
+          final pokemonData = await getPokemonById(id);
+          pokemons.add(pokemonData);
+        }
+
+        return pokemons;
+      }
+
+      throw Exception(
+          'Falha ao buscar Pokémon por tipo: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Falha ao buscar Pokémon por tipo: $e');
     }
-
-    throw Exception('Failed to load pokemons by type');
   }
 
   @override
@@ -82,17 +115,32 @@ class PokeApiAdapter implements PokemonRepository {
       return _parsePokemonList(cachedData);
     }
 
-    final response = await http.get(
-      Uri.parse('$_baseUrl/ability/$ability'),
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('$_baseUrl/ability/$ability'),
+      );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      await _cacheData(cacheKey, data);
-      return _parsePokemonList(data);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        await _cacheData(cacheKey, data);
+        final List<dynamic> pokemonList = data['pokemon'];
+        final List<Pokemon> pokemons = [];
+
+        for (var pokemon in pokemonList) {
+          final urlParts = pokemon['pokemon']['url'].split('/');
+          final id = int.parse(urlParts[urlParts.length - 2]);
+          final pokemonData = await getPokemonById(id);
+          pokemons.add(pokemonData);
+        }
+
+        return pokemons;
+      }
+
+      throw Exception(
+          'Falha ao buscar Pokémon por habilidade: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Falha ao buscar Pokémon por habilidade: $e');
     }
-
-    throw Exception('Failed to load pokemons by ability');
   }
 
   @override
@@ -137,6 +185,12 @@ class PokeApiAdapter implements PokemonRepository {
         name: result['name'],
         types: const [],
         abilities: const [],
+        stats: const [],
+        moves: const [],
+        evolutionChain: const [],
+        locations: const [],
+        height: 0,
+        weight: 0,
         imageUrl:
             'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png',
       );
@@ -153,9 +207,41 @@ class PokeApiAdapter implements PokemonRepository {
       abilities: (data['abilities'] as List)
           .map((ability) => ability['ability']['name'] as String)
           .toList(),
+      stats: List<Map<String, dynamic>>.from(
+        (data['stats'] as List).map(
+          (stat) => {
+            'name': stat['stat']['name'],
+            'value': stat['base_stat'],
+          },
+        ),
+      ),
+      moves: List<String>.from(
+        (data['moves'] as List).map((move) => move['move']['name'] as String),
+      ),
+      evolutionChain: const [],
+      locations: const [],
+      height: (data['height'] as num) / 10,
+      weight: (data['weight'] as num) / 10,
       imageUrl:
           'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data['id']}.png',
     );
+  }
+
+  @override
+  Future<Pokemon> getPokemonById(int id) async {
+    try {
+      final response = await client.get(
+        Uri.parse('$_baseUrl/pokemon/$id'),
+      );
+
+      if (response.statusCode == 200) {
+        return PokemonModel.fromJson(json.decode(response.body));
+      }
+
+      throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Falha ao buscar Pokémon: $e');
+    }
   }
 
   static Pokemon fromJson(Map<String, dynamic> data) {
@@ -191,5 +277,38 @@ class PokeApiAdapter implements PokemonRepository {
 
   static List<Pokemon> fromJsonList(List<Map<String, dynamic>> dataList) {
     return dataList.map((data) => fromJson(data)).toList();
+  }
+
+  @override
+  Future<List<Pokemon>> searchPokemons(String query) async {
+    try {
+      final response = await client.get(
+        Uri.parse('$_baseUrl/pokemon?limit=1118'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> results = data['results'];
+        final List<Pokemon> pokemons = [];
+
+        for (var result in results) {
+          if (result['name']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
+            final urlParts = result['url'].split('/');
+            final id = int.parse(urlParts[urlParts.length - 2]);
+            final pokemon = await getPokemonById(id);
+            pokemons.add(pokemon);
+          }
+        }
+
+        return pokemons;
+      }
+
+      throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Falha ao buscar Pokémon: $e');
+    }
   }
 }
