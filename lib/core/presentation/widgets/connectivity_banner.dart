@@ -31,7 +31,8 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
   }
 
   Future<void> _checkConnectivity() async {
-    final isConnected = await getIt<ConnectivityService>().checkConnectivity();
+    final isConnected =
+        await ServiceLocator.getIt<ConnectivityService>().checkConnectivity();
     if (mounted && isConnected != _isConnected) {
       setState(() {
         _isConnected = isConnected;
