@@ -28,13 +28,10 @@ class PokemonTypes extends StatelessWidget {
           runSpacing: AppConstants.spacingSmall,
           children: types.map((type) {
             return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.chipPadding,
-                vertical: AppConstants.spacingSmall,
-              ),
+              padding: AppConstants.chipPadding,
               decoration: BoxDecoration(
-                color: Color(
-                    AppConstants.typeColors[type.toLowerCase()] ?? 0xFFA8A878),
+                color:
+                    AppConstants.typeColors[type.toLowerCase()] ?? Colors.grey,
                 borderRadius:
                     BorderRadius.circular(AppConstants.chipBorderRadius),
               ),

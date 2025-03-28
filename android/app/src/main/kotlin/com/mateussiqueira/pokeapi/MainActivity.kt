@@ -3,20 +3,25 @@ package com.mateussiqueira.pokeapi
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity : FlutterActivity() {
     private val CONNECTIVITY_CHANNEL = "com.mateussiqueira.pokeapi/connectivity"
     private var connectivityEventSink: EventChannel.EventSink? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
 
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, CONNECTIVITY_CHANNEL)
             .setStreamHandler(object : EventChannel.StreamHandler {
@@ -32,20 +37,20 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun setupConnectivityListener() {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
-                    activity?.runOnUiThread {
+                    mainHandler.post {
                         connectivityEventSink?.success(true)
                     }
                 }
 
                 override fun onLost(network: Network) {
                     super.onLost(network)
-                    activity?.runOnUiThread {
+                    mainHandler.post {
                         connectivityEventSink?.success(false)
                     }
                 }
@@ -57,14 +62,14 @@ class MainActivity : FlutterActivity() {
             connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
-                    activity?.runOnUiThread {
+                    mainHandler.post {
                         connectivityEventSink?.success(true)
                     }
                 }
 
                 override fun onLost(network: Network) {
                     super.onLost(network)
-                    activity?.runOnUiThread {
+                    mainHandler.post {
                         connectivityEventSink?.success(false)
                     }
                 }

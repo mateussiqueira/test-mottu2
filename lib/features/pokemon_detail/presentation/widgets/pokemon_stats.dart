@@ -50,8 +50,7 @@ class PokemonStats extends StatelessWidget {
                 ),
                 const SizedBox(height: AppConstants.spacingSmall),
                 ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.statsBarRadius),
+                  borderRadius: BorderRadius.circular(4.0),
                   child: LinearProgressIndicator(
                     value: entry.value / AppConstants.maxStatValue,
                     minHeight: AppConstants.statsBarHeight,

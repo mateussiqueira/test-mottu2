@@ -21,11 +21,11 @@ class PokemonGridItem extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () => Get.toNamed(
-          AppConstants.pokemonDetailRoute,
+          AppConstants.detailRoute,
           arguments: pokemon,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.cardPadding),
+          padding: AppConstants.cardPadding,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -61,14 +61,10 @@ class PokemonGridItem extends StatelessWidget {
                 alignment: WrapAlignment.center,
                 children: pokemon.types.map((type) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.chipPadding,
-                      vertical: AppConstants.spacingSmall,
-                    ),
+                    padding: AppConstants.chipPadding,
                     decoration: BoxDecoration(
-                      color: Color(
-                          AppConstants.typeColors[type.toLowerCase()] ??
-                              0xFFA8A878),
+                      color: AppConstants.typeColors[type.toLowerCase()] ??
+                          Colors.grey,
                       borderRadius:
                           BorderRadius.circular(AppConstants.chipBorderRadius),
                     ),

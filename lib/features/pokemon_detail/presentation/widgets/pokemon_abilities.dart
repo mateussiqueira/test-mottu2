@@ -28,10 +28,7 @@ class PokemonAbilities extends StatelessWidget {
           runSpacing: AppConstants.spacingSmall,
           children: abilities.map((ability) {
             return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.chipPadding,
-                vertical: AppConstants.spacingSmall,
-              ),
+              padding: AppConstants.chipPadding,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius:
