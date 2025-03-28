@@ -1,40 +1,53 @@
-# Pokédex Flutter
+# PokeAPI Flutter App
 
-Um aplicativo Flutter que integra com a PokeAPI para exibir informações sobre Pokémon.
+A Flutter application that displays information about Pokémon using the PokeAPI.
 
-## Funcionalidades
+## Features
 
-- Lista de Pokémon com paginação
-- Detalhes de cada Pokémon
-- Monitoramento de conectividade
-- Cache de imagens
-- Interface moderna com Material Design 3
-- Gerenciamento de estado com GetX
-- Arquitetura limpa (Clean Architecture)
+- List of Pokémon with pagination
+- Search Pokémon by name
+- View detailed information about each Pokémon
+- Filter Pokémon by type and ability
+- Caching for offline access
+- Clean Architecture implementation
 
-## Tecnologias Utilizadas
-
-- Flutter 3.29.2
-- Dart 3.7.2
-- GetX para gerenciamento de estado e injeção de dependência
-- HTTP para requisições à API
-- Cached Network Image para cache de imagens
-- Shared Preferences para armazenamento local
-- Kotlin para código nativo Android
-
-## Estrutura do Projeto
+## Project Structure
 
 ```
 lib/
 ├── core/
 │   ├── constants/
-│   ├── services/
-│   └── utils/
+│   │   └── app_constants.dart
+│   ├── data/
+│   │   ├── adapters/
+│   │   │   └── poke_api_adapter.dart
+│   │   ├── models/
+│   │   │   └── pokemon_model.dart
+│   │   └── repositories/
+│   │       └── pokemon_repository_impl.dart
+│   ├── domain/
+│   │   ├── entities/
+│   │   │   └── pokemon.dart
+│   │   └── repositories/
+│   │       └── pokemon_repository.dart
+│   └── services/
+│       └── http_client.dart
 ├── features/
 │   ├── pokemon_list/
 │   │   ├── data/
+│   │   │   ├── adapters/
+│   │   │   ├── models/
+│   │   │   └── repositories/
 │   │   ├── domain/
-│   │   └── presentation/
+│   │   │   ├── entities/
+│   │   │   ├── repositories/
+│   │   │   └── usecases/
+│   │   ├── presentation/
+│   │   │   ├── bloc/
+│   │   │   ├── controllers/
+│   │   │   ├── pages/
+│   │   │   └── widgets/
+│   │   └── pokemon_list_module.dart
 │   └── pokemon_detail/
 │       ├── data/
 │       ├── domain/
@@ -42,43 +55,51 @@ lib/
 └── main.dart
 ```
 
-## Configuração do Ambiente
+## Architecture
 
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/pokeapi.git
-```
+The project follows Clean Architecture principles with the following layers:
 
-2. Instale as dependências:
-```bash
-flutter pub get
-```
+- **Core**: Contains shared code, constants, and base implementations
+- **Features**: Contains feature-specific code organized by domain
+- **Data**: Handles data operations and API communication
+- **Domain**: Contains business logic and entities
+- **Presentation**: Handles UI and state management
 
-3. Configure o arquivo `local.properties`:
-```properties
-flutter.sdk=/caminho/para/seu/flutter
-```
+## Dependencies
 
-4. Execute o aplicativo:
-```bash
-flutter run
-```
+- flutter_bloc: State management
+- get: Navigation and dependency injection
+- http: API communication
+- shared_preferences: Local storage
+- cached_network_image: Image caching
 
-## Arquitetura
+## Getting Started
 
-O projeto segue os princípios da Clean Architecture, com as seguintes camadas:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+3. Run the app:
+   ```bash
+   flutter run
+   ```
 
-- **Data**: Implementação dos repositórios e fontes de dados
-- **Domain**: Regras de negócio e casos de uso
-- **Presentation**: Interface do usuário e widgets
+## Recent Changes
 
-## Contribuição
+- Updated Pokemon entity structure to match PokeAPI response
+- Implemented proper data transformation in models and adapters
+- Added caching for offline access
+- Improved error handling and null safety
+- Updated UI components to work with new data structure
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
 
 ## Licença
 

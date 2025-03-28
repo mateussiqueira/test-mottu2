@@ -10,22 +10,49 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
   core.Pokemon _convertToCorePokemon(feature.Pokemon pokemon) {
     return core.Pokemon(
-      id: int.parse(pokemon.id),
+      id: int.tryParse(pokemon.id) ?? 0,
       name: pokemon.name,
-      imageUrl: pokemon.imageUrl,
-      types: pokemon.types,
-      abilities: pokemon.abilities,
-      stats: pokemon.stats.entries
-          .map((e) => {
-                'name': e.key,
-                'value': e.value,
-              })
-          .toList(),
+      baseExperience: 0, // Not available in feature model
       height: pokemon.height,
       weight: pokemon.weight,
-      evolutionChain: pokemon.evolutionChain,
-      locations: pokemon.locations,
-      moves: const [], // TODO: Implement moves
+      isDefault: true, // Default value
+      order: 0, // Not available in feature model
+      sprites: {
+        'other': {
+          'official-artwork': {
+            'front_default': pokemon.imageUrl,
+          },
+        },
+      },
+      types: pokemon.types
+          .map((type) => {
+                'type': {'name': type}
+              })
+          .toList(),
+      abilities: pokemon.abilities
+          .map((ability) => {
+                'ability': {'name': ability}
+              })
+          .toList(),
+      stats: pokemon.stats.entries
+          .map((e) => {
+                'stat': {'name': e.key},
+                'base_stat': e.value,
+              })
+          .toList(),
+      moves: pokemon.moves
+          .map((move) => {
+                'move': {'name': move['name']}
+              })
+          .toList(),
+      forms: [], // Not available in feature model
+      gameIndices: [], // Not available in feature model
+      heldItems: [], // Not available in feature model
+      locationAreaEncounters: '', // Not available in feature model
+      cries: [], // Not available in feature model
+      pastAbilities: [], // Not available in feature model
+      pastTypes: [], // Not available in feature model
+      species: {}, // Not available in feature model
     );
   }
 
@@ -38,7 +65,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
   @override
   Future<core.Pokemon> getPokemonById(int id) async {
-    final pokemon = await _adapter.getPokemonById(id.toString());
+    final pokemon = await _adapter.getPokemonById(id);
     return _convertToCorePokemon(pokemon);
   }
 

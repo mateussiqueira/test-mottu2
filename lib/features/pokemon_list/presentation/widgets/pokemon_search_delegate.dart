@@ -49,6 +49,14 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
     return _buildSearchResults();
   }
 
+  String _getImageUrl(pokemon) =>
+      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+
+  List<String> _getTypes(pokemon) => pokemon.types
+      .map((type) => type['type']?['name'] as String? ?? '')
+      .where((type) => type.isNotEmpty)
+      .toList();
+
   Widget _buildSearchResults() {
     return BlocBuilder<PokemonListBloc, PokemonListState>(
       bloc: bloc,
@@ -107,7 +115,7 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
               final pokemon = state.pokemons[index];
               return ListTile(
                 leading: Image.network(
-                  pokemon.imageUrl,
+                  _getImageUrl(pokemon),
                   width: 50,
                   height: 50,
                   fit: BoxFit.contain,
@@ -120,7 +128,7 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
                   ),
                 ),
                 subtitle: Text(
-                  pokemon.types.join(', '),
+                  _getTypes(pokemon).join(', '),
                   style: const TextStyle(fontSize: 14),
                 ),
                 onTap: () {

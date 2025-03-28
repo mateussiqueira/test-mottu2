@@ -12,6 +12,14 @@ class PokemonGridItem extends StatelessWidget {
     required this.pokemon,
   });
 
+  String get _imageUrl =>
+      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+
+  List<String> get _types => pokemon.types
+      .map((type) => type['type']?['name'] as String? ?? '')
+      .where((type) => type.isNotEmpty)
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -32,7 +40,7 @@ class PokemonGridItem extends StatelessWidget {
               AspectRatio(
                 aspectRatio: 1,
                 child: Image.network(
-                  pokemon.imageUrl,
+                  _imageUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
                     return const Icon(
@@ -59,7 +67,7 @@ class PokemonGridItem extends StatelessWidget {
                 spacing: AppConstants.spacingSmall,
                 runSpacing: AppConstants.spacingSmall,
                 alignment: WrapAlignment.center,
-                children: pokemon.types.map((type) {
+                children: _types.map((type) {
                   return Container(
                     padding: AppConstants.chipPadding,
                     decoration: BoxDecoration(

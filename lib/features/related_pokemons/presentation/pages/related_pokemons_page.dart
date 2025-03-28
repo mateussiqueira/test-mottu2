@@ -6,6 +6,14 @@ import '../bloc/related_pokemons_bloc.dart';
 class RelatedPokemonsPage extends StatelessWidget {
   const RelatedPokemonsPage({super.key});
 
+  String _getImageUrl(pokemon) =>
+      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+
+  List<String> _getTypes(pokemon) => pokemon.types
+      .map((type) => type['type']?['name'] as String? ?? '')
+      .where((type) => type.isNotEmpty)
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +104,7 @@ class RelatedPokemonsPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Image.network(
-                            pokemon.imageUrl,
+                            _getImageUrl(pokemon),
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -115,7 +123,7 @@ class RelatedPokemonsPage extends StatelessWidget {
                               const SizedBox(height: 4),
                               Wrap(
                                 spacing: 4,
-                                children: pokemon.types.map((type) {
+                                children: _getTypes(pokemon).map((type) {
                                   return Chip(
                                     label: Text(
                                       type,

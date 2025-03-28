@@ -12,6 +12,28 @@ import '../widgets/pokemon_types.dart';
 class PokemonDetailPage extends StatelessWidget {
   const PokemonDetailPage({super.key});
 
+  String _getImageUrl(Pokemon pokemon) =>
+      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+
+  List<String> _getTypes(Pokemon pokemon) => pokemon.types
+      .map((type) => type['type']?['name'] as String? ?? '')
+      .where((type) => type.isNotEmpty)
+      .toList();
+
+  List<String> _getAbilities(Pokemon pokemon) => pokemon.abilities
+      .map((ability) => ability['ability']?['name'] as String? ?? '')
+      .where((ability) => ability.isNotEmpty)
+      .toList();
+
+  Map<String, int> _getStats(Pokemon pokemon) => Map.fromEntries(
+        pokemon.stats.map(
+          (stat) => MapEntry(
+            stat['stat']?['name'] as String? ?? '',
+            stat['base_stat'] as int? ?? 0,
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final pokemon = Get.arguments as Pokemon;
@@ -31,7 +53,7 @@ class PokemonDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PokemonImage(imageUrl: pokemon.imageUrl),
+            PokemonImage(imageUrl: _getImageUrl(pokemon)),
             Padding(
               padding: const EdgeInsets.all(AppConstants.spacingLarge),
               child: Column(
@@ -39,24 +61,15 @@ class PokemonDetailPage extends StatelessWidget {
                 children: [
                   PokemonInfo(
                     name: pokemon.name,
-                    height: pokemon.height,
-                    weight: pokemon.weight,
+                    height: pokemon.height / 10.0,
+                    weight: pokemon.weight / 10.0,
                   ),
                   const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonTypes(types: pokemon.types),
+                  PokemonTypes(types: _getTypes(pokemon)),
                   const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonAbilities(abilities: pokemon.abilities),
+                  PokemonAbilities(abilities: _getAbilities(pokemon)),
                   const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonStats(
-                    stats: Map.fromEntries(
-                      pokemon.stats.map(
-                        (stat) => MapEntry(
-                          stat['name'] as String,
-                          stat['value'] as int,
-                        ),
-                      ),
-                    ),
-                  ),
+                  PokemonStats(stats: _getStats(pokemon)),
                 ],
               ),
             ),

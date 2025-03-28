@@ -214,39 +214,41 @@ class PokeApiAdapter implements PokemonRepository {
 
   static Pokemon fromJson(Map<String, dynamic> data) {
     return Pokemon(
-      id: data['id'],
-      name: data['name'],
-      imageUrl: data['sprites']['other']['official-artwork']['front_default'],
-      types: List<String>.from(
-        (data['types'] as List).map((type) => type['type']['name'] as String),
-      ),
-      stats: List<Map<String, dynamic>>.from(
-        (data['stats'] as List).map(
-          (stat) => {
-            'name': stat['stat']['name'],
-            'value': stat['base_stat'],
-          },
-        ),
-      ),
-      abilities: List<String>.from(
-        (data['abilities'] as List)
-            .map((ability) => ability['ability']['name'] as String),
-      ),
-      moves: List<String>.from(
-        (data['moves'] as List).map((move) => move['move']['name'] as String),
-      ),
-      evolutionChain: List<String>.from(
-        (data['evolution_chain'] as List?)
-                ?.map((chain) => chain['name'] as String) ??
-            [],
-      ),
-      locations: List<String>.from(
-        (data['locations'] as List?)
-                ?.map((location) => location['name'] as String) ??
-            [],
-      ),
-      height: (data['height'] as num) / 10,
-      weight: (data['weight'] as num) / 10,
+      id: data['id'] ?? 0,
+      name: data['name'] ?? '',
+      baseExperience: data['base_experience'] ?? 0,
+      height: data['height'] ?? 0,
+      weight: data['weight'] ?? 0,
+      isDefault: data['is_default'] ?? false,
+      order: data['order'] ?? 0,
+      sprites: data['sprites'] ?? {},
+      types:
+          (data['types'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
+      abilities:
+          (data['abilities'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
+              [],
+      stats:
+          (data['stats'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
+      moves:
+          (data['moves'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
+      forms:
+          (data['forms'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
+      gameIndices: (data['game_indices'] as List<dynamic>?)
+              ?.cast<Map<String, dynamic>>() ??
+          [],
+      heldItems: (data['held_items'] as List<dynamic>?)
+              ?.cast<Map<String, dynamic>>() ??
+          [],
+      locationAreaEncounters: data['location_area_encounters'] ?? '',
+      cries:
+          (data['cries'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
+      pastAbilities: (data['past_abilities'] as List<dynamic>?)
+              ?.cast<Map<String, dynamic>>() ??
+          [],
+      pastTypes: (data['past_types'] as List<dynamic>?)
+              ?.cast<Map<String, dynamic>>() ??
+          [],
+      species: data['species'] ?? {},
     );
   }
 

@@ -105,6 +105,14 @@ class PokemonCard extends StatelessWidget {
 
   const PokemonCard({super.key, required this.pokemon});
 
+  String get _imageUrl =>
+      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+
+  List<String> get _types => pokemon.types
+      .map((type) => type['type']?['name'] as String? ?? '')
+      .where((type) => type.isNotEmpty)
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -130,7 +138,7 @@ class PokemonCard extends StatelessWidget {
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(16)),
                     child: CachedNetworkImage(
-                      imageUrl: pokemon.imageUrl,
+                      imageUrl: _imageUrl,
                       fit: BoxFit.contain,
                       placeholder: (context, url) => const Center(
                         child: CircularProgressIndicator(),
@@ -139,7 +147,7 @@ class PokemonCard extends StatelessWidget {
                           const Icon(Icons.error),
                     ),
                   ),
-                  if (pokemon.types.isNotEmpty)
+                  if (_types.isNotEmpty)
                     Positioned(
                       top: 8,
                       right: 8,
@@ -153,7 +161,7 @@ class PokemonCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          pokemon.types.first,
+                          _types.first,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 12,

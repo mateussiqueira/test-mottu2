@@ -5,10 +5,11 @@ class Pokemon {
   final List<String> types;
   final List<String> abilities;
   final Map<String, int> stats;
-  final double height;
-  final double weight;
+  final int height;
+  final int weight;
   final List<String> evolutionChain;
   final List<String> locations;
+  final List<Map<String, dynamic>> moves;
 
   Pokemon({
     required this.id,
@@ -21,20 +22,44 @@ class Pokemon {
     required this.weight,
     required this.evolutionChain,
     required this.locations,
+    required this.moves,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
     return Pokemon(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      imageUrl: json['imageUrl'] as String,
-      types: List<String>.from(json['types'] as List),
-      abilities: List<String>.from(json['abilities'] as List),
-      stats: Map<String, int>.from(json['stats'] as Map),
-      height: json['height'] as double,
-      weight: json['weight'] as double,
-      evolutionChain: List<String>.from(json['evolutionChain'] as List),
-      locations: List<String>.from(json['locations'] as List),
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      imageUrl: json['sprites']?['other']?['official-artwork']
+              ?['front_default'] ??
+          '',
+      types: (json['types'] as List<dynamic>?)
+              ?.map((type) => type['type']['name'] as String)
+              .toList() ??
+          [],
+      abilities: (json['abilities'] as List<dynamic>?)
+              ?.map((ability) => ability['ability']['name'] as String)
+              .toList() ??
+          [],
+      stats: (json['stats'] as List<dynamic>?)?.fold<Map<String, int>>({},
+              (map, stat) {
+            map[stat['stat']['name']] = stat['base_stat'];
+            return map;
+          }) ??
+          {},
+      height: json['height'] ?? 0,
+      weight: json['weight'] ?? 0,
+      evolutionChain: const [], // Will be populated from species endpoint
+      locations: const [], // Will be populated from location endpoint
+      moves: (json['moves'] as List<dynamic>?)
+              ?.map((move) => {
+                    'name': move['move']['name'],
+                    'level': move['version_group_details']?[0]
+                        ?['level_learned_at'],
+                    'method': move['version_group_details']?[0]
+                        ?['move_learn_method']?['name'],
+                  })
+              .toList() ??
+          [],
     );
   }
 
@@ -50,6 +75,7 @@ class Pokemon {
       'weight': weight,
       'evolutionChain': evolutionChain,
       'locations': locations,
+      'moves': moves,
     };
   }
 }

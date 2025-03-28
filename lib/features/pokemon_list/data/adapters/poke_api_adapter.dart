@@ -3,136 +3,118 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/services/cache_service.dart';
 import '../../domain/entities/pokemon.dart';
 
 class PokeApiAdapter {
-  static const String _baseUrl = 'https://pokeapi.co/api/v2';
-  final http.Client _client;
+  final http.Client client;
   final SharedPreferences _prefs;
-  final CacheService _cacheService;
+  static const String _baseUrl = 'https://pokeapi.co/api/v2';
+  static const Duration _cacheDuration = Duration(hours: 24);
 
   PokeApiAdapter({
-    required http.Client client,
+    required this.client,
     required SharedPreferences prefs,
-  })  : _client = client,
-        _prefs = prefs,
-        _cacheService = CacheService(prefs);
+  }) : _prefs = prefs;
 
-  Future<List<Pokemon>> getPokemons({int offset = 0, int limit = 20}) async {
-    try {
-      // Tenta obter do cache primeiro
-      final cachedData = await _cacheService.getCachedPokemonList();
-      if (cachedData != null) {
-        return cachedData.map((json) => Pokemon.fromJson(json)).toList();
-      }
+  Future<List<Pokemon>> getPokemons({int limit = 20, int offset = 0}) async {
+    final cacheKey = 'pokemons_${limit}_$offset';
+    final cachedData = _prefs.getString(cacheKey);
+    final cachedTimestamp = _prefs.getInt('${cacheKey}_timestamp');
 
-      final response = await _client.get(
-        Uri.parse('$_baseUrl/pokemon?offset=$offset&limit=$limit'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final results = data['results'] as List;
-        final pokemons = <Pokemon>[];
-
-        for (var result in results) {
-          final pokemon = await getPokemonById(result['name']);
-          pokemons.add(pokemon);
-        }
-
-        // Salva no cache
-        await _cacheService.cachePokemonList(
-          pokemons.map((p) => p.toJson()).toList(),
-        );
-
-        return pokemons;
-      } else {
-        throw Exception('Failed to load pokemons');
-      }
-    } catch (e) {
-      throw Exception('Error fetching pokemons: $e');
+    if (cachedData != null &&
+        cachedTimestamp != null &&
+        DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
+            _cacheDuration.inMilliseconds) {
+      final List<dynamic> data = json.decode(cachedData);
+      return data.map((json) => Pokemon.fromJson(json)).toList();
     }
+
+    final response = await client.get(
+      Uri.parse('$_baseUrl/pokemon?limit=$limit&offset=$offset'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<dynamic> results = data['results'];
+      final List<Pokemon> pokemons = [];
+
+      for (var result in results) {
+        final urlParts = result['url'].split('/');
+        final id = int.parse(urlParts[urlParts.length - 2]);
+        final pokemon = await getPokemonById(id);
+        pokemons.add(pokemon);
+      }
+
+      await _prefs.setString(
+          cacheKey, json.encode(pokemons.map((p) => p.toJson()).toList()));
+      await _prefs.setInt(
+          '${cacheKey}_timestamp', DateTime.now().millisecondsSinceEpoch);
+
+      return pokemons;
+    }
+
+    throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
   }
 
-  Future<Pokemon> getPokemonById(String id) async {
-    try {
-      // Tenta obter do cache primeiro
-      final cachedData = await _cacheService.getCachedPokemonDetail(id);
-      if (cachedData != null) {
-        return Pokemon.fromJson(cachedData);
-      }
+  Future<Pokemon> getPokemonById(int id) async {
+    final cacheKey = 'pokemon_$id';
+    final cachedData = _prefs.getString(cacheKey);
+    final cachedTimestamp = _prefs.getInt('${cacheKey}_timestamp');
 
-      final response = await _client.get(
-        Uri.parse('$_baseUrl/pokemon/$id'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final pokemon = Pokemon(
-          id: data['id'].toString(),
-          name: data['name'],
-          imageUrl: data['sprites']['front_default'],
-          types: (data['types'] as List)
-              .map((type) => type['type']['name'] as String)
-              .toList(),
-          abilities: (data['abilities'] as List)
-              .map((ability) => ability['ability']['name'] as String)
-              .toList(),
-          stats: Map.fromEntries(
-            (data['stats'] as List).map(
-              (stat) => MapEntry(
-                stat['stat']['name'] as String,
-                stat['base_stat'] as int,
-              ),
-            ),
-          ),
-          height: data['height'] / 10, // Converte para metros
-          weight: data['weight'] / 10, // Converte para kg
-          evolutionChain: [], // Será preenchido em uma chamada separada
-          locations: [], // Será preenchido em uma chamada separada
-        );
-
-        // Salva no cache
-        await _cacheService.cachePokemonDetail(id, pokemon.toJson());
-
-        return pokemon;
-      } else {
-        throw Exception('Failed to load pokemon');
-      }
-    } catch (e) {
-      throw Exception('Error fetching pokemon: $e');
+    if (cachedData != null &&
+        cachedTimestamp != null &&
+        DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
+            _cacheDuration.inMilliseconds) {
+      return Pokemon.fromJson(json.decode(cachedData));
     }
+
+    final response = await client.get(
+      Uri.parse('$_baseUrl/pokemon/$id'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final pokemon = Pokemon.fromJson(data);
+
+      await _prefs.setString(cacheKey, json.encode(pokemon.toJson()));
+      await _prefs.setInt(
+          '${cacheKey}_timestamp', DateTime.now().millisecondsSinceEpoch);
+
+      return pokemon;
+    }
+
+    throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
   }
 
   Future<List<Pokemon>> searchPokemons(String query) async {
     try {
-      final response = await _client.get(
-        Uri.parse('$_baseUrl/pokemon?limit=1118'), // Limite máximo da API
+      final response = await client.get(
+        Uri.parse('$_baseUrl/pokemon?limit=1118'),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final results = data['results'] as List;
-        final matches = results
-            .where((result) => result['name']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
+        final List<dynamic> results = data['results'];
+        final List<Pokemon> pokemons = [];
 
-        final pokemons = <Pokemon>[];
-        for (var match in matches) {
-          final pokemon = await getPokemonById(match['name']);
-          pokemons.add(pokemon);
+        for (var result in results) {
+          if (result['name']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
+            final urlParts = result['url'].split('/');
+            final id = int.parse(urlParts[urlParts.length - 2]);
+            final pokemon = await getPokemonById(id);
+            pokemons.add(pokemon);
+          }
         }
 
         return pokemons;
-      } else {
-        throw Exception('Failed to search pokemons');
       }
+
+      throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
     } catch (e) {
-      throw Exception('Error searching pokemons: $e');
+      throw Exception('Falha ao buscar Pokémon: $e');
     }
   }
 }
