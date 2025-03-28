@@ -33,34 +33,33 @@ class PokemonModel extends Pokemon {
       weight: json['weight'] ?? 0,
       isDefault: json['is_default'] ?? false,
       order: json['order'] ?? 0,
-      sprites: json['sprites'] ?? {},
-      types:
-          (json['types'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      abilities:
-          (json['abilities'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
-              [],
-      stats:
-          (json['stats'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      moves:
-          (json['moves'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      forms:
-          (json['forms'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      gameIndices: (json['game_indices'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      heldItems: (json['held_items'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
+      sprites: Sprites.fromJson(json['sprites'] as Map<String, dynamic>),
+      types: (json['types'] as List<dynamic>)
+          .map((type) => Type.fromJson(type as Map<String, dynamic>))
+          .toList(),
+      abilities: (json['abilities'] as List<dynamic>)
+          .map((ability) => Ability.fromJson(ability as Map<String, dynamic>))
+          .toList(),
+      stats: (json['stats'] as List<dynamic>)
+          .map((stat) => Stat.fromJson(stat as Map<String, dynamic>))
+          .toList(),
+      moves: (json['moves'] as List<dynamic>)
+          .map((move) => Move.fromJson(move as Map<String, dynamic>))
+          .toList(),
+      forms: (json['forms'] as List<dynamic>)
+          .map((form) => Species.fromJson(form as Map<String, dynamic>))
+          .toList(),
+      gameIndices: (json['game_indices'] as List<dynamic>)
+          .map((index) => GameIndex.fromJson(index as Map<String, dynamic>))
+          .toList(),
+      heldItems: (json['held_items'] as List<dynamic>)
+          .map((item) => HeldItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
       locationAreaEncounters: json['location_area_encounters'] ?? '',
-      cries:
-          (json['cries'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      pastAbilities: (json['past_abilities'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      pastTypes: (json['past_types'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      species: json['species'] ?? {},
+      cries: Cries.fromJson(json['cries'] as Map<String, dynamic>),
+      pastAbilities: json['past_abilities'] ?? [],
+      pastTypes: json['past_types'] ?? [],
+      species: Species.fromJson(json['species'] as Map<String, dynamic>),
     );
   }
 
@@ -74,19 +73,19 @@ class PokemonModel extends Pokemon {
       'weight': weight,
       'is_default': isDefault,
       'order': order,
-      'sprites': sprites,
-      'types': types,
-      'abilities': abilities,
-      'stats': stats,
-      'moves': moves,
-      'forms': forms,
-      'game_indices': gameIndices,
-      'held_items': heldItems,
+      'sprites': sprites.toJson(),
+      'types': types.map((type) => type.toJson()).toList(),
+      'abilities': abilities.map((ability) => ability.toJson()).toList(),
+      'stats': stats.map((stat) => stat.toJson()).toList(),
+      'moves': moves.map((move) => move.toJson()).toList(),
+      'forms': forms.map((form) => form.toJson()).toList(),
+      'game_indices': gameIndices.map((index) => index.toJson()).toList(),
+      'held_items': heldItems.map((item) => item.toJson()).toList(),
       'location_area_encounters': locationAreaEncounters,
-      'cries': cries,
+      'cries': cries.toJson(),
       'past_abilities': pastAbilities,
       'past_types': pastTypes,
-      'species': species,
+      'species': species.toJson(),
     };
   }
 }

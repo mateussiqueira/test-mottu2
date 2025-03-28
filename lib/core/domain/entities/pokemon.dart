@@ -1,112 +1,157 @@
 class Pokemon {
-  final int id;
-  final String name;
+  final List<Ability> abilities;
   final int baseExperience;
+  final Cries cries;
+  final List<Species> forms;
+  final List<GameIndex> gameIndices;
   final int height;
-  final int weight;
+  final List<HeldItem> heldItems;
+  final int id;
   final bool isDefault;
-  final int order;
-  final Map<String, dynamic> sprites;
-  final List<Map<String, dynamic>> types;
-  final List<Map<String, dynamic>> abilities;
-  final List<Map<String, dynamic>> stats;
-  final List<Map<String, dynamic>> moves;
-  final List<Map<String, dynamic>> forms;
-  final List<Map<String, dynamic>> gameIndices;
-  final List<Map<String, dynamic>> heldItems;
   final String locationAreaEncounters;
-  final List<Map<String, dynamic>> cries;
-  final List<Map<String, dynamic>> pastAbilities;
-  final List<Map<String, dynamic>> pastTypes;
-  final Map<String, dynamic> species;
+  final List<Move> moves;
+  final String name;
+  final int order;
+  final List<dynamic> pastAbilities;
+  final List<dynamic> pastTypes;
+  final Species species;
+  final Sprites sprites;
+  final List<Stat> stats;
+  final List<Type> types;
+  final int weight;
 
   Pokemon({
-    required this.id,
-    required this.name,
-    required this.baseExperience,
-    required this.height,
-    required this.weight,
-    required this.isDefault,
-    required this.order,
-    required this.sprites,
-    required this.types,
     required this.abilities,
-    required this.stats,
-    required this.moves,
+    required this.baseExperience,
+    required this.cries,
     required this.forms,
     required this.gameIndices,
+    required this.height,
     required this.heldItems,
+    required this.id,
+    required this.isDefault,
     required this.locationAreaEncounters,
-    required this.cries,
+    required this.moves,
+    required this.name,
+    required this.order,
     required this.pastAbilities,
     required this.pastTypes,
     required this.species,
+    required this.sprites,
+    required this.stats,
+    required this.types,
+    required this.weight,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
     return Pokemon(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      abilities: (json['abilities'] as List<dynamic>)
+          .map((ability) => Ability.fromJson(ability as Map<String, dynamic>))
+          .toList(),
       baseExperience: json['base_experience'] ?? 0,
+      cries: Cries.fromJson(json['cries'] as Map<String, dynamic>),
+      forms: (json['forms'] as List<dynamic>)
+          .map((form) => Species.fromJson(form as Map<String, dynamic>))
+          .toList(),
+      gameIndices: (json['game_indices'] as List<dynamic>)
+          .map((index) => GameIndex.fromJson(index as Map<String, dynamic>))
+          .toList(),
       height: json['height'] ?? 0,
-      weight: json['weight'] ?? 0,
+      heldItems: (json['held_items'] as List<dynamic>)
+          .map((item) => HeldItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      id: json['id'] ?? 0,
       isDefault: json['is_default'] ?? false,
-      order: json['order'] ?? 0,
-      sprites: json['sprites'] ?? {},
-      types:
-          (json['types'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      abilities:
-          (json['abilities'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
-              [],
-      stats:
-          (json['stats'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      moves:
-          (json['moves'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      forms:
-          (json['forms'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      gameIndices: (json['game_indices'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      heldItems: (json['held_items'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
       locationAreaEncounters: json['location_area_encounters'] ?? '',
-      cries:
-          (json['cries'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      pastAbilities: (json['past_abilities'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      pastTypes: (json['past_types'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      species: json['species'] ?? {},
+      moves: (json['moves'] as List<dynamic>)
+          .map((move) => Move.fromJson(move as Map<String, dynamic>))
+          .toList(),
+      name: json['name'] ?? '',
+      order: json['order'] ?? 0,
+      pastAbilities: json['past_abilities'] ?? [],
+      pastTypes: json['past_types'] ?? [],
+      species: Species.fromJson(json['species'] as Map<String, dynamic>),
+      sprites: Sprites.fromJson(json['sprites'] as Map<String, dynamic>),
+      stats: (json['stats'] as List<dynamic>)
+          .map((stat) => Stat.fromJson(stat as Map<String, dynamic>))
+          .toList(),
+      types: (json['types'] as List<dynamic>)
+          .map((type) => Type.fromJson(type as Map<String, dynamic>))
+          .toList(),
+      weight: json['weight'] ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
+      'abilities': abilities.map((ability) => ability.toJson()).toList(),
       'base_experience': baseExperience,
+      'cries': cries.toJson(),
+      'forms': forms.map((form) => form.toJson()).toList(),
+      'game_indices': gameIndices.map((index) => index.toJson()).toList(),
       'height': height,
-      'weight': weight,
+      'held_items': heldItems.map((item) => item.toJson()).toList(),
+      'id': id,
       'is_default': isDefault,
-      'order': order,
-      'sprites': sprites,
-      'types': types,
-      'abilities': abilities,
-      'stats': stats,
-      'moves': moves,
-      'forms': forms,
-      'game_indices': gameIndices,
-      'held_items': heldItems,
       'location_area_encounters': locationAreaEncounters,
-      'cries': cries,
+      'moves': moves.map((move) => move.toJson()).toList(),
+      'name': name,
+      'order': order,
       'past_abilities': pastAbilities,
       'past_types': pastTypes,
-      'species': species,
+      'species': species.toJson(),
+      'sprites': sprites.toJson(),
+      'stats': stats.map((stat) => stat.toJson()).toList(),
+      'types': types.map((type) => type.toJson()).toList(),
+      'weight': weight,
     };
   }
+
+  Pokemon copyWith({
+    List<Ability>? abilities,
+    int? baseExperience,
+    Cries? cries,
+    List<Species>? forms,
+    List<GameIndex>? gameIndices,
+    int? height,
+    List<HeldItem>? heldItems,
+    int? id,
+    bool? isDefault,
+    String? locationAreaEncounters,
+    List<Move>? moves,
+    String? name,
+    int? order,
+    List<dynamic>? pastAbilities,
+    List<dynamic>? pastTypes,
+    Species? species,
+    Sprites? sprites,
+    List<Stat>? stats,
+    List<Type>? types,
+    int? weight,
+  }) =>
+      Pokemon(
+        abilities: abilities ?? this.abilities,
+        baseExperience: baseExperience ?? this.baseExperience,
+        cries: cries ?? this.cries,
+        forms: forms ?? this.forms,
+        gameIndices: gameIndices ?? this.gameIndices,
+        height: height ?? this.height,
+        heldItems: heldItems ?? this.heldItems,
+        id: id ?? this.id,
+        isDefault: isDefault ?? this.isDefault,
+        locationAreaEncounters:
+            locationAreaEncounters ?? this.locationAreaEncounters,
+        moves: moves ?? this.moves,
+        name: name ?? this.name,
+        order: order ?? this.order,
+        pastAbilities: pastAbilities ?? this.pastAbilities,
+        pastTypes: pastTypes ?? this.pastTypes,
+        species: species ?? this.species,
+        sprites: sprites ?? this.sprites,
+        stats: stats ?? this.stats,
+        types: types ?? this.types,
+        weight: weight ?? this.weight,
+      );
 }
 
 class Ability {
@@ -119,6 +164,22 @@ class Ability {
     required this.isHidden,
     required this.slot,
   });
+
+  factory Ability.fromJson(Map<String, dynamic> json) {
+    return Ability(
+      ability: Species.fromJson(json['ability'] as Map<String, dynamic>),
+      isHidden: json['is_hidden'] ?? false,
+      slot: json['slot'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ability': ability.toJson(),
+      'is_hidden': isHidden,
+      'slot': slot,
+    };
+  }
 
   Ability copyWith({
     Species? ability,
@@ -141,6 +202,20 @@ class Species {
     required this.url,
   });
 
+  factory Species.fromJson(Map<String, dynamic> json) {
+    return Species(
+      name: json['name'] ?? '',
+      url: json['url'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'url': url,
+    };
+  }
+
   Species copyWith({
     String? name,
     String? url,
@@ -159,6 +234,20 @@ class Cries {
     required this.latest,
     required this.legacy,
   });
+
+  factory Cries.fromJson(Map<String, dynamic> json) {
+    return Cries(
+      latest: json['latest'] ?? '',
+      legacy: json['legacy'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'latest': latest,
+      'legacy': legacy,
+    };
+  }
 
   Cries copyWith({
     String? latest,
@@ -179,6 +268,20 @@ class GameIndex {
     required this.version,
   });
 
+  factory GameIndex.fromJson(Map<String, dynamic> json) {
+    return GameIndex(
+      gameIndex: json['game_index'] ?? 0,
+      version: Species.fromJson(json['version'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'game_index': gameIndex,
+      'version': version.toJson(),
+    };
+  }
+
   GameIndex copyWith({
     int? gameIndex,
     Species? version,
@@ -197,6 +300,24 @@ class HeldItem {
     required this.item,
     required this.versionDetails,
   });
+
+  factory HeldItem.fromJson(Map<String, dynamic> json) {
+    return HeldItem(
+      item: Species.fromJson(json['item'] as Map<String, dynamic>),
+      versionDetails: (json['version_details'] as List<dynamic>)
+          .map((detail) =>
+              VersionDetail.fromJson(detail as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'item': item.toJson(),
+      'version_details':
+          versionDetails.map((detail) => detail.toJson()).toList(),
+    };
+  }
 
   HeldItem copyWith({
     Species? item,
@@ -217,6 +338,20 @@ class VersionDetail {
     required this.version,
   });
 
+  factory VersionDetail.fromJson(Map<String, dynamic> json) {
+    return VersionDetail(
+      rarity: json['rarity'] ?? 0,
+      version: Species.fromJson(json['version'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'rarity': rarity,
+      'version': version.toJson(),
+    };
+  }
+
   VersionDetail copyWith({
     int? rarity,
     Species? version,
@@ -235,6 +370,24 @@ class Move {
     required this.move,
     required this.versionGroupDetails,
   });
+
+  factory Move.fromJson(Map<String, dynamic> json) {
+    return Move(
+      move: Species.fromJson(json['move'] as Map<String, dynamic>),
+      versionGroupDetails: (json['version_group_details'] as List<dynamic>)
+          .map((detail) =>
+              VersionGroupDetail.fromJson(detail as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'move': move.toJson(),
+      'version_group_details':
+          versionGroupDetails.map((detail) => detail.toJson()).toList(),
+    };
+  }
 
   Move copyWith({
     Species? move,
@@ -258,6 +411,26 @@ class VersionGroupDetail {
     required this.order,
     required this.versionGroup,
   });
+
+  factory VersionGroupDetail.fromJson(Map<String, dynamic> json) {
+    return VersionGroupDetail(
+      levelLearnedAt: json['level_learned_at'] ?? 0,
+      moveLearnMethod:
+          Species.fromJson(json['move_learn_method'] as Map<String, dynamic>),
+      order: json['order'] ?? 0,
+      versionGroup:
+          Species.fromJson(json['version_group'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'level_learned_at': levelLearnedAt,
+      'move_learn_method': moveLearnMethod.toJson(),
+      'order': order,
+      'version_group': versionGroup.toJson(),
+    };
+  }
 
   VersionGroupDetail copyWith({
     int? levelLearnedAt,
@@ -407,6 +580,38 @@ class Sprites {
     required this.versions,
     required this.animated,
   });
+
+  factory Sprites.fromJson(Map<String, dynamic> json) {
+    return Sprites(
+      backDefault: json['back_default'] ?? '',
+      backFemale: json['back_female'] ?? '',
+      backShiny: json['back_shiny'] ?? '',
+      backShinyFemale: json['back_shiny_female'] ?? '',
+      frontDefault: json['front_default'] ?? '',
+      frontFemale: json['front_female'] ?? '',
+      frontShiny: json['front_shiny'] ?? '',
+      frontShinyFemale: json['front_shiny_female'] ?? '',
+      other: Other.fromJson(json['other'] as Map<String, dynamic>),
+      versions: Versions.fromJson(json['versions'] as Map<String, dynamic>),
+      animated: Sprites.fromJson(json['animated'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'back_default': backDefault,
+      'back_female': backFemale,
+      'back_shiny': backShiny,
+      'back_shiny_female': backShinyFemale,
+      'front_default': frontDefault,
+      'front_female': frontFemale,
+      'front_shiny': frontShiny,
+      'front_shiny_female': frontShinyFemale,
+      'other': other.toJson(),
+      'versions': versions.toJson(),
+      'animated': animated.toJson(),
+    };
+  }
 
   Sprites copyWith({
     String? backDefault,
@@ -721,6 +926,22 @@ class Stat {
     required this.stat,
   });
 
+  factory Stat.fromJson(Map<String, dynamic> json) {
+    return Stat(
+      baseStat: json['base_stat'] ?? 0,
+      effort: json['effort'] ?? 0,
+      stat: Species.fromJson(json['stat'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'base_stat': baseStat,
+      'effort': effort,
+      'stat': stat.toJson(),
+    };
+  }
+
   Stat copyWith({
     int? baseStat,
     int? effort,
@@ -741,6 +962,20 @@ class Type {
     required this.slot,
     required this.type,
   });
+
+  factory Type.fromJson(Map<String, dynamic> json) {
+    return Type(
+      slot: json['slot'] ?? 0,
+      type: Species.fromJson(json['type'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'slot': slot,
+      'type': type.toJson(),
+    };
+  }
 
   Type copyWith({
     int? slot,
