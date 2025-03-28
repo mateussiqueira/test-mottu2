@@ -39,6 +39,13 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    if (query.isEmpty) {
+      return const Center(
+        child: Text('Digite para buscar Pokémon'),
+      );
+    }
+
+    bloc.add(SearchPokemon(query));
     return _buildSearchResults();
   }
 

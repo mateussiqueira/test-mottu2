@@ -98,4 +98,21 @@ class AppConstants {
   static const String errorNoInternet = 'No internet connection';
   static const String errorCache = 'Failed to load cached data';
   static const String errorUnknown = 'An unknown error occurred';
+
+  // Asset Paths
+  static const String pokemonLogoPath = 'assets/images/pokemon_logo.png';
+  static const String pokemonPlaceholderPath =
+      'assets/images/pokemon_placeholder.png';
+
+  // UI Strings
+  static const String searchHint = 'Search Pokémon...';
+  static const String searchEmpty = 'Enter a Pokémon name to search';
+  static const String searchNoResults = 'No Pokémon found';
+  static const String statsLabel = 'Stats';
+  static const String abilitiesLabel = 'Abilities';
+  static const String movesLabel = 'Moves';
+  static const String heightLabel = 'Height';
+  static const String weightLabel = 'Weight';
+  static const String metersUnit = 'm';
+  static const String kilogramsUnit = 'kg';
 }

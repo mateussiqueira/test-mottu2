@@ -8,8 +8,8 @@ class Pokemon extends Equatable {
   final List<Map<String, dynamic>> stats;
   final List<String> abilities;
   final List<String> moves;
-  final List<Map<String, dynamic>> evolutionChain;
-  final List<Map<String, dynamic>> locations;
+  final List<String> evolutionChain;
+  final List<String> locations;
   final double height;
   final double weight;
 
@@ -26,6 +26,38 @@ class Pokemon extends Equatable {
     required this.height,
     required this.weight,
   });
+
+  factory Pokemon.fromJson(Map<String, dynamic> json) {
+    return Pokemon(
+      id: json['id'],
+      name: json['name'],
+      types: List<String>.from(json['types']),
+      abilities: List<String>.from(json['abilities']),
+      stats: List<Map<String, dynamic>>.from(json['stats']),
+      moves: List<String>.from(json['moves']),
+      evolutionChain: List<String>.from(json['evolutionChain']),
+      locations: List<String>.from(json['locations']),
+      height: json['height'].toDouble(),
+      weight: json['weight'].toDouble(),
+      imageUrl: json['imageUrl'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'types': types,
+      'abilities': abilities,
+      'stats': stats,
+      'moves': moves,
+      'evolutionChain': evolutionChain,
+      'locations': locations,
+      'height': height,
+      'weight': weight,
+      'imageUrl': imageUrl,
+    };
+  }
 
   @override
   List<Object?> get props => [
