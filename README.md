@@ -1,133 +1,184 @@
-# Pokédex App
+# 🧪 I'm Mottu Mobile — Teste prático Flutter com PokeAPI
 
-A Flutter application that uses the PokeAPI to display information about Pokémon.
+Este teste está dividido em três níveis de dificuldade. Você pode desenvolver seu App atendendo apenas a um nível ou a todos, conforme desejar demonstrar suas habilidades.
 
-## Features
+---
 
-### Level 1
+## ✅ Etapas Iniciais (obrigatórias para qualquer nível)
 
-- ✅ List of Pokémon with images and names
-- ✅ Detail page showing:
-  - Image
-  - Name
-  - Height
-  - Weight
+1. ✅ Faça um **fork deste repositório** para o seu GitHub como privado.
+2. ✅ Adicione os usuários abaixo como colaboradores:
+   - `@brunosmm`
+   - `@BetoMottu`
+   - `@moreirawebmaster`
+   - `@jeanchrocha`
+3. ✅ Crie um novo projeto Flutter com o package:
+4. ✅ Utilize a [PokeAPI](https://pokeapi.co/) como fonte de dados.
+5. ✅ Crie um arquivo `README.md` com:
+- Quais funcionalidades foram implementadas
+- Como rodar o projeto
+- Arquitetura utilizada (se houver)
+6. ✅ O app deve buildar também para a plataforma **iOS**.
 
-### Level 2
+---
 
-- ✅ Local cache for API requests
-- ✅ Search filter by name
-- ✅ Additional details:
-  - Types
-  - Abilities
+## 📚 Referência da API
 
-### Level 3
+A API utilizada neste teste é a [PokeAPI](https://pokeapi.co/). Abaixo, alguns endpoints úteis:
 
-- ✅ Custom splash screen
-- ✅ Clear cache when closing the app
-- ✅ Pagination in the list
-- ✅ Related Pokémon by type and ability
-- ✅ Navigation to related Pokémon details
-- ✅ Unit tests for business rules
+| Recurso              | Endpoint base                                 | Exemplo                                      |
+|----------------------|-----------------------------------------------|----------------------------------------------|
+| Lista de pokémons    | `/api/v2/pokemon`                             | https://pokeapi.co/api/v2/pokemon            |
+| Detalhes do pokémon  | `/api/v2/pokemon/{name}`                      | https://pokeapi.co/api/v2/pokemon/pikachu    |
+| Tipos                | `/api/v2/type`                                | https://pokeapi.co/api/v2/type/electric      |
+| Habilidades          | `/api/v2/ability`                             | https://pokeapi.co/api/v2/ability/1          |
 
-### Extra Features
+> A documentação completa está disponível em:  
+> 🔗 https://pokeapi.co/docs/v2
 
-- ✅ Clean Architecture
-- ✅ BLoC for state management
-- ✅ Native channel for connectivity detection
-- ✅ Offline status message
+---
 
-## How to Run
+## 🔸 Nível 1 — `level_1`
 
-1. Make sure you have Flutter installed and set up
-2. Clone this repository
-3. Run `flutter pub get` to install dependencies
-4. Run `flutter run` to start the app
+- ✅ Realizar todas as **etapas iniciais**
+- ✅ Mostrar uma **listagem de Pokémons** com:
+  - ✅ Imagem
+  - ✅ Nome
+- ✅ Ao clicar em um card da listagem, exibir a tela de **detalhes** com:
+  - ✅ Imagem
+  - ✅ Nome
+  - ✅ Altura
+  - ✅ Peso
 
-## Architecture
+---
 
-The project follows Clean Architecture principles with the following layers:
+## 🔸 Nível 2 — `level_2`
 
-- **Domain**: Contains business logic and entities
+- ✅ Tudo do **Nível 1**
+- ✅ Armazenar localmente em **cache** as consultas feitas à API
+- ✅ Criar um **filtro por nome** para a listagem
+- ✅ Na tela de detalhes, exibir também:
+  - ✅ **Tipos**
+  - ✅ **Habilidades**
 
-  - Entities
-  - Repositories (interfaces)
-  - Use cases
+---
 
-- **Data**: Implements data sources and repositories
+## 🔸 Nível 3 — `level_3`
 
-  - Models
-  - Repositories (implementations)
-  - Data sources
+- ✅ Tudo do **Nível 2**
+- ✅ Criar uma **Splash screen customizada**
+- ✅ Limpar o **cache** ao fechar o app
+- ✅ Implementar **paginação** na listagem
+- ✅ Ao clicar em um tipo ou habilidade, exibir a lista de pokémons relacionados
+- ✅ Permitir navegação para os detalhes de pokémons relacionados
+- ✅ Criar **testes de unidade** para as regras de negócio
 
-- **Presentation**: Contains UI components and state management
-  - Pages
-  - Widgets
-  - BLoCs
+---
 
-### State Management
+## 💎 Pontos Extras (opcional)
 
-The app uses the BLoC (Business Logic Component) pattern for state management, which helps to:
+- ✅ Utilizar **GetX**
+- ❌ Configurar **Firebase Crashlytics**
+- ❌ Criar **channel nativo (Kotlin)** para detectar mudanças de conexão e exibir mensagem de status offline no app
+- ✅ Utilizar uma arquitetura (Clean Architecture + BLoC)
 
-- Separate business logic from UI
-- Handle complex state changes
-- Make the code more testable
+---
 
-### Dependency Injection
+## 💡 Boas práticas
 
-GetIt is used for dependency injection, making it easy to:
+- ✅ Faça commits frequentes e descritivos
+- ✅ Trabalhe com **branches separadas por nível** (ex: `level_1`, `level_2`, etc)
+- ✅ Use Pull Requests (PRs) ao evoluir entre níveis
+- ✅ Seja criativo(a), mas evite cópias ou uso de IA — nós vamos perceber 😎
 
-- Manage singleton instances
-- Provide dependencies to widgets and BLoCs
-- Mock dependencies for testing
+---
 
-### Caching
+## 🏗️ Arquitetura
 
-The app implements caching using SharedPreferences to:
+O projeto utiliza a Clean Architecture com BLoC para gerenciamento de estado, seguindo os princípios SOLID e boas práticas de desenvolvimento.
 
-- Store API responses locally
-- Reduce API calls
-- Provide offline support
+### Estrutura de Diretórios
 
-### Native Features
-
-The app includes a native channel implementation to:
-
-- Detect network connectivity changes
-- Display offline status to users
-- Handle network-related errors
-
-## Testing
-
-The project includes:
-
-- Unit tests for business logic
-- Widget tests for UI components
-- Integration tests for main features
-
-To run the tests:
-
-```bash
-flutter test
+```
+lib/
+├── core/
+│   ├── constants/
+│   ├── data/
+│   │   ├── adapters/
+│   │   ├── models/
+│   │   └── repositories/
+│   ├── di/
+│   ├── domain/
+│   │   ├── entities/
+│   │   └── repositories/
+│   ├── presentation/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   └── theme/
+│   └── services/
+└── features/
+    ├── pokemon_detail/
+    │   └── presentation/
+    │       ├── pages/
+    │       └── widgets/
+    └── pokemon_list/
+        ├── data/
+        │   ├── datasources/
+        │   ├── models/
+        │   └── repositories/
+        └── presentation/
+            ├── bloc/
+            ├── controllers/
+            ├── pages/
+            └── widgets/
 ```
 
-## Dependencies
+### Tecnologias Utilizadas
 
-- flutter_bloc: State management
-- dio: HTTP client
-- get_it: Dependency injection
-- equatable: Value equality
-- cached_network_image: Image caching
-- flutter_cache_manager: Cache management
+- Flutter
+- GetX (Navegação e Injeção de Dependência)
+- BLoC (Gerenciamento de Estado)
+- SharedPreferences (Cache Local)
+- Clean Architecture
+- SOLID Principles
 
-## Contributing
+## 🚀 Como Rodar o Projeto
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Clone o repositório
+2. Instale as dependências:
+   ```bash
+   flutter pub get
+   ```
+3. Execute o projeto:
+   ```bash
+   flutter run
+   ```
 
-## License
+## 📱 Funcionalidades Implementadas
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Nível 1
+- Listagem de Pokémons com imagem e nome
+- Tela de detalhes com imagem, nome, altura e peso
+- Navegação entre telas
+
+### Nível 2
+- Cache local com SharedPreferences
+- Filtro por nome
+- Exibição de tipos e habilidades na tela de detalhes
+
+### Nível 3
+- Splash screen customizada
+- Limpeza de cache ao fechar o app
+- Paginação na listagem
+- Lista de pokémons relacionados por tipo e habilidade
+- Testes de unidade
+
+### Pontos Extras
+- GetX para navegação e injeção de dependência
+- Clean Architecture + BLoC
+- Commits frequentes e descritivos
+- Branches separadas por nível
+- Pull Requests para evolução entre níveis
+
+Boa sorte e divirta-se!  
+🚀 Equipe Mottu
