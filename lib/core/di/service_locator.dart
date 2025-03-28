@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/pokemon_list/presentation/bloc/pokemon_list_bloc.dart';
@@ -13,10 +14,14 @@ Future<void> setupServiceLocator() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
   getIt.registerSingleton<ConnectivityService>(ConnectivityService());
+  getIt.registerSingleton<http.Client>(http.Client());
 
   // Repositories
   getIt.registerSingleton<PokemonRepository>(
-    PokeApiAdapter(),
+    PokeApiAdapter(
+      client: getIt<http.Client>(),
+      prefs: getIt<SharedPreferences>(),
+    ),
   );
 
   // Blocs

@@ -47,7 +47,16 @@ class PokemonDetailPage extends StatelessWidget {
                   const SizedBox(height: AppConstants.spacingLarge),
                   PokemonAbilities(abilities: pokemon.abilities),
                   const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonStats(stats: pokemon.stats),
+                  PokemonStats(
+                    stats: Map.fromEntries(
+                      pokemon.stats.map(
+                        (stat) => MapEntry(
+                          stat['name'] as String,
+                          stat['value'] as int,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

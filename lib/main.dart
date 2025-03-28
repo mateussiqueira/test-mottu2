@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'core/domain/entities/pokemon.dart';
 import 'core/presentation/pages/splash_page.dart';
 import 'core/presentation/theme/app_theme.dart';
 import 'features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
@@ -31,9 +30,7 @@ class MyApp extends StatelessWidget {
         ),
         GetPage(
           name: '/pokemon-detail',
-          page: () => PokemonDetailPage(
-            pokemon: Get.arguments as Pokemon,
-          ),
+          page: () => const PokemonDetailPage(),
         ),
       ],
     );

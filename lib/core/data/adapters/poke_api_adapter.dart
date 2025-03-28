@@ -235,9 +235,16 @@ class PokeApiAdapter implements PokemonRepository {
       moves: List<String>.from(
         (data['moves'] as List).map((move) => move['move']['name'] as String),
       ),
-      evolutionChain:
-          List<Map<String, dynamic>>.from(data['evolution_chain'] ?? []),
-      locations: List<Map<String, dynamic>>.from(data['locations'] ?? []),
+      evolutionChain: List<String>.from(
+        (data['evolution_chain'] as List?)
+                ?.map((chain) => chain['name'] as String) ??
+            [],
+      ),
+      locations: List<String>.from(
+        (data['locations'] as List?)
+                ?.map((location) => location['name'] as String) ??
+            [],
+      ),
       height: (data['height'] as num) / 10,
       weight: (data['weight'] as num) / 10,
     );

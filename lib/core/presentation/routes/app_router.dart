@@ -26,7 +26,7 @@ class AppRouter {
       case pokemonDetail:
         final pokemon = settings.arguments as Pokemon;
         return GetPageRoute(
-          page: () => PokemonDetailPage(pokemon: pokemon),
+          page: () => const PokemonDetailPage(),
           settings: settings,
         );
       default:

@@ -38,14 +38,22 @@ class PokemonModel extends Pokemon {
       moves: List<String>.from(
         (json['moves'] as List).map((move) => move['move']['name'] as String),
       ),
-      evolutionChain:
-          List<Map<String, dynamic>>.from(json['evolution_chain'] ?? []),
-      locations: List<Map<String, dynamic>>.from(json['locations'] ?? []),
+      evolutionChain: List<String>.from(
+        (json['evolution_chain'] as List?)
+                ?.map((chain) => chain['name'] as String) ??
+            [],
+      ),
+      locations: List<String>.from(
+        (json['locations'] as List?)
+                ?.map((location) => location['name'] as String) ??
+            [],
+      ),
       height: (json['height'] as num) / 10,
       weight: (json['weight'] as num) / 10,
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
