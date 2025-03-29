@@ -51,5 +51,50 @@ npm test
 
 ## API Endpoints
 
+### Health Check
+
 - `GET /health` - Health check endpoint
-- More endpoints coming soon...
+
+### Pokemon Endpoints
+
+- `GET /api/pokemon` - Get list of pokemons with pagination
+
+  - Query parameters:
+    - `limit` (optional): Number of pokemons to return (default: 20)
+    - `offset` (optional): Number of pokemons to skip (default: 0)
+
+- `GET /api/pokemon/:id` - Get pokemon by ID
+
+  - Path parameters:
+    - `id`: Pokemon ID
+
+- `GET /api/pokemon/search` - Search pokemons by name
+
+  - Query parameters:
+    - `q`: Search query
+
+- `GET /api/pokemon/type/:type` - Get pokemons by type
+
+  - Path parameters:
+    - `type`: Pokemon type (e.g., fire, water, grass)
+
+- `GET /api/pokemon/ability/:ability` - Get pokemons by ability
+  - Path parameters:
+    - `ability`: Pokemon ability (e.g., blaze, overgrow)
+
+## Response Format
+
+All endpoints return JSON responses in the following format:
+
+```json
+{
+  "id": number,
+  "name": string,
+  "types": string[],
+  "abilities": string[],
+  "height": number,
+  "weight": number,
+  "baseExperience": number,
+  "imageUrl": string
+}
+```
