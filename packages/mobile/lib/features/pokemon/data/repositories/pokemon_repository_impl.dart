@@ -25,79 +25,47 @@ class PokemonRepositoryImpl implements PokemonRepository {
     required int offset,
   }) async {
     try {
-      final cachedPokemons = await localDataSource.getPokemonList();
-      if (cachedPokemons.isNotEmpty) {
-        return Result.success(cachedPokemons);
-      }
-
-      final remoteResult = await remoteDataSource.getPokemonList(
-        limit: limit,
-        offset: offset,
-      );
-      await localDataSource.savePokemonList(remoteResult);
-      return Result.success(remoteResult);
+      final result = await remoteDataSource.getPokemonList(limit, offset);
+      final pokemons =
+          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
+      return Result.success(pokemons);
     } catch (e) {
-      if (e is NetworkError) {
-        return Result.failure(PokemonNetworkError());
-      } else if (e is CacheError) {
-        return Result.failure(CacheError());
-      } else {
-        return Result.failure(PokemonUnexpectedError());
-      }
+      return Result.failure(PokemonUnexpectedError());
     }
   }
 
   @override
   Future<Result<PokemonEntityImpl>> getPokemonDetail(int id) async {
     try {
-      final cachedPokemon = await localDataSource.getPokemonDetail(id);
-      if (cachedPokemon != null) {
-        return Result.success(cachedPokemon);
-      }
-
-      final remoteResult = await remoteDataSource.getPokemonById(id);
-      await localDataSource.savePokemonDetail(remoteResult);
-      return Result.success(remoteResult);
+      final result = await remoteDataSource.getPokemonById(id);
+      final pokemon = PokemonEntityImpl.fromJson(result);
+      return Result.success(pokemon);
     } catch (e) {
-      if (e is NetworkError) {
-        return Result.failure(PokemonNetworkError());
-      } else if (e is CacheError) {
-        return Result.failure(CacheError());
-      } else {
-        return Result.failure(PokemonUnexpectedError());
-      }
+      return Result.failure(PokemonUnexpectedError());
     }
   }
 
   @override
   Future<Result<List<PokemonEntityImpl>>> searchPokemon(String query) async {
     try {
-      final remoteResult = await remoteDataSource.searchPokemon(query);
-      return Result.success(remoteResult);
+      final result = await remoteDataSource.searchPokemon(query);
+      final pokemons =
+          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
+      return Result.success(pokemons);
     } catch (e) {
-      if (e is NetworkError) {
-        return Result.failure(PokemonNetworkError());
-      } else if (e is ValidationError) {
-        return Result.failure(PokemonValidationError(e.message));
-      } else {
-        return Result.failure(PokemonUnexpectedError());
-      }
+      return Result.failure(PokemonUnexpectedError());
     }
   }
 
   @override
   Future<Result<List<PokemonEntityImpl>>> getPokemonsByType(String type) async {
     try {
-      final remoteResult = await remoteDataSource.getPokemonsByType(type);
-      return Result.success(remoteResult);
+      final result = await remoteDataSource.getPokemonsByType(type);
+      final pokemons =
+          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
+      return Result.success(pokemons);
     } catch (e) {
-      if (e is NetworkError) {
-        return Result.failure(PokemonNetworkError());
-      } else if (e is ValidationError) {
-        return Result.failure(PokemonValidationError(e.message));
-      } else {
-        return Result.failure(PokemonUnexpectedError());
-      }
+      return Result.failure(PokemonUnexpectedError());
     }
   }
 
@@ -105,16 +73,12 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Future<Result<List<PokemonEntityImpl>>> getPokemonsByAbility(
       String ability) async {
     try {
-      final remoteResult = await remoteDataSource.getPokemonsByAbility(ability);
-      return Result.success(remoteResult);
+      final result = await remoteDataSource.getPokemonsByAbility(ability);
+      final pokemons =
+          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
+      return Result.success(pokemons);
     } catch (e) {
-      if (e is NetworkError) {
-        return Result.failure(PokemonNetworkError());
-      } else if (e is ValidationError) {
-        return Result.failure(PokemonValidationError(e.message));
-      } else {
-        return Result.failure(PokemonUnexpectedError());
-      }
+      return Result.failure(PokemonUnexpectedError());
     }
   }
 }

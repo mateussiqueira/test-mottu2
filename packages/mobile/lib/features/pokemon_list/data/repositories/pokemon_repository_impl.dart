@@ -25,9 +25,9 @@ class PokemonRepositoryImpl implements PokemonRepository {
                 name: model.name,
                 types: model.types.map((t) => t.type.name).toList(),
                 abilities: model.abilities.map((a) => a.ability.name).toList(),
-                height: model.height.toDouble(),
-                weight: model.weight.toDouble(),
-                baseExperience: model.baseExperience?.toDouble() ?? 0.0,
+                height: model.height,
+                weight: model.weight,
+                baseExperience: model.baseExperience ?? 0,
                 imageUrl: model.sprites.frontDefault ?? '',
               ))
           .toList();
@@ -49,9 +49,9 @@ class PokemonRepositoryImpl implements PokemonRepository {
         name: result.name,
         types: result.types.map((t) => t.type.name).toList(),
         abilities: result.abilities.map((a) => a.ability.name).toList(),
-        height: result.height.toDouble(),
-        weight: result.weight.toDouble(),
-        baseExperience: result.baseExperience?.toDouble() ?? 0.0,
+        height: result.height,
+        weight: result.weight,
+        baseExperience: result.baseExperience ?? 0,
         imageUrl: result.sprites.frontDefault ?? '',
       );
       return core.Result.success(entity);
@@ -77,9 +77,9 @@ class PokemonRepositoryImpl implements PokemonRepository {
                 name: model.name,
                 types: model.types.map((t) => t.type.name).toList(),
                 abilities: model.abilities.map((a) => a.ability.name).toList(),
-                height: model.height.toDouble(),
-                weight: model.weight.toDouble(),
-                baseExperience: model.baseExperience?.toDouble() ?? 0.0,
+                height: model.height,
+                weight: model.weight,
+                baseExperience: model.baseExperience ?? 0,
                 imageUrl: model.sprites.frontDefault ?? '',
               ))
           .toList();
