@@ -5,15 +5,29 @@ import '../../domain/repositories/pokemon_repository.dart';
 import '../controllers/pokemon_list_controller.dart';
 import '../controllers/pokemon_search_controller.dart';
 import '../widgets/pokemon_grid_item.dart';
+import '../widgets/pokemon_grid_item_skeleton.dart';
 import '../widgets/pokemon_search_delegate.dart';
 
 class PokemonListPage extends StatelessWidget {
   final PokemonRepository repository;
+  final ScrollController _scrollController = ScrollController();
 
-  const PokemonListPage({
+  PokemonListPage({
     super.key,
     required this.repository,
-  });
+  }) {
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final controller = Get.find<PokemonListController>();
+      if (!controller.isLoadingMore.value && controller.hasMore.value) {
+        controller.loadMorePokemons();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +55,17 @@ class PokemonListPage extends StatelessWidget {
       ),
       body: Obx(() {
         if (listController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: 10,
+            itemBuilder: (context, index) => const PokemonGridItemSkeleton(),
+          );
         }
 
         if (listController.error.value.isNotEmpty) {
@@ -60,39 +84,29 @@ class PokemonListPage extends StatelessWidget {
           );
         }
 
-        return NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (scrollInfo.metrics.pixels >=
-                    scrollInfo.metrics.maxScrollExtent * 0.8 &&
-                !listController.isLoading.value &&
-                listController.hasMore.value) {
-              listController.loadPokemons();
-            }
-            return true;
-          },
-          child: GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: listController.pokemons.length +
-                (listController.hasMore.value ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == listController.pokemons.length) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-              final pokemon = listController.pokemons[index];
-              return PokemonGridItem(pokemon: pokemon);
-            },
+        return GridView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
+          itemCount: listController.pokemons.length +
+              (listController.hasMore.value ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == listController.pokemons.length) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+            final pokemon = listController.pokemons[index];
+            return PokemonGridItem(pokemon: pokemon);
+          },
         );
       }),
     );

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../controllers/pokemon_list_controller.dart';
 import 'pokemon_grid_item.dart';
+import 'pokemon_grid_item_skeleton.dart';
 
 class PokemonSearchDelegate extends SearchDelegate<void> {
   final PokemonListController controller = Get.find<PokemonListController>();
@@ -57,8 +58,16 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
 
     return Obx(() {
       if (controller.isLoading.value) {
-        return const Center(
-          child: CircularProgressIndicator(),
+        return GridView.builder(
+          padding: const EdgeInsets.all(16.0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16.0,
+            mainAxisSpacing: 16.0,
+          ),
+          itemCount: 6,
+          itemBuilder: (context, index) => const PokemonGridItemSkeleton(),
         );
       }
 

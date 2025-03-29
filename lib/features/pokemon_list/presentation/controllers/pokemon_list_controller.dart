@@ -6,6 +6,7 @@ class PokemonListController extends GetxController {
   final PokemonRepository _repository;
   final RxList<PokemonEntity> pokemons = <PokemonEntity>[].obs;
   final RxBool isLoading = false.obs;
+  final RxBool isLoadingMore = false.obs;
   final RxString error = ''.obs;
   final RxInt currentPage = 0.obs;
   final RxBool hasMore = true.obs;
@@ -45,6 +46,31 @@ class PokemonListController extends GetxController {
       error.value = 'Error loading pokemons: $e';
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loadMorePokemons() async {
+    if (!hasMore.value || isLoadingMore.value) return;
+
+    try {
+      isLoadingMore.value = true;
+      final newPokemons = await _repository.getPokemons(
+        offset: currentPage.value * _limit,
+        limit: _limit,
+      );
+
+      if (newPokemons.isEmpty) {
+        hasMore.value = false;
+        return;
+      }
+
+      pokemons.addAll(newPokemons);
+      hasMore.value = newPokemons.length == _limit;
+      currentPage.value++;
+    } catch (e) {
+      error.value = 'Error loading more pokemons: $e';
+    } finally {
+      isLoadingMore.value = false;
     }
   }
 
