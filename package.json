@@ -1,0 +1,16 @@
+{
+  "name": "pokeapi",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "cd packages/mobile && flutter run",
+    "bff": "cd packages/bff && npm run dev",
+    "dev": "concurrently \"npm run mobile\" \"npm run bff\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
