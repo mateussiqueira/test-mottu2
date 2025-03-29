@@ -15,6 +15,14 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
+        icon: const Icon(Icons.home),
+        onPressed: () {
+          close(context, null);
+          controller.loadPokemons();
+          Get.offAllNamed('/');
+        },
+      ),
+      IconButton(
         icon: const Icon(Icons.clear),
         onPressed: () {
           if (query.isEmpty) {
@@ -30,25 +38,12 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            close(context, null);
-            controller.loadPokemons();
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.home),
-          onPressed: () {
-            close(context, null);
-            controller.loadPokemons();
-            Get.offAllNamed(
-                '/'); // Navega para a home e remove todas as rotas anteriores
-          },
-        ),
-      ],
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+        controller.loadPokemons();
+      },
     );
   }
 
@@ -60,23 +55,8 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Type to search for Pokémon'),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                close(context, null);
-                controller.loadPokemons();
-                Get.offAllNamed('/');
-              },
-              icon: const Icon(Icons.home),
-              label: const Text('Voltar para Home'),
-            ),
-          ],
-        ),
+      return const Center(
+        child: Text('Type to search for Pokémon'),
       );
     }
 
@@ -101,43 +81,13 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
 
       if (controller.error.value.isNotEmpty) {
         return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(controller.error.value),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  close(context, null);
-                  controller.loadPokemons();
-                  Get.offAllNamed('/');
-                },
-                icon: const Icon(Icons.home),
-                label: const Text('Voltar para Home'),
-              ),
-            ],
-          ),
+          child: Text(controller.error.value),
         );
       }
 
       if (controller.pokemons.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('No Pokémon found'),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  close(context, null);
-                  controller.loadPokemons();
-                  Get.offAllNamed('/');
-                },
-                icon: const Icon(Icons.home),
-                label: const Text('Voltar para Home'),
-              ),
-            ],
-          ),
+        return const Center(
+          child: Text('No Pokémon found'),
         );
       }
 
