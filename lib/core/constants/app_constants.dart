@@ -88,7 +88,7 @@ class AppConstants {
 
   // Routes
   static const String homeRoute = '/';
-  static const String detailRoute = '/detail';
+  static const String detailRoute = '/pokemon-detail';
 
   // Error Messages
   static const String errorLoadingPokemons = 'Failed to load pokemons';
