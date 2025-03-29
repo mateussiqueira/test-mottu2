@@ -30,12 +30,25 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
 
   @override
   Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-        controller.loadPokemons();
-      },
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            close(context, null);
+            controller.loadPokemons();
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.home),
+          onPressed: () {
+            close(context, null);
+            controller.loadPokemons();
+            Get.offAllNamed(
+                '/'); // Navega para a home e remove todas as rotas anteriores
+          },
+        ),
+      ],
     );
   }
 
@@ -47,8 +60,23 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
-      return const Center(
-        child: Text('Type to search for Pokémon'),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Type to search for Pokémon'),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                close(context, null);
+                controller.loadPokemons();
+                Get.offAllNamed('/');
+              },
+              icon: const Icon(Icons.home),
+              label: const Text('Voltar para Home'),
+            ),
+          ],
+        ),
       );
     }
 
@@ -73,13 +101,43 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
 
       if (controller.error.value.isNotEmpty) {
         return Center(
-          child: Text(controller.error.value),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(controller.error.value),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  close(context, null);
+                  controller.loadPokemons();
+                  Get.offAllNamed('/');
+                },
+                icon: const Icon(Icons.home),
+                label: const Text('Voltar para Home'),
+              ),
+            ],
+          ),
         );
       }
 
       if (controller.pokemons.isEmpty) {
-        return const Center(
-          child: Text('No Pokémon found'),
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('No Pokémon found'),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  close(context, null);
+                  controller.loadPokemons();
+                  Get.offAllNamed('/');
+                },
+                icon: const Icon(Icons.home),
+                label: const Text('Voltar para Home'),
+              ),
+            ],
+          ),
         );
       }
 
