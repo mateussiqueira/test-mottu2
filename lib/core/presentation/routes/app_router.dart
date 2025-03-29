@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
 import '../../../features/pokemon_list/domain/entities/pokemon.dart';
+import '../../../features/pokemon_list/domain/repositories/pokemon_repository.dart';
 import '../../../features/pokemon_list/presentation/pages/pokemon_list_page.dart';
 import '../../presentation/pages/splash_page.dart';
 
@@ -20,24 +21,40 @@ class AppRouter {
         );
       case pokemonList:
         return GetPageRoute(
-          page: () => const PokemonListPage(),
+          page: () =>
+              PokemonListPage(repository: Get.find<PokemonRepository>()),
           settings: settings,
         );
       case pokemonDetail:
-        final pokemon = settings.arguments as PokemonEntity;
-        return GetPageRoute(
-          page: () => PokemonDetailPage(pokemon: pokemon),
-          settings: settings,
-        );
+        // Verifica se o argumento é do tipo esperado
+        final arguments = settings.arguments;
+        if (arguments is PokemonEntity) {
+          return GetPageRoute(
+            page: () => PokemonDetailPage(pokemon: arguments),
+            settings: settings,
+          );
+        } else {
+          return _errorRoute(
+            'Argumento inválido para a rota $pokemonDetail. Esperado: PokemonEntity.',
+          );
+        }
       default:
-        return GetPageRoute(
-          page: () => Scaffold(
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
-          ),
-          settings: settings,
-        );
+        return _errorRoute('Rota não definida para ${settings.name}');
     }
+  }
+
+  // Método auxiliar para rotas de erro
+  static Route<dynamic> _errorRoute(String message) {
+    return GetPageRoute(
+      page: () => Scaffold(
+        body: Center(
+          child: Text(
+            message,
+            style: const TextStyle(fontSize: 18, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 }
