@@ -2,11 +2,7 @@ import { Request, Response } from 'express';
 import { PokemonService } from '../services/pokemon.service';
 
 export class PokemonController {
-  private pokemonService: PokemonService;
-
-  constructor() {
-    this.pokemonService = new PokemonService();
-  }
+  constructor(private pokemonService: PokemonService) {}
 
   async getPokemonList(req: Request, res: Response) {
     try {
