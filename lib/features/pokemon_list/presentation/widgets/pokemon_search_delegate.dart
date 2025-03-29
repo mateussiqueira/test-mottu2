@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/presentation/adapters/getx_adapter.dart';
 import '../controllers/pokemon_list_controller.dart';
 import 'pokemon_grid_item.dart';
 import 'pokemon_grid_item_skeleton.dart';
 
 class PokemonSearchDelegate extends SearchDelegate<void> {
-  final PokemonListController controller = Get.find<PokemonListController>();
+  final _adapter = GetXAdapter();
+  final PokemonListController controller =
+      GetXAdapter().find<PokemonListController>();
   final _debouncer = Debouncer(milliseconds: 500);
 
   @override
@@ -19,7 +22,7 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
         onPressed: () {
           close(context, null);
           controller.loadPokemons();
-          Get.offAllNamed('/');
+          _adapter.offAllNamed('/');
         },
       ),
       IconButton(

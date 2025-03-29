@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
+import 'package:pokeapi/core/presentation/adapters/getx_adapter.dart';
 import 'package:pokeapi/features/pokemon_list/domain/entities/pokemon.dart'; // Ensure this is the correct path for the Pokemon class
 import 'package:pokeapi/features/pokemon_list/domain/repositories/pokemon_repository.dart';
 
 class PokemonListController extends GetxController {
   final PokemonRepository _repository;
+  final _adapter = GetXAdapter();
   final RxList<PokemonEntity> pokemons = <PokemonEntity>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isLoadingMore = false.obs;
@@ -44,6 +46,10 @@ class PokemonListController extends GetxController {
       currentPage.value++;
     } catch (e) {
       error.value = 'Error loading pokemons: $e';
+      _adapter.showSnackbar(
+        title: 'Error',
+        message: 'Failed to load pokemons. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -82,24 +88,25 @@ class PokemonListController extends GetxController {
   }
 
   Future<void> searchPokemon(String query) async {
-    try {
-      if (query.isEmpty) {
-        searchQuery.value = '';
-        reset();
-        loadPokemons();
-        return;
-      }
+    if (query.isEmpty) {
+      pokemons.clear();
+      currentPage.value = 0;
+      hasMore.value = true;
+      loadPokemons();
+      return;
+    }
 
-      searchQuery.value = query;
+    try {
       isLoading.value = true;
       error.value = '';
-
-      final result = await _repository.searchPokemons(query.toLowerCase());
-      pokemons.value = result;
-      hasMore.value = false;
+      final results = await _repository.searchPokemons(query);
+      pokemons.value = results;
     } catch (e) {
-      error.value = 'Erro ao buscar Pokémon. Tente novamente.';
-      pokemons.value = [];
+      error.value = 'Error searching pokemons: $e';
+      _adapter.showSnackbar(
+        title: 'Error',
+        message: 'Failed to search pokemons. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -107,17 +114,19 @@ class PokemonListController extends GetxController {
 
   Future<void> loadPokemonsByType(String type) async {
     try {
-      filterType.value = type;
-      filterAbility.value = '';
-      searchQuery.value = '';
       isLoading.value = true;
       error.value = '';
+      filterType.value = type;
+      filterAbility.value = '';
 
       final result = await _repository.getPokemonsByType(type);
       pokemons.value = result;
-      hasMore.value = false;
     } catch (e) {
-      error.value = e.toString();
+      error.value = 'Error loading pokemons by type: $e';
+      _adapter.showSnackbar(
+        title: 'Error',
+        message: 'Failed to load pokemons by type. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -125,23 +134,37 @@ class PokemonListController extends GetxController {
 
   Future<void> loadPokemonsByAbility(String ability) async {
     try {
-      filterType.value = '';
-      filterAbility.value = ability;
-      searchQuery.value = '';
       isLoading.value = true;
       error.value = '';
+      filterType.value = '';
+      filterAbility.value = ability;
 
       final result = await _repository.getPokemonsByAbility(ability);
       pokemons.value = result;
-      hasMore.value = false;
     } catch (e) {
-      error.value = e.toString();
+      error.value = 'Error loading pokemons by ability: $e';
+      _adapter.showSnackbar(
+        title: 'Error',
+        message: 'Failed to load pokemons by ability. Please try again.',
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
   void clearFilters() {
+    filterType.value = '';
+    filterAbility.value = '';
+    pokemons.clear();
+    currentPage.value = 0;
+    hasMore.value = true;
     loadPokemons();
+  }
+
+  void navigateToDetail(PokemonEntity pokemon) {
+    _adapter.toNamed(
+      '/pokemon-detail',
+      arguments: pokemon,
+    );
   }
 }
