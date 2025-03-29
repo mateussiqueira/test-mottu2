@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../pokemon_detail/presentation/pages/pokemon_detail_page.dart';
+import '../../../../core/presentation/routes/app_router.dart';
 import '../../domain/entities/pokemon.dart';
 
 class PokemonGridItem extends StatelessWidget {
@@ -53,7 +53,7 @@ class PokemonGridItem extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          Get.to(() => PokemonDetailPage(pokemon: pokemon));
+          Get.toNamed(AppRouter.pokemonDetail, arguments: pokemon);
         },
         child: Container(
           decoration: BoxDecoration(

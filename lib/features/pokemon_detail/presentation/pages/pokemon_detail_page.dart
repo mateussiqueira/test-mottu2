@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/presentation/routes/app_router.dart';
 import '../../../../features/pokemon_list/domain/entities/pokemon.dart';
 import '../widgets/pokemon_detail_header.dart';
 import '../widgets/pokemon_detail_info.dart';
@@ -32,7 +33,7 @@ class PokemonDetailPage extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.offAllNamed('/'),
+          onPressed: () => Get.offAllNamed(AppRouter.pokemonList),
         ),
       ),
       body: SingleChildScrollView(
