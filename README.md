@@ -4,12 +4,16 @@ A Flutter application that displays information about Pokémon using the PokeAPI
 
 ## Features
 
-- List of Pokémon with pagination
-- Search Pokémon by name
+- List of Pokémon with infinite scroll pagination
+- Search Pokémon by name with debounce
 - View detailed information about each Pokémon
 - Filter Pokémon by type and ability
 - Caching for offline access
 - Clean Architecture implementation
+- GetX for state management and navigation
+- Shimmer loading effects
+- Error handling and user feedback
+- Responsive UI design
 
 ## Project Structure
 
@@ -43,7 +47,6 @@ lib/
 │   │   │   ├── repositories/
 │   │   │   └── usecases/
 │   │   ├── presentation/
-│   │   │   ├── bloc/
 │   │   │   ├── controllers/
 │   │   │   ├── pages/
 │   │   │   └── widgets/
@@ -67,11 +70,11 @@ The project follows Clean Architecture principles with the following layers:
 
 ## Dependencies
 
-- flutter_bloc: State management
-- get: Navigation and dependency injection
+- get: State management and navigation
 - http: API communication
 - shared_preferences: Local storage
 - cached_network_image: Image caching
+- shimmer: Loading effects
 
 ## Getting Started
 
@@ -85,13 +88,48 @@ The project follows Clean Architecture principles with the following layers:
    flutter run
    ```
 
+## Features Implementation Details
+
+### Pokemon List
+
+- Infinite scroll pagination
+- Grid view with responsive layout
+- Loading states with shimmer effects
+- Error handling and retry mechanism
+
+### Pokemon Search
+
+- Debounced search to prevent excessive API calls
+- Real-time results as you type
+- Loading states during search
+- Error handling for failed searches
+
+### Pokemon Detail
+
+- Comprehensive information display
+- Stats visualization
+- Type-based color coding
+- Abilities and moves list
+- Responsive layout
+
+### Caching
+
+- Local storage for offline access
+- Image caching for better performance
+- Cache invalidation strategy
+- Error handling for offline mode
+
 ## Recent Changes
 
-- Updated Pokemon entity structure to match PokeAPI response
-- Implemented proper data transformation in models and adapters
-- Added caching for offline access
-- Improved error handling and null safety
-- Updated UI components to work with new data structure
+- Implemented GetX for state management and navigation
+- Added shimmer loading effects
+- Improved error handling and user feedback
+- Enhanced UI responsiveness
+- Added infinite scroll pagination
+- Implemented debounced search
+- Added type and ability filtering
+- Improved caching mechanism
+- Enhanced offline support
 
 ## Contributing
 
@@ -101,9 +139,9 @@ The project follows Clean Architecture principles with the following layers:
 4. Push to the branch
 5. Create a new Pull Request
 
-## Licença
+## License
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Contato
 
