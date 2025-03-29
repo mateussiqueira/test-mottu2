@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../../features/pokemon_list/domain/entities/pokemon.dart';
 import '../widgets/pokemon_detail_header.dart';
@@ -29,6 +30,10 @@ class PokemonDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(pokemon.name.toUpperCase()),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.offAllNamed('/'),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
