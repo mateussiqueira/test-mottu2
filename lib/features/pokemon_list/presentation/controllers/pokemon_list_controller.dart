@@ -1,19 +1,18 @@
 import 'package:get/get.dart';
-
-import '../../../../core/domain/entities/pokemon.dart';
-import '../../../../core/domain/repositories/pokemon_repository.dart';
+import 'package:pokeapi/features/pokemon_list/domain/entities/pokemon.dart'; // Ensure this is the correct path for the Pokemon class
+import 'package:pokeapi/features/pokemon_list/domain/repositories/pokemon_repository.dart';
 
 class PokemonListController extends GetxController {
   final PokemonRepository _repository;
-  final pokemons = <Pokemon>[].obs;
-  final isLoading = false.obs;
-  final error = ''.obs;
-  final hasMore = true.obs;
+  final RxList<PokemonEntity> pokemons = <PokemonEntity>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxString error = ''.obs;
+  final RxInt currentPage = 0.obs;
+  final RxBool hasMore = true.obs;
   final searchQuery = ''.obs;
   final filterType = ''.obs;
   final filterAbility = ''.obs;
   final _limit = 20;
-  int _offset = 0;
 
   PokemonListController(this._repository);
 
@@ -23,52 +22,45 @@ class PokemonListController extends GetxController {
     loadPokemons();
   }
 
-  Future<void> loadPokemons({bool refresh = false}) async {
+  Future<void> loadPokemons() async {
+    if (!hasMore.value || isLoading.value) return;
+
     try {
-      if (refresh) {
-        _offset = 0;
-        hasMore.value = true;
-        filterType.value = '';
-        filterAbility.value = '';
-        searchQuery.value = '';
-      }
-
-      if (!hasMore.value) return;
-
       isLoading.value = true;
       error.value = '';
-
-      final result = await _repository.getPokemons(
+      final newPokemons = await _repository.getPokemons(
+        offset: currentPage.value * _limit,
         limit: _limit,
-        offset: _offset,
       );
 
-      if (refresh) {
-        pokemons.value = result;
-      } else {
-        pokemons.addAll(result);
+      if (newPokemons.isEmpty) {
+        hasMore.value = false;
+        return;
       }
 
-      _offset += _limit;
-      hasMore.value = result.length >= _limit;
+      pokemons.addAll(newPokemons);
+      hasMore.value = newPokemons.length == _limit;
+      currentPage.value++;
     } catch (e) {
-      error.value = e.toString();
+      error.value = 'Error loading pokemons: $e';
     } finally {
       isLoading.value = false;
     }
   }
 
-  void loadMore() {
-    if (!isLoading.value && hasMore.value) {
-      loadPokemons();
-    }
+  void reset() {
+    pokemons.clear();
+    currentPage.value = 0;
+    hasMore.value = true;
+    error.value = '';
   }
 
   Future<void> searchPokemon(String query) async {
     try {
       if (query.isEmpty) {
         searchQuery.value = '';
-        loadPokemons(refresh: true);
+        reset();
+        loadPokemons();
         return;
       }
 
@@ -124,6 +116,6 @@ class PokemonListController extends GetxController {
   }
 
   void clearFilters() {
-    loadPokemons(refresh: true);
+    loadPokemons();
   }
 }

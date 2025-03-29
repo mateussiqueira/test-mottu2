@@ -1,11 +1,10 @@
 import 'package:get/get.dart';
-
-import '../../../../core/domain/entities/pokemon.dart';
-import '../../../../core/domain/repositories/pokemon_repository.dart';
+import 'package:pokeapi/features/pokemon_list/domain/entities/pokemon.dart';
+import 'package:pokeapi/features/pokemon_list/domain/repositories/pokemon_repository.dart';
 
 class RelatedPokemonsController extends GetxController {
   final PokemonRepository _repository;
-  final pokemons = <Pokemon>[].obs;
+  final pokemons = <PokemonEntity>[].obs;
   final isLoading = false.obs;
   final error = ''.obs;
   final filterType = ''.obs;

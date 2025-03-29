@@ -1,91 +1,313 @@
-import '../../../../core/domain/entities/pokemon.dart';
+import '../../domain/entities/pokemon.dart';
 
-class PokemonModel extends Pokemon {
+class PokemonModel {
+  final int id;
+  final String name;
+  final int height;
+  final int weight;
+  final int? baseExperience;
+  final List<Stat> stats;
+  final List<Type> types;
+  final List<Ability> abilities;
+  final List<Move> moves;
+  final Sprites sprites;
+
   PokemonModel({
-    required super.id,
-    required super.name,
-    required super.baseExperience,
-    required super.height,
-    required super.weight,
-    required super.isDefault,
-    required super.order,
-    required super.sprites,
-    required super.types,
-    required super.abilities,
-    required super.stats,
-    required super.moves,
-    required super.forms,
-    required super.gameIndices,
-    required super.heldItems,
-    required super.locationAreaEncounters,
-    required super.cries,
-    required super.pastAbilities,
-    required super.pastTypes,
-    required super.species,
+    required this.id,
+    required this.name,
+    required this.height,
+    required this.weight,
+    required this.baseExperience,
+    required this.stats,
+    required this.types,
+    required this.abilities,
+    required this.moves,
+    required this.sprites,
   });
 
   factory PokemonModel.fromJson(Map<String, dynamic> json) {
     return PokemonModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      baseExperience: json['base_experience'] ?? 0,
-      height: json['height'] ?? 0,
-      weight: json['weight'] ?? 0,
-      isDefault: json['is_default'] ?? false,
-      order: json['order'] ?? 0,
-      sprites: Sprites.fromJson(json['sprites'] as Map<String, dynamic>),
-      types: (json['types'] as List<dynamic>)
-          .map((type) => Type.fromJson(type as Map<String, dynamic>))
+      id: json['id'],
+      name: json['name'],
+      height: json['height'],
+      weight: json['weight'],
+      baseExperience: json['base_experience'],
+      stats:
+          (json['stats'] as List).map((stat) => Stat.fromJson(stat)).toList(),
+      types:
+          (json['types'] as List).map((type) => Type.fromJson(type)).toList(),
+      abilities: (json['abilities'] as List)
+          .map((ability) => Ability.fromJson(ability))
           .toList(),
-      abilities: (json['abilities'] as List<dynamic>)
-          .map((ability) => Ability.fromJson(ability as Map<String, dynamic>))
-          .toList(),
-      stats: (json['stats'] as List<dynamic>)
-          .map((stat) => Stat.fromJson(stat as Map<String, dynamic>))
-          .toList(),
-      moves: (json['moves'] as List<dynamic>)
-          .map((move) => Move.fromJson(move as Map<String, dynamic>))
-          .toList(),
-      forms: (json['forms'] as List<dynamic>)
-          .map((form) => Species.fromJson(form as Map<String, dynamic>))
-          .toList(),
-      gameIndices: (json['game_indices'] as List<dynamic>)
-          .map((index) => GameIndex.fromJson(index as Map<String, dynamic>))
-          .toList(),
-      heldItems: (json['held_items'] as List<dynamic>)
-          .map((item) => HeldItem.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      locationAreaEncounters: json['location_area_encounters'] ?? '',
-      cries: Cries.fromJson(json['cries'] as Map<String, dynamic>),
-      pastAbilities: json['past_abilities'] ?? [],
-      pastTypes: json['past_types'] ?? [],
-      species: Species.fromJson(json['species'] as Map<String, dynamic>),
+      moves:
+          (json['moves'] as List).map((move) => Move.fromJson(move)).toList(),
+      sprites: Sprites.fromJson(json['sprites']),
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
-      'base_experience': baseExperience,
       'height': height,
       'weight': weight,
-      'is_default': isDefault,
-      'order': order,
-      'sprites': sprites.toJson(),
+      'base_experience': baseExperience,
+      'stats': stats.map((stat) => stat.toJson()).toList(),
       'types': types.map((type) => type.toJson()).toList(),
       'abilities': abilities.map((ability) => ability.toJson()).toList(),
-      'stats': stats.map((stat) => stat.toJson()).toList(),
       'moves': moves.map((move) => move.toJson()).toList(),
-      'forms': forms.map((form) => form.toJson()).toList(),
-      'game_indices': gameIndices.map((index) => index.toJson()).toList(),
-      'held_items': heldItems.map((item) => item.toJson()).toList(),
-      'location_area_encounters': locationAreaEncounters,
-      'cries': cries.toJson(),
-      'past_abilities': pastAbilities,
-      'past_types': pastTypes,
-      'species': species.toJson(),
+      'sprites': sprites.toJson(),
+    };
+  }
+
+  PokemonEntity toEntity() {
+    return PokemonEntity(
+      id: id,
+      name: name,
+      height: height,
+      weight: weight,
+      baseExperience: baseExperience,
+      stats: stats.map((stat) => stat.toEntity()).toList(),
+      types: types.map((type) => type.toEntity()).toList(),
+      abilities: abilities.map((ability) => ability.toEntity()).toList(),
+      moves: moves.map((move) => move.toEntity()).toList(),
+      sprites: sprites.toEntity(),
+    );
+  }
+}
+
+class Stat {
+  final int baseStat;
+  final int effort;
+  final Species stat;
+
+  Stat({
+    required this.baseStat,
+    required this.effort,
+    required this.stat,
+  });
+
+  factory Stat.fromJson(Map<String, dynamic> json) {
+    return Stat(
+      baseStat: json['base_stat'],
+      effort: json['effort'],
+      stat: Species.fromJson(json['stat']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'base_stat': baseStat,
+      'effort': effort,
+      'stat': stat.toJson(),
+    };
+  }
+
+  StatEntity toEntity() {
+    return StatEntity(
+      baseStat: baseStat,
+      name: stat.name,
+    );
+  }
+}
+
+class Type {
+  final int slot;
+  final Species type;
+
+  Type({
+    required this.slot,
+    required this.type,
+  });
+
+  factory Type.fromJson(Map<String, dynamic> json) {
+    return Type(
+      slot: json['slot'],
+      type: Species.fromJson(json['type']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'slot': slot,
+      'type': type.toJson(),
+    };
+  }
+
+  TypeEntity toEntity() {
+    return TypeEntity(name: type.name);
+  }
+}
+
+class Ability {
+  final bool isHidden;
+  final int slot;
+  final Species ability;
+
+  Ability({
+    required this.isHidden,
+    required this.slot,
+    required this.ability,
+  });
+
+  factory Ability.fromJson(Map<String, dynamic> json) {
+    return Ability(
+      isHidden: json['is_hidden'],
+      slot: json['slot'],
+      ability: Species.fromJson(json['ability']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'is_hidden': isHidden,
+      'slot': slot,
+      'ability': ability.toJson(),
+    };
+  }
+
+  AbilityEntity toEntity() {
+    return AbilityEntity(
+      name: ability.name,
+      isHidden: isHidden,
+    );
+  }
+}
+
+class Move {
+  final Species move;
+  final List<Map<String, dynamic>> versionGroupDetails;
+
+  Move({
+    required this.move,
+    required this.versionGroupDetails,
+  });
+
+  factory Move.fromJson(Map<String, dynamic> json) {
+    return Move(
+      move: Species.fromJson(json['move']),
+      versionGroupDetails:
+          List<Map<String, dynamic>>.from(json['version_group_details']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'move': move.toJson(),
+      'version_group_details': versionGroupDetails,
+    };
+  }
+
+  MoveEntity toEntity() {
+    return MoveEntity(name: move.name);
+  }
+}
+
+class Sprites {
+  final String? frontDefault;
+  final Other? other;
+
+  Sprites({
+    this.frontDefault,
+    this.other,
+  });
+
+  factory Sprites.fromJson(Map<String, dynamic> json) {
+    return Sprites(
+      frontDefault: json['front_default'],
+      other: json['other'] != null ? Other.fromJson(json['other']) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'front_default': frontDefault,
+      'other': other?.toJson(),
+    };
+  }
+
+  SpritesEntity toEntity() {
+    return SpritesEntity(
+      frontDefault: frontDefault,
+      other: other?.toEntity(),
+    );
+  }
+}
+
+class Other {
+  final OfficialArtwork? officialArtwork;
+
+  Other({
+    this.officialArtwork,
+  });
+
+  factory Other.fromJson(Map<String, dynamic> json) {
+    return Other(
+      officialArtwork: json['official-artwork'] != null
+          ? OfficialArtwork.fromJson(json['official-artwork'])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'official-artwork': officialArtwork?.toJson(),
+    };
+  }
+
+  OtherEntity toEntity() {
+    return OtherEntity(
+      officialArtwork: officialArtwork?.toEntity(),
+    );
+  }
+}
+
+class OfficialArtwork {
+  final String? frontDefault;
+
+  OfficialArtwork({
+    this.frontDefault,
+  });
+
+  factory OfficialArtwork.fromJson(Map<String, dynamic> json) {
+    return OfficialArtwork(
+      frontDefault: json['front_default'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'front_default': frontDefault,
+    };
+  }
+
+  OfficialArtworkEntity toEntity() {
+    return OfficialArtworkEntity(
+      frontDefault: frontDefault,
+    );
+  }
+}
+
+class Species {
+  final String name;
+  final String url;
+
+  Species({
+    required this.name,
+    required this.url,
+  });
+
+  factory Species.fromJson(Map<String, dynamic> json) {
+    return Species(
+      name: json['name'],
+      url: json['url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'url': url,
     };
   }
 }

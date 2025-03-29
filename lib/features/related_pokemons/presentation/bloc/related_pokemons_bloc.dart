@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/domain/entities/pokemon.dart';
-import '../../../../core/domain/repositories/pokemon_repository.dart';
+import 'package:pokeapi/features/pokemon_list/domain/entities/pokemon.dart';
+import 'package:pokeapi/features/pokemon_list/domain/repositories/pokemon_repository.dart';
 
 // Events
 abstract class RelatedPokemonsEvent extends Equatable {
@@ -43,7 +42,7 @@ class RelatedPokemonsInitial extends RelatedPokemonsState {}
 class RelatedPokemonsLoading extends RelatedPokemonsState {}
 
 class RelatedPokemonsLoaded extends RelatedPokemonsState {
-  final List<Pokemon> pokemons;
+  final List<PokemonEntity> pokemons;
   final String? filterType;
   final String? filterAbility;
 

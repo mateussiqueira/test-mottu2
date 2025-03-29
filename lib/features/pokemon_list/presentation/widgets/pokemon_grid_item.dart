@@ -1,103 +1,142 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/domain/entities/pokemon.dart';
+import '../../../pokemon_detail/presentation/pages/pokemon_detail_page.dart';
+import '../../domain/entities/pokemon.dart';
 
 class PokemonGridItem extends StatelessWidget {
-  final Pokemon pokemon;
+  final PokemonEntity pokemon;
 
   const PokemonGridItem({
     super.key,
     required this.pokemon,
   });
 
-  String get _imageUrl => pokemon.sprites.other.officialArtwork.frontDefault;
+  String get _imageUrl {
+    return pokemon.sprites.other?.officialArtwork?.frontDefault ??
+        pokemon.sprites.frontDefault ??
+        '';
+  }
 
-  List<String> get _types => pokemon.types
-      .map((type) => type.type.name)
-      .where((type) => type.isNotEmpty)
-      .toList();
+  Color get _typeColor {
+    final Map<String, Color> typeColors = {
+      'normal': Colors.grey,
+      'fire': Colors.red,
+      'water': Colors.blue,
+      'electric': Colors.yellow,
+      'grass': Colors.green,
+      'ice': Colors.lightBlue,
+      'fighting': Colors.orange,
+      'poison': Colors.purple,
+      'ground': Colors.brown,
+      'flying': Colors.indigo,
+      'psychic': Colors.pink,
+      'bug': Colors.lightGreen,
+      'rock': Colors.grey[700]!,
+      'ghost': Colors.deepPurple,
+      'dragon': Colors.deepPurple[700]!,
+      'dark': Colors.grey[900]!,
+      'steel': Colors.blueGrey,
+      'fairy': Colors.pinkAccent,
+    };
+
+    final type = pokemon.types.first.name.toLowerCase();
+    return typeColors[type] ?? Colors.grey;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: AppConstants.cardElevation,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+        borderRadius: BorderRadius.circular(16.0),
       ),
       child: InkWell(
-        onTap: () => Get.toNamed(
-          AppConstants.detailRoute,
-          arguments: pokemon,
-        ),
-        child: Padding(
-          padding: AppConstants.cardPadding,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Image.network(
+        onTap: () {
+          Get.to(() => PokemonDetailPage(pokemon: pokemon));
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                _typeColor.withOpacity(0.7),
+                _typeColor.withOpacity(0.2),
+              ],
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _imageUrl.isNotEmpty
+                    ? Image.network(
                         _imageUrl,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
                           return const Icon(
                             Icons.error_outline,
-                            size: AppConstants.iconSizeLarge,
+                            size: 48,
                             color: Colors.red,
                           );
                         },
+                      )
+                    : const Icon(
+                        Icons.image_not_supported,
+                        size: 48,
+                        color: Colors.grey,
+                      ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '#${pokemon.id.toString().padLeft(3, '0')}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Text(
-                    pokemon.name,
-                    style: const TextStyle(
-                      fontSize: AppConstants.bodyMediumSize,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: 4.0),
+                    Text(
+                      pokemon.name.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppConstants.spacingSmall),
-                  Expanded(
-                    flex: 1,
-                    child: Wrap(
-                      spacing: AppConstants.spacingSmall,
-                      runSpacing: AppConstants.spacingSmall,
-                      alignment: WrapAlignment.center,
-                      children: _types.map((type) {
+                    const SizedBox(height: 8.0),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: pokemon.types.map((type) {
                         return Container(
-                          padding: AppConstants.chipPadding,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 4.0,
+                          ),
                           decoration: BoxDecoration(
-                            color:
-                                AppConstants.typeColors[type.toLowerCase()] ??
-                                    Colors.grey,
-                            borderRadius: BorderRadius.circular(
-                                AppConstants.chipBorderRadius),
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
                           child: Text(
-                            type,
+                            type.name.toUpperCase(),
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: AppConstants.chipFontSize,
+                              fontSize: 12,
                               fontWeight: FontWeight.w500,
+                              color: Colors.white,
                             ),
                           ),
                         );
                       }).toList(),
                     ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

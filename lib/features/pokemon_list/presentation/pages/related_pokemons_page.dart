@@ -1,115 +1,84 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/domain/entities/pokemon.dart';
-import '../controllers/related_pokemons_controller.dart';
-import '../widgets/pokemon_skeleton_card.dart';
+import '../../domain/entities/pokemon.dart';
+import '../bloc/pokemon_list_bloc.dart';
+import '../widgets/pokemon_grid_item.dart';
 
-class RelatedPokemonsPage extends GetView<RelatedPokemonsController> {
-  const RelatedPokemonsPage({super.key});
+class RelatedPokemonsPage extends StatelessWidget {
+  final String title;
+  final String type;
+  final bool isType;
+
+  const RelatedPokemonsPage({
+    super.key,
+    required this.title,
+    required this.type,
+    required this.isType,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() {
-          if (controller.filterType.isNotEmpty) {
-            return Text('${controller.filterType.value.toUpperCase()} Pokémon');
-          }
-          if (controller.filterAbility.isNotEmpty) {
-            return Text(
-                '${controller.filterAbility.value.toUpperCase()} Pokémon');
-          }
-          return const Text('Related Pokémon');
-        }),
+        title: Text(title),
+        centerTitle: true,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return _buildSkeletonGrid();
-        }
+      body: BlocBuilder<PokemonListBloc, PokemonListState>(
+        builder: (context, state) {
+          if (state is PokemonListLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        if (controller.error.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(controller.error.value),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    if (controller.filterType.isNotEmpty) {
-                      controller
-                          .loadPokemonsByType(controller.filterType.value);
-                    } else if (controller.filterAbility.isNotEmpty) {
-                      controller.loadPokemonsByAbility(
-                          controller.filterAbility.value);
-                    }
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
+          if (state is PokemonListError) {
+            return Center(
+              child: Text(state.message),
+            );
+          }
 
-        if (controller.pokemons.isEmpty) {
-          return const Center(child: Text('No Pokémon found'));
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            if (controller.filterType.isNotEmpty) {
-              await controller.loadPokemonsByType(controller.filterType.value);
-            } else if (controller.filterAbility.isNotEmpty) {
-              await controller
-                  .loadPokemonsByAbility(controller.filterAbility.value);
+          if (state is PokemonListLoaded) {
+            if (state.pokemons.isEmpty) {
+              return const Center(
+                child: Text('No Pokémon found'),
+              );
             }
-          },
-          child: GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: controller.pokemons.length,
-            itemBuilder: (context, index) {
-              final pokemon = controller.pokemons[index];
-              return PokemonCard(pokemon: pokemon);
-            },
-          ),
-        );
-      }),
-    );
-  }
 
-  Widget _buildSkeletonGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+            return GridView.builder(
+              padding: const EdgeInsets.all(16.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.75,
+                crossAxisSpacing: 16.0,
+                mainAxisSpacing: 16.0,
+              ),
+              itemCount: state.pokemons.length,
+              itemBuilder: (context, index) {
+                final pokemon = state.pokemons[index];
+                return PokemonGridItem(pokemon: pokemon);
+              },
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
       ),
-      itemCount: 6,
-      itemBuilder: (context, index) => const PokemonSkeletonCard(),
     );
   }
 }
 
 class PokemonCard extends StatelessWidget {
-  final Pokemon pokemon;
+  final PokemonEntity pokemon;
 
   const PokemonCard({super.key, required this.pokemon});
 
-  String get _imageUrl => pokemon.sprites.other.officialArtwork.frontDefault;
+  String get _imageUrl => pokemon.sprites.frontDefault ?? '';
 
   List<String> get _types => pokemon.types
-      .map((type) => type.type.name)
-      .where((type) => type.isNotEmpty)
+      .map((type) => type.name)
+      .where((type) => (type).isNotEmpty)
       .toList();
 
   @override
@@ -136,15 +105,23 @@ class PokemonCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: CachedNetworkImage(
-                      imageUrl: _imageUrl,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.error),
-                    ),
+                    child: _imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: _imageUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                          )
+                        : const Center(
+                            child: Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
+                          ),
                   ),
                   if (_types.isNotEmpty)
                     Positioned(

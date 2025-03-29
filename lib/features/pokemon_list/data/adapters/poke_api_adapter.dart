@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../domain/entities/pokemon.dart';
+import '../models/pokemon_model.dart';
 
 class PokeApiAdapter {
   final http.Client client;
@@ -16,7 +16,8 @@ class PokeApiAdapter {
     required SharedPreferences prefs,
   }) : _prefs = prefs;
 
-  Future<List<Pokemon>> getPokemons({int limit = 20, int offset = 0}) async {
+  Future<List<PokemonModel>> getPokemons(
+      {int limit = 20, int offset = 0}) async {
     final cacheKey = 'pokemons_${limit}_$offset';
     final cachedData = _prefs.getString(cacheKey);
     final cachedTimestamp = _prefs.getInt('${cacheKey}_timestamp');
@@ -26,7 +27,7 @@ class PokeApiAdapter {
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
       final List<dynamic> data = json.decode(cachedData);
-      return data.map((json) => Pokemon.fromJson(json)).toList();
+      return data.map((json) => PokemonModel.fromJson(json)).toList();
     }
 
     final response = await client.get(
@@ -36,7 +37,7 @@ class PokeApiAdapter {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final List<dynamic> results = data['results'];
-      final List<Pokemon> pokemons = [];
+      final List<PokemonModel> pokemons = [];
 
       for (var result in results) {
         final urlParts = result['url'].split('/');
@@ -56,7 +57,7 @@ class PokeApiAdapter {
     throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
   }
 
-  Future<Pokemon> getPokemonById(int id) async {
+  Future<PokemonModel> getPokemonById(int id) async {
     final cacheKey = 'pokemon_$id';
     final cachedData = _prefs.getString(cacheKey);
     final cachedTimestamp = _prefs.getInt('${cacheKey}_timestamp');
@@ -65,7 +66,7 @@ class PokeApiAdapter {
         cachedTimestamp != null &&
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
-      return Pokemon.fromJson(json.decode(cachedData));
+      return PokemonModel.fromJson(json.decode(cachedData));
     }
 
     final response = await client.get(
@@ -74,7 +75,7 @@ class PokeApiAdapter {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      final pokemon = Pokemon.fromJson(data);
+      final pokemon = PokemonModel.fromJson(data);
 
       await _prefs.setString(cacheKey, json.encode(pokemon.toJson()));
       await _prefs.setInt(
@@ -86,7 +87,7 @@ class PokeApiAdapter {
     throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
   }
 
-  Future<List<Pokemon>> searchPokemons(String query) async {
+  Future<List<PokemonModel>> searchPokemons(String query) async {
     try {
       final response = await client.get(
         Uri.parse('$_baseUrl/pokemon?limit=1118'),
@@ -95,7 +96,7 @@ class PokeApiAdapter {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> results = data['results'];
-        final List<Pokemon> pokemons = [];
+        final List<PokemonModel> pokemons = [];
 
         for (var result in results) {
           if (result['name']

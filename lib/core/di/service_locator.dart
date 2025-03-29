@@ -1,42 +1,36 @@
-import 'package:get_it/get_it.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/pokemon_list/data/adapters/poke_api_adapter.dart';
+import '../../features/pokemon_list/data/datasources/pokemon_remote_data_source.dart';
 import '../../features/pokemon_list/data/repositories/pokemon_repository_impl.dart';
+import '../../features/pokemon_list/domain/repositories/pokemon_repository.dart';
 import '../../features/pokemon_list/presentation/bloc/pokemon_list_bloc.dart';
-import '../domain/repositories/pokemon_repository.dart';
 import '../services/cache_service.dart';
 import '../services/connectivity_service.dart';
 import '../services/image_cache_service.dart';
 
-class ServiceLocator {
-  static final GetIt getIt = GetIt.instance;
+Future<void> setupServiceLocator() async {
+  // External dependencies
+  final prefs = await SharedPreferences.getInstance();
+  final client = http.Client();
 
-  static Future<void> init() async {
-    // Serviços
-    final prefs = await SharedPreferences.getInstance();
-    getIt.registerSingleton<CacheService>(CacheService(prefs));
-    getIt.registerSingleton<ConnectivityService>(ConnectivityService());
-    getIt.registerSingleton<ImageCacheService>(ImageCacheService());
-    getIt.registerSingleton<http.Client>(http.Client());
+  // Data sources
+  final pokemonDataSource = PokemonRemoteDataSourceImpl(client: client);
 
-    // Adapters
-    getIt.registerSingleton<PokeApiAdapter>(
-      PokeApiAdapter(
-        client: getIt<http.Client>(),
-        prefs: prefs,
-      ),
-    );
+  // Repositories
+  final pokemonRepository = PokemonRepositoryImpl(pokemonDataSource);
 
-    // Repositories
-    getIt.registerSingleton<PokemonRepository>(
-      PokemonRepositoryImpl(getIt<PokeApiAdapter>()),
-    );
+  // Blocs
+  final pokemonListBloc = PokemonListBloc(repository: pokemonRepository);
 
-    // Blocs
-    getIt.registerFactory<PokemonListBloc>(
-      () => PokemonListBloc(repository: getIt<PokemonRepository>()),
-    );
-  }
+  // Register dependencies
+  Get.put<PokemonRepository>(pokemonRepository);
+  Get.put<PokemonListBloc>(pokemonListBloc);
+
+  // Serviços
+  Get.put<CacheService>(CacheService(prefs));
+  Get.put<ConnectivityService>(ConnectivityService());
+  Get.put<ImageCacheService>(ImageCacheService());
+  Get.put<http.Client>(client);
 }

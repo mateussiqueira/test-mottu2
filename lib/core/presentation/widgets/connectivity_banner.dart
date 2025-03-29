@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../di/service_locator.dart';
 import '../../services/connectivity_service.dart';
 
 class ConnectivityBanner extends StatefulWidget {
@@ -32,7 +32,7 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
 
   Future<void> _checkConnectivity() async {
     final isConnected =
-        await ServiceLocator.getIt<ConnectivityService>().checkConnectivity();
+        await Get.find<ConnectivityService>().checkConnectivity();
     if (mounted && isConnected != _isConnected) {
       setState(() {
         _isConnected = isConnected;

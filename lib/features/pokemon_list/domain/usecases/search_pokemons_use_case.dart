@@ -1,4 +1,5 @@
-import '../../../../core/domain/entities/pokemon.dart';
+import 'package:pokeapi/features/pokemon_list/domain/entities/pokemon.dart';
+
 import '../repositories/pokemon_repository.dart';
 
 class SearchPokemonsUseCase {
@@ -6,7 +7,7 @@ class SearchPokemonsUseCase {
 
   SearchPokemonsUseCase(this.repository);
 
-  Future<List<Pokemon>> call(String query) async {
+  Future<List<PokemonEntity>> call(String query) async {
     return repository.searchPokemons(query);
   }
 }

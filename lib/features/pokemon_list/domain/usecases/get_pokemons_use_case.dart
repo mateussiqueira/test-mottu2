@@ -1,4 +1,5 @@
-import '../../../../core/domain/entities/pokemon.dart';
+import 'package:pokeapi/features/pokemon_list/domain/entities/pokemon.dart';
+
 import '../repositories/pokemon_repository.dart';
 
 class GetPokemonsUseCase {
@@ -6,7 +7,7 @@ class GetPokemonsUseCase {
 
   GetPokemonsUseCase(this.repository);
 
-  Future<List<Pokemon>> call({int offset = 0, int limit = 20}) async {
+  Future<List<PokemonEntity>> call({int offset = 0, int limit = 20}) async {
     return repository.getPokemons(offset: offset, limit: limit);
   }
 }

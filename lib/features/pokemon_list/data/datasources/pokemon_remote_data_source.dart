@@ -2,13 +2,16 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../../../core/domain/entities/pokemon.dart';
 import '../models/pokemon_model.dart';
 
 abstract class PokemonRemoteDataSource {
-  Future<List<Pokemon>> getPokemons({int offset = 0, int limit = 20});
-  Future<Pokemon> getPokemonById(int id);
-  Future<List<Pokemon>> searchPokemons(String query);
+  Future<List<PokemonModel>> getPokemons({int offset = 0, int limit = 20});
+  Future<PokemonModel> getPokemonById(int id);
+  Future<PokemonModel> getPokemonByName(String name);
+  Future<List<PokemonModel>> searchPokemons(String query);
+  Future<List<PokemonModel>> getPokemonsByType(String type);
+  Future<List<PokemonModel>> getPokemonsByAbility(String ability);
+  Future<void> clearCache();
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -19,80 +22,139 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
       : client = client ?? http.Client();
 
   @override
-  Future<List<Pokemon>> getPokemons({int offset = 0, int limit = 20}) async {
-    try {
-      final response = await client.get(
-        Uri.parse('$_baseUrl/pokemon?offset=$offset&limit=$limit'),
+  Future<List<PokemonModel>> getPokemons(
+      {int offset = 0, int limit = 20}) async {
+    final response = await client.get(
+      Uri.parse('$_baseUrl/pokemon?offset=$offset&limit=$limit'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List;
+      final pokemons = await Future.wait(
+        results.map((pokemon) async {
+          final pokemonResponse = await client.get(Uri.parse(pokemon['url']));
+          if (pokemonResponse.statusCode == 200) {
+            return PokemonModel.fromJson(json.decode(pokemonResponse.body));
+          } else {
+            throw Exception('Failed to load pokemon: ${pokemon['name']}');
+          }
+        }),
       );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> results = data['results'];
-        final List<Pokemon> pokemons = [];
-
-        for (var result in results) {
-          final urlParts = result['url'].split('/');
-          final id = int.parse(urlParts[urlParts.length - 2]);
-          final pokemon = await getPokemonById(id);
-          pokemons.add(pokemon);
-        }
-
-        return pokemons;
-      }
-
-      throw Exception('Failed to fetch pokemons: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('Failed to fetch pokemons: $e');
+      return pokemons;
+    } else {
+      throw Exception('Failed to load pokemons');
     }
   }
 
   @override
-  Future<Pokemon> getPokemonById(int id) async {
-    try {
-      final response = await client.get(
-        Uri.parse('$_baseUrl/pokemon/$id'),
-      );
+  Future<PokemonModel> getPokemonById(int id) async {
+    final response = await client.get(Uri.parse('$_baseUrl/pokemon/$id'));
 
-      if (response.statusCode == 200) {
-        return PokemonModel.fromJson(json.decode(response.body));
-      }
-
-      throw Exception('Failed to fetch pokemon: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('Failed to fetch pokemon: $e');
+    if (response.statusCode == 200) {
+      return PokemonModel.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load pokemon');
     }
   }
 
   @override
-  Future<List<Pokemon>> searchPokemons(String query) async {
-    try {
-      final response = await client.get(
-        Uri.parse('$_baseUrl/pokemon?limit=1118'), // Total number of pokemons
-      );
+  Future<PokemonModel> getPokemonByName(String name) async {
+    final response = await client.get(Uri.parse('$_baseUrl/pokemon/$name'));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> results = data['results'];
-        final List<Pokemon> pokemons = [];
+    if (response.statusCode == 200) {
+      return PokemonModel.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load pokemon');
+    }
+  }
 
-        for (var result in results) {
-          if (result['name']
+  @override
+  Future<List<PokemonModel>> searchPokemons(String query) async {
+    final response = await client.get(
+      Uri.parse('$_baseUrl/pokemon?limit=1000'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = data['results'] as List;
+      final filteredResults = results
+          .where((pokemon) => pokemon['name']
               .toString()
               .toLowerCase()
-              .contains(query.toLowerCase())) {
-            final urlParts = result['url'].split('/');
-            final id = int.parse(urlParts[urlParts.length - 2]);
-            final pokemon = await getPokemonById(id);
-            pokemons.add(pokemon);
+              .contains(query.toLowerCase()))
+          .toList();
+      final pokemons = await Future.wait(
+        filteredResults.map((pokemon) async {
+          final pokemonResponse = await client.get(Uri.parse(pokemon['url']));
+          if (pokemonResponse.statusCode == 200) {
+            return PokemonModel.fromJson(json.decode(pokemonResponse.body));
+          } else {
+            throw Exception('Failed to load pokemon: ${pokemon['name']}');
           }
-        }
-
-        return pokemons;
-      }
-
-      throw Exception('Failed to search pokemons: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('Failed to search pokemons: $e');
+        }),
+      );
+      return pokemons;
+    } else {
+      throw Exception('Failed to search pokemons');
     }
+  }
+
+  @override
+  Future<List<PokemonModel>> getPokemonsByType(String type) async {
+    final response = await client.get(Uri.parse('$_baseUrl/type/$type'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final pokemon = data['pokemon'] as List;
+      final pokemons = await Future.wait(
+        pokemon.map((p) async {
+          final pokemonResponse =
+              await client.get(Uri.parse(p['pokemon']['url']));
+          if (pokemonResponse.statusCode == 200) {
+            return PokemonModel.fromJson(json.decode(pokemonResponse.body));
+          } else {
+            throw Exception('Failed to load pokemon: ${p['pokemon']['name']}');
+          }
+        }),
+      );
+      return pokemons;
+    } else {
+      throw Exception('Failed to load pokemons by type');
+    }
+  }
+
+  @override
+  Future<List<PokemonModel>> getPokemonsByAbility(String ability) async {
+    final response = await client.get(Uri.parse('$_baseUrl/ability/$ability'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final pokemon = data['pokemon'] as List;
+      final pokemons = await Future.wait(
+        pokemon.map((p) async {
+          final pokemonResponse =
+              await client.get(Uri.parse(p['pokemon']['url']));
+          if (pokemonResponse.statusCode == 200) {
+            return PokemonModel.fromJson(json.decode(pokemonResponse.body));
+          } else {
+            throw Exception('Failed to load pokemon: ${p['pokemon']['name']}');
+          }
+        }),
+      );
+      return pokemons;
+    } else {
+      throw Exception('Failed to load pokemons by ability');
+    }
+  }
+
+  @override
+  Future<void> clearCache() async {
+    // Implement cache clearing if needed
+  }
+
+  @override
+  String toString() {
+    return 'PokemonRemoteDataSourceImpl()';
   }
 }

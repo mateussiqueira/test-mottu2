@@ -1,73 +1,100 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 
-import '../../../../core/data/adapters/poke_api_adapter.dart';
-import '../../../../core/data/repositories/pokemon_repository_impl.dart';
-import '../bloc/pokemon_list_bloc.dart';
-import '../widgets/pokemon_grid.dart';
+import '../../domain/repositories/pokemon_repository.dart';
+import '../controllers/pokemon_list_controller.dart';
+import '../controllers/pokemon_search_controller.dart';
+import '../widgets/pokemon_grid_item.dart';
 import '../widgets/pokemon_search_delegate.dart';
 
 class PokemonListPage extends StatelessWidget {
-  const PokemonListPage({super.key});
+  final PokemonRepository repository;
+
+  const PokemonListPage({
+    super.key,
+    required this.repository,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<SharedPreferences>(
-      future: SharedPreferences.getInstance(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+    // Initialize controllers with repository
+    Get.put(PokemonListController(repository));
+    Get.put(PokemonSearchController(repository));
+
+    final listController = Get.find<PokemonListController>();
+    final searchController = Get.find<PokemonSearchController>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Pokédex'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: PokemonSearchDelegate(),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Obx(() {
+        if (listController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
-          );
-        }
-
-        final prefs = snapshot.data!;
-        final client = http.Client();
-
-        return BlocProvider(
-          create: (context) {
-            final repository = PokemonRepositoryImpl(
-              PokeApiAdapter(
-                client: client,
-                prefs: prefs,
-              ),
-            );
-            return PokemonListBloc(repository: repository)
-              ..add(const LoadPokemons());
-          },
-          child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Pokédex'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    showSearch(
-                      context: context,
-                      delegate: PokemonSearchDelegate(
-                        context.read<PokemonListBloc>(),
-                      ),
-                    );
-                  },
+        if (listController.error.value.isNotEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(listController.error.value),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => listController.loadPokemons(),
+                  child: const Text('Tentar novamente'),
                 ),
               ],
             ),
-            body: const PokemonGrid(),
+          );
+        }
+
+        return NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent * 0.8 &&
+                !listController.isLoading.value &&
+                listController.hasMore.value) {
+              listController.loadPokemons();
+            }
+            return true;
+          },
+          child: GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: listController.pokemons.length +
+                (listController.hasMore.value ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == listController.pokemons.length) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              final pokemon = listController.pokemons[index];
+              return PokemonGridItem(pokemon: pokemon);
+            },
           ),
         );
-      },
+      }),
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/domain/entities/pokemon.dart';
 import '../../../features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
+import '../../../features/pokemon_list/domain/entities/pokemon.dart';
 import '../../../features/pokemon_list/presentation/pages/pokemon_list_page.dart';
 import '../../presentation/pages/splash_page.dart';
 
@@ -24,7 +24,7 @@ class AppRouter {
           settings: settings,
         );
       case pokemonDetail:
-        final pokemon = settings.arguments as Pokemon;
+        final pokemon = settings.arguments as PokemonEntity;
         return GetPageRoute(
           page: () => PokemonDetailPage(pokemon: pokemon),
           settings: settings,

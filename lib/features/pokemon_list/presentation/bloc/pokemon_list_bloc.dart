@@ -1,132 +1,108 @@
 import 'dart:async';
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/domain/entities/pokemon.dart';
-import '../../../../core/domain/repositories/pokemon_repository.dart';
+import '../../domain/entities/pokemon.dart';
+import '../../domain/repositories/pokemon_repository.dart';
 
 // Events
-abstract class PokemonListEvent extends Equatable {
-  const PokemonListEvent();
+abstract class PokemonListEvent {}
 
-  @override
-  List<Object?> get props => [];
-}
+class LoadPokemons extends PokemonListEvent {}
 
-class LoadPokemons extends PokemonListEvent {
-  final int offset;
-  final int limit;
-
-  const LoadPokemons({this.offset = 0, this.limit = 20});
-
-  @override
-  List<Object?> get props => [offset, limit];
-}
-
-class SearchPokemon extends PokemonListEvent {
+class SearchPokemons extends PokemonListEvent {
   final String query;
 
-  const SearchPokemon(this.query);
+  SearchPokemons(this.query);
 
   @override
-  List<Object?> get props => [query];
+  String toString() => 'SearchPokemons(query: $query)';
 }
 
 class LoadPokemonsByType extends PokemonListEvent {
   final String type;
 
-  const LoadPokemonsByType(this.type);
+  LoadPokemonsByType(this.type);
 
   @override
-  List<Object?> get props => [type];
+  String toString() => 'LoadPokemonsByType(type: $type)';
 }
 
 class LoadPokemonsByAbility extends PokemonListEvent {
   final String ability;
 
-  const LoadPokemonsByAbility(this.ability);
+  LoadPokemonsByAbility(this.ability);
 
   @override
-  List<Object?> get props => [ability];
+  String toString() => 'LoadPokemonsByAbility(ability: $ability)';
 }
 
 // States
-abstract class PokemonListState extends Equatable {
-  const PokemonListState();
+abstract class PokemonListState {}
 
+class PokemonListInitial extends PokemonListState {
   @override
-  List<Object?> get props => [];
+  String toString() => 'PokemonListInitial';
 }
 
-class PokemonListInitial extends PokemonListState {}
-
 class PokemonListLoading extends PokemonListState {
-  final List<Pokemon> pokemons;
-  final bool hasMore;
-  final String? filterType;
-  final String? filterAbility;
-  final String? searchQuery;
-
-  const PokemonListLoading({
-    this.pokemons = const [],
-    this.hasMore = true,
-    this.filterType,
-    this.filterAbility,
-    this.searchQuery,
-  });
-
   @override
-  List<Object?> get props =>
-      [pokemons, hasMore, filterType, filterAbility, searchQuery];
+  String toString() => 'PokemonListLoading';
 }
 
 class PokemonListLoaded extends PokemonListState {
-  final List<Pokemon> pokemons;
-  final bool hasMore;
-  final String? filterType;
-  final String? filterAbility;
-  final String? searchQuery;
+  final List<PokemonEntity> pokemons;
 
-  const PokemonListLoaded({
-    required this.pokemons,
-    this.hasMore = true,
-    this.filterType,
-    this.filterAbility,
-    this.searchQuery,
-  });
+  PokemonListLoaded(this.pokemons);
 
   @override
-  List<Object?> get props =>
-      [pokemons, hasMore, filterType, filterAbility, searchQuery];
+  String toString() => 'PokemonListLoaded(pokemons: $pokemons)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is PokemonListLoaded && other.pokemons == pokemons;
+  }
+
+  @override
+  int get hashCode => pokemons.hashCode;
 }
 
 class PokemonListError extends PokemonListState {
   final String message;
 
-  const PokemonListError(this.message);
+  PokemonListError(this.message);
 
   @override
-  List<Object?> get props => [message];
+  String toString() => 'PokemonListError(message: $message)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is PokemonListError && other.message == message;
+  }
+
+  @override
+  int get hashCode => message.hashCode;
 }
 
-// BLoC
+// Bloc
 class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
   final PokemonRepository repository;
-  int _currentOffset = 0;
-  static const int _limit = 20;
-  Timer? _debounceTimer;
+  Timer? _debounce;
 
   PokemonListBloc({required this.repository}) : super(PokemonListInitial()) {
     on<LoadPokemons>(_onLoadPokemons);
-    on<SearchPokemon>(_onSearchPokemon);
+    on<SearchPokemons>(_onSearchPokemons);
     on<LoadPokemonsByType>(_onLoadPokemonsByType);
     on<LoadPokemonsByAbility>(_onLoadPokemonsByAbility);
   }
 
   @override
   Future<void> close() {
-    _debounceTimer?.cancel();
+    _debounce?.cancel();
     return super.close();
   }
 
@@ -134,81 +110,25 @@ class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
     LoadPokemons event,
     Emitter<PokemonListState> emit,
   ) async {
+    emit(PokemonListLoading());
     try {
-      if (state is PokemonListLoading) return;
-
-      final currentState = state;
-      final currentPokemons = currentState is PokemonListLoaded
-          ? currentState.pokemons
-          : currentState is PokemonListLoading
-              ? currentState.pokemons
-              : <Pokemon>[];
-
-      emit(PokemonListLoading(
-        pokemons: currentPokemons,
-        hasMore:
-            currentState is PokemonListLoaded ? currentState.hasMore : true,
-        filterType:
-            currentState is PokemonListLoaded ? currentState.filterType : null,
-        filterAbility: currentState is PokemonListLoaded
-            ? currentState.filterAbility
-            : null,
-        searchQuery:
-            currentState is PokemonListLoaded ? currentState.searchQuery : null,
-      ));
-
-      final pokemons = await repository.getPokemons(
-        offset: event.offset,
-        limit: event.limit,
-      );
-
-      _currentOffset = event.offset + event.limit;
-
-      final updatedPokemons =
-          event.offset == 0 ? pokemons : [...currentPokemons, ...pokemons];
-
-      emit(PokemonListLoaded(
-        pokemons: updatedPokemons,
-        hasMore: pokemons.length == event.limit,
-        filterType:
-            currentState is PokemonListLoaded ? currentState.filterType : null,
-        filterAbility: currentState is PokemonListLoaded
-            ? currentState.filterAbility
-            : null,
-        searchQuery:
-            currentState is PokemonListLoaded ? currentState.searchQuery : null,
-      ));
+      final pokemons = await repository.getPokemons();
+      emit(PokemonListLoaded(pokemons));
     } catch (e) {
       emit(PokemonListError(e.toString()));
     }
   }
 
-  Future<void> _onSearchPokemon(
-    SearchPokemon event,
+  Future<void> _onSearchPokemons(
+    SearchPokemons event,
     Emitter<PokemonListState> emit,
   ) async {
-    // Cancela o timer anterior se existir
-    _debounceTimer?.cancel();
-
-    // Se a query estiver vazia, volta para a lista normal
-    if (event.query.isEmpty) {
-      add(const LoadPokemons());
-      return;
-    }
-
-    // Cria um novo timer para debounce
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      emit(PokemonListLoading());
       try {
-        if (state is PokemonListLoading) return;
-
-        emit(const PokemonListLoading());
-
         final pokemons = await repository.searchPokemons(event.query);
-        emit(PokemonListLoaded(
-          pokemons: pokemons,
-          hasMore: false,
-          searchQuery: event.query,
-        ));
+        emit(PokemonListLoaded(pokemons));
       } catch (e) {
         emit(PokemonListError(e.toString()));
       }
@@ -219,17 +139,10 @@ class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
     LoadPokemonsByType event,
     Emitter<PokemonListState> emit,
   ) async {
+    emit(PokemonListLoading());
     try {
-      if (state is PokemonListLoading) return;
-
-      emit(const PokemonListLoading());
-
       final pokemons = await repository.getPokemonsByType(event.type);
-      emit(PokemonListLoaded(
-        pokemons: pokemons,
-        hasMore: false,
-        filterType: event.type,
-      ));
+      emit(PokemonListLoaded(pokemons));
     } catch (e) {
       emit(PokemonListError(e.toString()));
     }
@@ -239,19 +152,25 @@ class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
     LoadPokemonsByAbility event,
     Emitter<PokemonListState> emit,
   ) async {
+    emit(PokemonListLoading());
     try {
-      if (state is PokemonListLoading) return;
-
-      emit(const PokemonListLoading());
-
       final pokemons = await repository.getPokemonsByAbility(event.ability);
-      emit(PokemonListLoaded(
-        pokemons: pokemons,
-        hasMore: false,
-        filterAbility: event.ability,
-      ));
+      emit(PokemonListLoaded(pokemons));
     } catch (e) {
       emit(PokemonListError(e.toString()));
     }
   }
+
+  @override
+  String toString() => 'PokemonListBloc(repository: $repository)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is PokemonListBloc && other.repository == repository;
+  }
+
+  @override
+  int get hashCode => repository.hashCode;
 }
