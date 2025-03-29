@@ -28,7 +28,9 @@ class PokeApiAdapter implements PokemonRepository {
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
       final List<dynamic> data = json.decode(cachedData);
-      return data.map((json) => Pokemon.fromJson(json)).toList();
+      return data
+          .map((json) => Pokemon.fromJson(json as Map<String, dynamic>))
+          .toList();
     }
 
     final response = await client.get(
@@ -68,7 +70,7 @@ class PokeApiAdapter implements PokemonRepository {
         cachedTimestamp != null &&
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
-      return Pokemon.fromJson(json.decode(cachedData));
+      return Pokemon.fromJson(json.decode(cachedData) as Map<String, dynamic>);
     }
 
     final response = await client.get(
@@ -77,7 +79,7 @@ class PokeApiAdapter implements PokemonRepository {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      final pokemon = Pokemon.fromJson(data);
+      final pokemon = Pokemon.fromJson(data as Map<String, dynamic>);
 
       await _prefs.setString(cacheKey, json.encode(pokemon.toJson()));
       await _prefs.setInt(
@@ -100,7 +102,9 @@ class PokeApiAdapter implements PokemonRepository {
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
       final List<dynamic> data = json.decode(cachedData);
-      return data.map((json) => Pokemon.fromJson(json)).toList();
+      return data
+          .map((json) => Pokemon.fromJson(json as Map<String, dynamic>))
+          .toList();
     }
 
     final response = await client.get(
@@ -141,7 +145,9 @@ class PokeApiAdapter implements PokemonRepository {
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
       final List<dynamic> data = json.decode(cachedData);
-      return data.map((json) => Pokemon.fromJson(json)).toList();
+      return data
+          .map((json) => Pokemon.fromJson(json as Map<String, dynamic>))
+          .toList();
     }
 
     final response = await client.get(
@@ -191,7 +197,7 @@ class PokeApiAdapter implements PokemonRepository {
         cachedTimestamp != null &&
         DateTime.now().millisecondsSinceEpoch - cachedTimestamp <
             _cacheDuration.inMilliseconds) {
-      return Pokemon.fromJson(json.decode(cachedData));
+      return Pokemon.fromJson(json.decode(cachedData) as Map<String, dynamic>);
     }
 
     final response = await client.get(
@@ -200,7 +206,7 @@ class PokeApiAdapter implements PokemonRepository {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      final pokemon = Pokemon.fromJson(data);
+      final pokemon = Pokemon.fromJson(data as Map<String, dynamic>);
 
       await _prefs.setString(cacheKey, json.encode(pokemon.toJson()));
       await _prefs.setInt(
@@ -210,50 +216,6 @@ class PokeApiAdapter implements PokemonRepository {
     }
 
     throw Exception('Falha ao buscar Pokémon: ${response.statusCode}');
-  }
-
-  static Pokemon fromJson(Map<String, dynamic> data) {
-    return Pokemon(
-      id: data['id'] ?? 0,
-      name: data['name'] ?? '',
-      baseExperience: data['base_experience'] ?? 0,
-      height: data['height'] ?? 0,
-      weight: data['weight'] ?? 0,
-      isDefault: data['is_default'] ?? false,
-      order: data['order'] ?? 0,
-      sprites: data['sprites'] ?? {},
-      types:
-          (data['types'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      abilities:
-          (data['abilities'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
-              [],
-      stats:
-          (data['stats'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      moves:
-          (data['moves'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      forms:
-          (data['forms'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      gameIndices: (data['game_indices'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      heldItems: (data['held_items'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      locationAreaEncounters: data['location_area_encounters'] ?? '',
-      cries:
-          (data['cries'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
-      pastAbilities: (data['past_abilities'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      pastTypes: (data['past_types'] as List<dynamic>?)
-              ?.cast<Map<String, dynamic>>() ??
-          [],
-      species: data['species'] ?? {},
-    );
-  }
-
-  static List<Pokemon> fromJsonList(List<Map<String, dynamic>> dataList) {
-    return dataList.map((data) => fromJson(data)).toList();
   }
 
   @override

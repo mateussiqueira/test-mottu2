@@ -12,47 +12,89 @@ class PokemonRepositoryImpl implements PokemonRepository {
     return core.Pokemon(
       id: int.tryParse(pokemon.id) ?? 0,
       name: pokemon.name,
-      baseExperience: 0, // Not available in feature model
+      baseExperience: 0,
       height: pokemon.height,
       weight: pokemon.weight,
-      isDefault: true, // Default value
-      order: 0, // Not available in feature model
-      sprites: {
-        'other': {
-          'official-artwork': {
-            'front_default': pokemon.imageUrl,
-          },
-        },
-      },
+      isDefault: true,
+      order: 0,
+      sprites: core.Sprites(
+        backDefault: '',
+        backFemale: '',
+        backShiny: '',
+        backShinyFemale: '',
+        frontDefault: '',
+        frontFemale: '',
+        frontShiny: '',
+        frontShinyFemale: '',
+        other: core.Other(
+          dreamWorld: core.DreamWorld(
+            frontDefault: '',
+            frontFemale: '',
+          ),
+          home: core.Home(
+            frontDefault: '',
+            frontFemale: '',
+            frontShiny: '',
+            frontShinyFemale: '',
+          ),
+          officialArtwork: core.OfficialArtwork(
+            frontDefault: pokemon.imageUrl,
+            frontShiny: '',
+          ),
+        ),
+      ),
       types: pokemon.types
-          .map((type) => {
-                'type': {'name': type}
-              })
+          .map((type) => core.Type(
+                slot: 1,
+                type: core.Species(
+                  name: type,
+                  url: '',
+                ),
+              ))
           .toList(),
       abilities: pokemon.abilities
-          .map((ability) => {
-                'ability': {'name': ability}
-              })
+          .map((ability) => core.Ability(
+                ability: core.Species(
+                  name: ability,
+                  url: '',
+                ),
+                isHidden: false,
+                slot: 1,
+              ))
           .toList(),
       stats: pokemon.stats.entries
-          .map((e) => {
-                'stat': {'name': e.key},
-                'base_stat': e.value,
-              })
+          .map((e) => core.Stat(
+                baseStat: e.value,
+                effort: 0,
+                stat: core.Species(
+                  name: e.key,
+                  url: '',
+                ),
+              ))
           .toList(),
       moves: pokemon.moves
-          .map((move) => {
-                'move': {'name': move['name']}
-              })
+          .map((move) => core.Move(
+                move: core.Species(
+                  name: move['name'] as String? ?? '',
+                  url: '',
+                ),
+                versionGroupDetails: [],
+              ))
           .toList(),
-      forms: [], // Not available in feature model
-      gameIndices: [], // Not available in feature model
-      heldItems: [], // Not available in feature model
-      locationAreaEncounters: '', // Not available in feature model
-      cries: [], // Not available in feature model
-      pastAbilities: [], // Not available in feature model
-      pastTypes: [], // Not available in feature model
-      species: {}, // Not available in feature model
+      forms: [],
+      gameIndices: [],
+      heldItems: [],
+      locationAreaEncounters: '',
+      cries: core.Cries(
+        latest: '',
+        legacy: '',
+      ),
+      pastAbilities: [],
+      pastTypes: [],
+      species: core.Species(
+        name: pokemon.name,
+        url: '',
+      ),
     );
   }
 

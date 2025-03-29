@@ -13,23 +13,23 @@ class PokemonDetailPage extends StatelessWidget {
   const PokemonDetailPage({super.key});
 
   String _getImageUrl(Pokemon pokemon) =>
-      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+      pokemon.sprites.other.officialArtwork.frontDefault ?? '';
 
   List<String> _getTypes(Pokemon pokemon) => pokemon.types
-      .map((type) => type['type']?['name'] as String? ?? '')
+      .map((type) => type.type.name)
       .where((type) => type.isNotEmpty)
       .toList();
 
   List<String> _getAbilities(Pokemon pokemon) => pokemon.abilities
-      .map((ability) => ability['ability']?['name'] as String? ?? '')
+      .map((ability) => ability.ability.name)
       .where((ability) => ability.isNotEmpty)
       .toList();
 
   Map<String, int> _getStats(Pokemon pokemon) => Map.fromEntries(
         pokemon.stats.map(
           (stat) => MapEntry(
-            stat['stat']?['name'] as String? ?? '',
-            stat['base_stat'] as int? ?? 0,
+            stat.stat.name,
+            stat.baseStat,
           ),
         ),
       );

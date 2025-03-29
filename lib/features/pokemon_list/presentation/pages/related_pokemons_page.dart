@@ -105,11 +105,10 @@ class PokemonCard extends StatelessWidget {
 
   const PokemonCard({super.key, required this.pokemon});
 
-  String get _imageUrl =>
-      pokemon.sprites['other']?['official-artwork']?['front_default'] ?? '';
+  String get _imageUrl => pokemon.sprites.other.officialArtwork.frontDefault;
 
   List<String> get _types => pokemon.types
-      .map((type) => type['type']?['name'] as String? ?? '')
+      .map((type) => type.type.name)
       .where((type) => type.isNotEmpty)
       .toList();
 
