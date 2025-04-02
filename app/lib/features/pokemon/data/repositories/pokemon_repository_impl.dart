@@ -1,132 +1,115 @@
-import 'package:mobile/core/domain/errors/pokemon_error.dart';
-import 'package:mobile/core/domain/result.dart' as core;
-import 'package:mobile/features/pokemon/data/datasources/pokemon_remote_data_source.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon/domain/repositories/pokemon_repository.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../../../../core/logging/pokemon_logger.dart';
+import '../../domain/entities/pokemon_entity.dart';
+import '../../domain/repositories/i_pokemon_repository.dart';
+import '../datasources/i_pokemon_remote_datasource.dart';
 
-class PokemonRepositoryImpl implements PokemonRepository {
-  final PokemonRemoteDataSource remoteDataSource;
+class PokemonRepositoryImpl implements IPokemonRepository {
+  final IPokemonRemoteDataSource remoteDataSource;
+  final PokemonLogger logger;
 
-  PokemonRepositoryImpl(this.remoteDataSource);
+  PokemonRepositoryImpl({
+    required this.remoteDataSource,
+    required this.logger,
+  });
 
   @override
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonList({
-    required int limit,
-    required int offset,
+  Future<Result<List<PokemonEntity>>> getPokemonList({
+    int offset = 0,
+    int limit = 20,
   }) async {
     try {
-      final pokemons = await remoteDataSource.getPokemons(
-        limit: limit,
-        offset: offset,
+      logger.info('Getting Pokemon list',
+          data: {'offset': offset, 'limit': limit});
+      final result =
+          await remoteDataSource.getPokemonList(offset: offset, limit: limit);
+      logger.info('Successfully got Pokemon list',
+          data: {'count': result.length});
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      logger.error(
+        'Error getting Pokemon list',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'offset': offset, 'limit': limit},
       );
-
-      return core.Result.success(
-        pokemons
-            .map((p) => PokemonEntityImpl(
-                  id: p.id,
-                  name: p.name,
-                  types: p.types,
-                  abilities: p.abilities,
-                  height: p.height,
-                  weight: p.weight,
-                  baseExperience: p.baseExperience,
-                  imageUrl: p.imageUrl,
-                ))
-            .toList(),
-      );
-    } catch (e) {
-      return core.Result.failure(const PokemonUnexpectedError());
+      return Result.failure(e.toString());
     }
   }
 
   @override
-  Future<core.Result<PokemonEntityImpl>> getPokemonDetail(int id) async {
+  Future<Result<PokemonEntity>> getPokemonDetail(int id) async {
     try {
-      final pokemon = await remoteDataSource.getPokemonDetail(id);
-      return core.Result.success(PokemonEntityImpl(
-        id: pokemon.id,
-        name: pokemon.name,
-        types: pokemon.types,
-        abilities: pokemon.abilities,
-        height: pokemon.height,
-        weight: pokemon.weight,
-        baseExperience: pokemon.baseExperience,
-        imageUrl: pokemon.imageUrl,
-      ));
-    } catch (e) {
-      return core.Result.failure(const PokemonUnexpectedError());
-    }
-  }
-
-  @override
-  Future<core.Result<List<PokemonEntityImpl>>> searchPokemon(
-      String query) async {
-    try {
-      final pokemons = await remoteDataSource.searchPokemons(query);
-      return core.Result.success(
-        pokemons
-            .map((p) => PokemonEntityImpl(
-                  id: p.id,
-                  name: p.name,
-                  types: p.types,
-                  abilities: p.abilities,
-                  height: p.height,
-                  weight: p.weight,
-                  baseExperience: p.baseExperience,
-                  imageUrl: p.imageUrl,
-                ))
-            .toList(),
+      logger.info('Getting Pokemon detail', data: {'id': id});
+      final result = await remoteDataSource.getPokemonDetail(id);
+      logger.info('Successfully got Pokemon detail', data: {'id': id});
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      logger.error(
+        'Error getting Pokemon detail',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'id': id},
       );
-    } catch (e) {
-      return core.Result.failure(const PokemonUnexpectedError());
+      return Result.failure(e.toString());
     }
   }
 
   @override
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonsByType(
-      String type) async {
+  Future<Result<List<PokemonEntity>>> searchPokemon(String query) async {
     try {
-      final pokemons = await remoteDataSource.getPokemonsByType(type);
-      return core.Result.success(
-        pokemons
-            .map((p) => PokemonEntityImpl(
-                  id: p.id,
-                  name: p.name,
-                  types: p.types,
-                  abilities: p.abilities,
-                  height: p.height,
-                  weight: p.weight,
-                  baseExperience: p.baseExperience,
-                  imageUrl: p.imageUrl,
-                ))
-            .toList(),
+      logger.info('Searching Pokemon', data: {'query': query});
+      final result = await remoteDataSource.searchPokemon(query);
+      logger.info('Successfully searched Pokemon',
+          data: {'query': query, 'count': result.length});
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      logger.error(
+        'Error searching Pokemon',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'query': query},
       );
-    } catch (e) {
-      return core.Result.failure(const PokemonUnexpectedError());
+      return Result.failure(e.toString());
     }
   }
 
   @override
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonsByAbility(
+  Future<Result<List<PokemonEntity>>> getPokemonsByType(String type) async {
+    try {
+      logger.info('Getting Pokemon by type', data: {'type': type});
+      final result = await remoteDataSource.getPokemonsByType(type);
+      logger.info('Successfully got Pokemon by type',
+          data: {'type': type, 'count': result.length});
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      logger.error(
+        'Error getting Pokemon by type',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'type': type},
+      );
+      return Result.failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<List<PokemonEntity>>> getPokemonsByAbility(
       String ability) async {
     try {
-      final pokemons = await remoteDataSource.getPokemonsByAbility(ability);
-      return core.Result.success(
-        pokemons
-            .map((p) => PokemonEntityImpl(
-                  id: p.id,
-                  name: p.name,
-                  types: p.types,
-                  abilities: p.abilities,
-                  height: p.height,
-                  weight: p.weight,
-                  baseExperience: p.baseExperience,
-                  imageUrl: p.imageUrl,
-                ))
-            .toList(),
+      logger.info('Getting Pokemon by ability', data: {'ability': ability});
+      final result = await remoteDataSource.getPokemonsByAbility(ability);
+      logger.info('Successfully got Pokemon by ability',
+          data: {'ability': ability, 'count': result.length});
+      return Result.success(result);
+    } catch (e, stackTrace) {
+      logger.error(
+        'Error getting Pokemon by ability',
+        error: e,
+        stackTrace: stackTrace,
+        data: {'ability': ability},
       );
-    } catch (e) {
-      return core.Result.failure(const PokemonUnexpectedError());
+      return Result.failure(e.toString());
     }
   }
 

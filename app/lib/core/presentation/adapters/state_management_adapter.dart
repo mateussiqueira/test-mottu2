@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum SnackPosition {
+  TOP,
+  CENTER,
+  BOTTOM,
+}
+
 abstract class StateManagementAdapter {
   /// Navega para uma rota nomeada e substitui a rota atual
   Future<T?> toNamed<T>(
@@ -74,10 +80,4 @@ abstract class StateManagementAdapter {
     bool isScrollControlled = true,
     bool enableDrag = true,
   });
-}
-
-enum SnackPosition {
-  TOP,
-  CENTER,
-  BOTTOM,
 }

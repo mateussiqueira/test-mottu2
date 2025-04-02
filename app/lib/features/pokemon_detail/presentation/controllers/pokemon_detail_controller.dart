@@ -1,95 +1,101 @@
 import 'package:get/get.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_detail/domain/usecases/get_pokemon_by_id.dart';
-import 'package:mobile/features/pokemon_detail/domain/usecases/get_pokemons_by_ability.dart';
-import 'package:mobile/features/pokemon_detail/domain/usecases/get_pokemons_by_type.dart';
 
-class PokemonDetailController extends GetxController {
-  final GetPokemonById getPokemonById;
+import '../../../../core/presentation/adapters/getx_adapter.dart';
+import '../../../../core/state/base_state_controller.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../../features/pokemon/domain/repositories/pokemon_repository.dart';
+import '../../domain/usecases/get_pokemon_detail.dart';
+import '../../domain/usecases/get_pokemons_by_ability.dart';
+import '../../domain/usecases/get_pokemons_by_type.dart';
+import 'i_pokemon_detail_controller.dart';
+
+class PokemonDetailController extends BaseStateController
+    implements IPokemonDetailController {
+  final GetPokemonDetail getPokemonDetail;
   final GetPokemonsByType getPokemonsByType;
   final GetPokemonsByAbility getPokemonsByAbility;
+  final PokemonRepository repository;
+  final _adapter = GetXAdapter();
 
-  final pokemon = Rxn<PokemonEntity>();
-  final sameTypePokemons = <PokemonEntity>[].obs;
-  final sameAbilityPokemons = <PokemonEntity>[].obs;
-  final isLoading = false.obs;
+  final _pokemon = Rxn<PokemonEntity>();
+  final _sameTypePokemons = <PokemonEntity>[].obs;
+  final _sameAbilityPokemons = <PokemonEntity>[].obs;
 
   PokemonDetailController({
-    required this.getPokemonById,
+    required this.getPokemonDetail,
     required this.getPokemonsByType,
     required this.getPokemonsByAbility,
+    required this.repository,
   });
 
   @override
-  void onInit() {
-    super.onInit();
-    final arguments = Get.arguments;
-    if (arguments is Map<String, dynamic> &&
-        arguments['pokemon'] is PokemonEntity) {
-      updatePokemon(arguments['pokemon'] as PokemonEntity);
-    }
-  }
+  Rxn<PokemonEntity> get pokemon => _pokemon;
 
-  void updatePokemon(PokemonEntity newPokemon) {
-    pokemon.value = newPokemon;
-    loadRelatedPokemons();
-  }
+  @override
+  RxBool get isLoading => isLoading;
 
-  Future<void> loadPokemon(int id) async {
-    try {
-      isLoading.value = true;
-      final result = await getPokemonById(id);
-      pokemon.value = result;
-      await loadRelatedPokemons();
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load Pokemon details',
-        snackPosition: SnackPosition.BOTTOM,
+  @override
+  RxString get error => error;
+
+  @override
+  RxList<PokemonEntity> get sameTypePokemons => _sameTypePokemons;
+
+  @override
+  RxList<PokemonEntity> get sameAbilityPokemons => _sameAbilityPokemons;
+
+  @override
+  Future<void> fetchPokemonById(int id) async {
+    await trackOperation('detail_load', () async {
+      setLoading(true);
+      clearError();
+
+      logger.info('Fetching Pokemon detail', data: {'id': id});
+      final result = await getPokemonDetail(id);
+      _pokemon.value = result;
+      logger.info(
+        'Successfully fetched Pokemon detail',
+        data: {'id': id},
       );
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> loadRelatedPokemons() async {
-    if (pokemon.value == null) return;
-
-    try {
-      final type = pokemon.value!.types.first;
-      final ability = pokemon.value!.abilities.first;
-
-      final typePokemons = await getPokemonsByType(type);
-      final abilityPokemons = await getPokemonsByAbility(ability);
-
-      sameTypePokemons.value =
-          typePokemons.where((p) => p.id != pokemon.value!.id).take(5).toList();
-
-      sameAbilityPokemons.value = abilityPokemons
-          .where((p) => p.id != pokemon.value!.id)
-          .take(5)
-          .toList();
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load related Pokemons',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  Future<List<PokemonEntity>> fetchPokemonsByType(String type) async {
-    return await getPokemonsByType(type);
-  }
-
-  Future<List<PokemonEntity>> fetchPokemonsByAbility(String ability) async {
-    return await getPokemonsByAbility(ability);
+    });
   }
 
   @override
-  void onClose() {
-    sameTypePokemons.clear();
-    sameAbilityPokemons.clear();
-    super.onClose();
+  Future<void> fetchPokemonsByType(String type) async {
+    await trackOperation('type_related', () async {
+      setLoading(true);
+      clearError();
+
+      logger.info('Fetching Pokemon by type', data: {'type': type});
+      final result = await getPokemonsByType(type);
+      _sameTypePokemons.value = result;
+      logger.info(
+        'Successfully fetched Pokemon by type',
+        data: {'type': type, 'count': result.length},
+      );
+    });
+  }
+
+  @override
+  Future<void> fetchPokemonsByAbility(String ability) async {
+    await trackOperation('ability_related', () async {
+      setLoading(true);
+      clearError();
+
+      logger.info('Fetching Pokemon by ability', data: {'ability': ability});
+      final result = await getPokemonsByAbility(ability);
+      _sameAbilityPokemons.value = result;
+      logger.info(
+        'Successfully fetched Pokemon by ability',
+        data: {'ability': ability, 'count': result.length},
+      );
+    });
+  }
+
+  @override
+  void navigateToRelatedPokemons(List<PokemonEntity> pokemons, String title) {
+    _adapter.toNamed(
+      '/related-pokemons',
+      arguments: {'pokemons': pokemons, 'title': title},
+    );
   }
 }

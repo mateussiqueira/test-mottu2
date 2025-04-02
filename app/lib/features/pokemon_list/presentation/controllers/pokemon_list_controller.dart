@@ -1,194 +1,189 @@
 import 'package:get/get.dart';
 
 import '../../../../core/presentation/adapters/getx_adapter.dart';
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
-import '../../../pokemon/domain/repositories/pokemon_repository.dart';
+import '../../../../core/state/base_state_controller.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../../features/pokemon/domain/repositories/pokemon_repository.dart';
+import '../../domain/usecases/get_pokemon_list.dart';
+import '../../domain/usecases/search_pokemon.dart';
+import 'i_pokemon_list_controller.dart';
 
-class PokemonListController extends GetxController {
-  final PokemonRepository _repository;
+class PokemonListController extends BaseStateController
+    implements IPokemonListController {
+  final GetPokemonList getPokemonList;
+  final SearchPokemon searchPokemon;
+  final PokemonRepository repository;
   final _adapter = GetXAdapter();
-  final RxList<PokemonEntityImpl> pokemons = <PokemonEntityImpl>[].obs;
-  final RxBool isLoading = false.obs;
-  final RxBool isLoadingMore = false.obs;
-  final RxString error = ''.obs;
-  final RxInt currentPage = 0.obs;
-  final RxBool hasMore = true.obs;
-  final searchQuery = ''.obs;
-  final filterType = ''.obs;
-  final filterAbility = ''.obs;
-  final _limit = 20;
 
-  PokemonListController(this._repository);
+  final _pokemons = <PokemonEntity>[].obs;
+  final _isLoadingMore = false.obs;
+  final _currentPage = 0.obs;
+  final _hasMore = true.obs;
+  final _searchQuery = ''.obs;
+  final _filterType = ''.obs;
+  final _filterAbility = ''.obs;
+
+  static const int _limit = 20;
+
+  PokemonListController({
+    required this.getPokemonList,
+    required this.searchPokemon,
+    required this.repository,
+  });
+
+  @override
+  RxList<PokemonEntity> get pokemons => _pokemons;
+
+  @override
+  RxBool get isLoading => isLoading;
+
+  @override
+  RxBool get isLoadingMore => _isLoadingMore;
+
+  @override
+  RxString get error => error;
+
+  @override
+  RxInt get currentPage => _currentPage;
+
+  @override
+  RxBool get hasMore => _hasMore;
+
+  @override
+  RxString get searchQuery => _searchQuery;
+
+  @override
+  RxString get filterType => _filterType;
+
+  @override
+  RxString get filterAbility => _filterAbility;
 
   @override
   void onInit() {
     super.onInit();
-    loadPokemons();
+    fetchPokemonList();
   }
 
-  Future<void> loadPokemons() async {
-    if (!hasMore.value || isLoading.value) return;
+  @override
+  Future<void> fetchPokemonList() async {
+    await trackOperation('list_load', () async {
+      setLoading(true);
+      clearError();
 
-    try {
-      isLoading.value = true;
-      error.value = '';
-      final result = await _repository.getPokemonList(
-        offset: currentPage.value * _limit,
-        limit: _limit,
+      logger.info('Fetching Pokemon list');
+      final result = await getPokemonList();
+      _pokemons.value = result;
+      logger.info(
+        'Successfully fetched Pokemon list',
+        data: {'count': result.length},
       );
-
-      if (result.isSuccess && result.data != null) {
-        if (result.data!.isEmpty) {
-          hasMore.value = false;
-          return;
-        }
-
-        pokemons.addAll(result.data!);
-        hasMore.value = result.data!.length == _limit;
-        currentPage.value++;
-      } else {
-        error.value = result.error?.toString() ?? 'Unknown error';
-      }
-    } catch (e) {
-      error.value = 'Error loading pokemons: $e';
-      _adapter.showSnackbar(
-        title: 'Error',
-        message: 'Failed to load pokemons. Please try again.',
-      );
-    } finally {
-      isLoading.value = false;
-    }
+    });
   }
 
+  @override
   Future<void> loadMorePokemons() async {
-    if (!hasMore.value || isLoadingMore.value) return;
+    if (!_hasMore.value || _isLoadingMore.value) return;
 
     try {
-      isLoadingMore.value = true;
-      final result = await _repository.getPokemonList(
-        offset: currentPage.value * _limit,
+      _isLoadingMore.value = true;
+      final result = await repository.getPokemonList(
+        offset: _currentPage.value * _limit,
         limit: _limit,
       );
 
       if (result.isSuccess && result.data != null) {
         if (result.data!.isEmpty) {
-          hasMore.value = false;
+          _hasMore.value = false;
           return;
         }
 
-        pokemons.addAll(result.data!);
-        hasMore.value = result.data!.length == _limit;
-        currentPage.value++;
+        _pokemons.addAll(result.data!);
+        _hasMore.value = result.data!.length == _limit;
+        _currentPage.value++;
       } else {
-        error.value = result.error?.toString() ?? 'Unknown error';
+        setError(result.error?.toString() ?? 'Unknown error');
       }
     } catch (e) {
-      error.value = 'Error loading more pokemons: $e';
+      setError('Error loading more pokemons: $e');
     } finally {
-      isLoadingMore.value = false;
+      _isLoadingMore.value = false;
     }
   }
 
-  void reset() {
-    pokemons.clear();
-    currentPage.value = 0;
-    hasMore.value = true;
-    error.value = '';
-  }
-
-  Future<void> searchPokemon(String query) async {
-    if (query.isEmpty) {
-      pokemons.clear();
-      currentPage.value = 0;
-      hasMore.value = true;
-      loadPokemons();
-      return;
-    }
-
-    try {
-      isLoading.value = true;
-      error.value = '';
-      final result = await _repository.searchPokemon(query);
-      if (result.isSuccess && result.data != null) {
-        pokemons.value = result.data!;
-      } else {
-        error.value = result.error?.toString() ?? 'Unknown error';
+  @override
+  Future<void> search(String query) async {
+    await trackOperation('search', () async {
+      _searchQuery.value = query;
+      if (query.isEmpty) {
+        _pokemons.clear();
+        _currentPage.value = 0;
+        _hasMore.value = true;
+        await fetchPokemonList();
+        return;
       }
-    } catch (e) {
-      error.value = 'Error searching pokemons: $e';
-      _adapter.showSnackbar(
-        title: 'Error',
-        message: 'Error searching pokemons: $e',
+
+      logger.info('Searching Pokemon', data: {'query': query});
+      final result = await searchPokemon(query);
+      _pokemons.value = result;
+      logger.info(
+        'Successfully searched Pokemon',
+        data: {'query': query, 'count': result.length},
       );
-    } finally {
-      isLoading.value = false;
-    }
+    });
   }
 
+  @override
   Future<void> loadPokemonsByType(String type) async {
-    try {
-      isLoading.value = true;
-      error.value = '';
-      filterType.value = type;
-      filterAbility.value = '';
+    await trackOperation('type_filter', () async {
+      setLoading(true);
+      clearError();
+      _filterType.value = type;
+      _filterAbility.value = '';
 
-      final result = await _repository.getPokemonList(offset: 0, limit: 20);
+      final result = await repository.getPokemonList(offset: 0, limit: 20);
       if (result.isSuccess && result.data != null) {
         final filteredPokemons = result.data!
             .where((pokemon) => pokemon.types.contains(type))
             .toList();
-        pokemons.value = filteredPokemons;
+        _pokemons.value = filteredPokemons;
       } else {
-        error.value = result.error?.toString() ?? 'Unknown error';
+        setError(result.error?.toString() ?? 'Unknown error');
       }
-    } catch (e) {
-      error.value = 'Error loading pokemons by type: $e';
-      _adapter.showSnackbar(
-        title: 'Error',
-        message: 'Failed to load pokemons by type. Please try again.',
-      );
-    } finally {
-      isLoading.value = false;
-    }
+    });
   }
 
+  @override
   Future<void> loadPokemonsByAbility(String ability) async {
-    try {
-      isLoading.value = true;
-      error.value = '';
-      filterType.value = '';
-      filterAbility.value = ability;
+    await trackOperation('ability_filter', () async {
+      setLoading(true);
+      clearError();
+      _filterType.value = '';
+      _filterAbility.value = ability;
 
-      final result = await _repository.getPokemonList(offset: 0, limit: 20);
+      final result = await repository.getPokemonList(offset: 0, limit: 20);
       if (result.isSuccess && result.data != null) {
         final filteredPokemons = result.data!
             .where((pokemon) => pokemon.abilities.contains(ability))
             .toList();
-        pokemons.value = filteredPokemons;
+        _pokemons.value = filteredPokemons;
       } else {
-        error.value = result.error?.toString() ?? 'Unknown error';
+        setError(result.error?.toString() ?? 'Unknown error');
       }
-    } catch (e) {
-      error.value = 'Error loading pokemons by ability: $e';
-      _adapter.showSnackbar(
-        title: 'Error',
-        message: 'Failed to load pokemons by ability. Please try again.',
-      );
-    } finally {
-      isLoading.value = false;
-    }
+    });
   }
 
+  @override
   void clearFilters() {
-    filterType.value = '';
-    filterAbility.value = '';
-    pokemons.clear();
-    currentPage.value = 0;
-    hasMore.value = true;
-    loadPokemons();
+    _filterType.value = '';
+    _filterAbility.value = '';
+    _pokemons.clear();
+    _currentPage.value = 0;
+    _hasMore.value = true;
+    fetchPokemonList();
   }
 
-  void navigateToDetail(PokemonEntityImpl pokemon) {
+  @override
+  void navigateToDetail(PokemonEntity pokemon) {
     _adapter.toNamed(
       '/pokemon-detail',
       arguments: pokemon,

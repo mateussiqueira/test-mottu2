@@ -54,6 +54,8 @@ dependencies:
   flutter_dotenv: ^5.1.0
   dartz: ^0.10.1
 
+  dio: ^5.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

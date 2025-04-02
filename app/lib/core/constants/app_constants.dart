@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   // App Info
-  static const String appName = 'Pokédex';
+  static const String appName = 'PokeAPI';
   static const String baseUrl = 'https://pokeapi.co/api/v2';
+  static const String imageBaseUrl =
+      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork';
 
   // Cache Settings
-  static const Duration cacheDuration = Duration(hours: 1);
+  static const Duration cacheDuration = Duration(days: 7);
 
   // Grid Settings
   static const int gridCrossAxisCount = 2;
@@ -109,4 +111,17 @@ class AppConstants {
   static const String weightLabel = 'Weight';
   static const String metersUnit = 'm';
   static const String kilogramsUnit = 'kg';
+
+  // New constants from the code block
+  static const int pageSize = 20;
+  static const int maxRetries = 3;
+  static const Duration timeoutDuration = Duration(seconds: 30);
+  static const Duration splashDuration = Duration(seconds: 2);
+  static const Duration toastDuration = Duration(seconds: 3);
+  static const Duration debounceTime = Duration(milliseconds: 500);
+  static const Duration throttleTime = Duration(milliseconds: 500);
+  static const int maxSearchHistory = 10;
+  static const int maxFavorites = 100;
+  static const int maxRecentlyViewed = 20;
+  static const int maxOfflinePokemons = 500;
 }
