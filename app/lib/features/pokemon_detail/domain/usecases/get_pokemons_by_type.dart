@@ -1,14 +1,20 @@
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_detail/domain/repositories/pokemon_detail_repository.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../repositories/i_pokemon_detail_repository.dart';
+import 'i_get_pokemons_by_type.dart';
 
-class GetPokemonsByType {
-  final PokemonDetailRepository repository;
+class GetPokemonsByType implements IGetPokemonsByType {
+  final IPokemonDetailRepository repository;
 
   GetPokemonsByType({
     required this.repository,
   });
 
+  @override
   Future<List<PokemonEntity>> call(String type) async {
-    return await repository.getPokemonsByType(type);
+    final result = await repository.getPokemonsByType(type);
+    if (result.isSuccess && result.data != null) {
+      return result.data!;
+    }
+    throw Exception(result.error?.toString() ?? 'Unknown error');
   }
 }
