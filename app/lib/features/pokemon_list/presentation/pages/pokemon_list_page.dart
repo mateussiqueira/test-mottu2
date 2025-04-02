@@ -38,23 +38,92 @@ class PokemonListPage extends StatelessWidget {
     final searchController = Get.find<PokemonSearchController>();
 
     return Scaffold(
+      backgroundColor: Colors.red,
       appBar: AppBar(
-        title: const Text('Pokédex'),
+        backgroundColor: Colors.red,
+        elevation: 0,
+        title: const Text(
+          'Pokédex',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search, color: Colors.white),
             onPressed: () {
               showSearch(
                 context: context,
-                delegate: PokemonSearchDelegate(),
+                delegate: PokemonSearchDelegate(listController),
               );
             },
           ),
         ],
       ),
-      body: Obx(() {
-        if (listController.isLoading.value) {
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: Obx(() {
+          if (listController.isLoading.value) {
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.75,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: 10,
+              itemBuilder: (context, index) => const PokemonGridItemSkeleton(),
+            );
+          }
+
+          if (listController.error.value.isNotEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    listController.error.value,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => listController.loadPokemons(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Tentar novamente'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return GridView.builder(
+            controller: _scrollController,
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -62,50 +131,26 @@ class PokemonListPage extends StatelessWidget {
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
             ),
-            itemCount: 10,
-            itemBuilder: (context, index) => const PokemonGridItemSkeleton(),
-          );
-        }
+            itemCount: listController.pokemons.length +
+                (listController.hasMore.value ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == listController.pokemons.length) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                  ),
+                );
+              }
 
-        if (listController.error.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(listController.error.value),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => listController.loadPokemons(),
-                  child: const Text('Tentar novamente'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return GridView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: listController.pokemons.length +
-              (listController.hasMore.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == listController.pokemons.length) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              final pokemon = listController.pokemons[index];
+              return Hero(
+                tag: 'pokemon-${pokemon.id}',
+                child: PokemonGridItem(pokemon: pokemon),
               );
-            }
-
-            final pokemon = listController.pokemons[index];
-            return PokemonGridItem(pokemon: pokemon);
-          },
-        );
-      }),
+            },
+          );
+        }),
+      ),
     );
   }
 }

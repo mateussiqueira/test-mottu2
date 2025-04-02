@@ -16,5 +16,4 @@ export interface PokemonResponse {
   weight: number;
   baseExperience: number;
   imageUrl: string;
-  stats: PokemonStats;
 }

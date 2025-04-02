@@ -5,13 +5,7 @@ import { PokemonController } from './pokemon.controller';
 import { PokemonService } from './pokemon.service';
 
 @Module({
-  imports: [
-    HttpModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-  ],
+  imports: [HttpModule, ConfigModule],
   controllers: [PokemonController],
   providers: [PokemonService],
   exports: [PokemonService],

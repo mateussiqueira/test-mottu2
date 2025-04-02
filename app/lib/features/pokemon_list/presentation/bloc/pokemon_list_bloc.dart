@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../../domain/repositories/pokemon_repository.dart';
 
-// Events
 abstract class PokemonListEvent {}
 
 class LoadPokemons extends PokemonListEvent {}
@@ -37,7 +36,6 @@ class LoadPokemonsByAbility extends PokemonListEvent {
   String toString() => 'LoadPokemonsByAbility(ability: $ability)';
 }
 
-// States
 abstract class PokemonListState {}
 
 class PokemonListInitial extends PokemonListState {
@@ -88,7 +86,6 @@ class PokemonListError extends PokemonListState {
   int get hashCode => message.hashCode;
 }
 
-// Bloc
 class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
   final PokemonRepository repository;
   Timer? _debounce;

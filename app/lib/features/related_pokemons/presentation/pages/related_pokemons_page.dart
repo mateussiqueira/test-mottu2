@@ -94,53 +94,55 @@ class RelatedPokemonsPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final pokemon = state.pokemons[index];
                 return Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () {
-                      // TODO: Navegar para a página de detalhes
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: Image.network(
-                            _getImageUrl(pokemon),
-                            fit: BoxFit.contain,
-                          ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Image.network(
+                          _getImageUrl(pokemon),
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 48,
+                            );
+                          },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                pokemon.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              pokemon.name.toUpperCase(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
-                              const SizedBox(height: 4),
-                              Wrap(
-                                spacing: 4,
-                                children: _getTypes(pokemon).map((type) {
-                                  return Chip(
-                                    label: Text(
-                                      type,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    backgroundColor: _getTypeColor(type),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 4,
+                              children: _getTypes(pokemon)
+                                  .map((type) => Chip(
+                                        label: Text(
+                                          type.toUpperCase(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        backgroundColor: _getTypeColor(type),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -148,7 +150,7 @@ class RelatedPokemonsPage extends StatelessWidget {
           }
 
           return const Center(
-            child: Text('Carregando Pokémon...'),
+            child: Text('Selecione um tipo ou habilidade'),
           );
         },
       ),
@@ -157,42 +159,42 @@ class RelatedPokemonsPage extends StatelessWidget {
 
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
-      case 'normal':
-        return Colors.grey;
+      case 'grass':
+        return Colors.green;
       case 'fire':
         return Colors.red;
       case 'water':
         return Colors.blue;
       case 'electric':
         return Colors.yellow;
-      case 'grass':
-        return Colors.green;
+      case 'psychic':
+        return Colors.purple;
       case 'ice':
         return Colors.lightBlue;
-      case 'fighting':
+      case 'dragon':
+        return Colors.indigo;
+      case 'dark':
         return Colors.brown;
+      case 'fairy':
+        return Colors.pink;
+      case 'normal':
+        return Colors.grey;
+      case 'fighting':
+        return Colors.orange;
+      case 'flying':
+        return Colors.indigo;
       case 'poison':
         return Colors.purple;
       case 'ground':
-        return Colors.brown[300]!;
-      case 'flying':
-        return Colors.indigo;
-      case 'psychic':
-        return Colors.pink;
+        return Colors.brown;
+      case 'rock':
+        return Colors.grey;
       case 'bug':
         return Colors.lightGreen;
-      case 'rock':
-        return Colors.grey[700]!;
       case 'ghost':
         return Colors.deepPurple;
-      case 'dragon':
-        return Colors.indigo[700]!;
-      case 'dark':
-        return Colors.grey[900]!;
       case 'steel':
         return Colors.blueGrey;
-      case 'fairy':
-        return Colors.pink[200]!;
       default:
         return Colors.grey;
     }

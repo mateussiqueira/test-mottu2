@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/presentation/l10n/app_localizations.dart';
 
-/// Widget de erro para os detalhes do Pokemon
 class PokemonDetailError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

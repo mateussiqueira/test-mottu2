@@ -1,4 +1,3 @@
-/// Classe que representa uma entidade Pokemon
 class PokemonEntity {
   final int id;
   final String name;

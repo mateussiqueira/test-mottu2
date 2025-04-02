@@ -1,7 +1,6 @@
 import '../../../../core/domain/result.dart' as core;
 import '../entities/pokemon_entity.dart';
 
-/// Interface do repositório de Pokemon
 abstract class PokemonRepository {
   /// Busca a lista de Pokemons
   Future<core.Result<List<PokemonEntityImpl>>> getPokemonList({

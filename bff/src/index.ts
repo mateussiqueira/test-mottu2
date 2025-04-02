@@ -31,3 +31,10 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+export * from './app.controller';
+export * from './app.module';
+export * from './app.service';
+export * from './pokemon/pokemon.controller';
+export * from './pokemon/pokemon.module';
+export * from './pokemon/pokemon.service';

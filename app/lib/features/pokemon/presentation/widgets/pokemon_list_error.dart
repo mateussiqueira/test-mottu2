@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/presentation/l10n/app_localizations.dart';
 
-/// Widget de erro para a lista de Pokemons
 class PokemonListError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

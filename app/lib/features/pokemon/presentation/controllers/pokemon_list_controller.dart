@@ -4,7 +4,6 @@ import 'package:mobile/features/pokemon/domain/repositories/pokemon_repository.d
 import 'package:mobile/features/pokemon/domain/usecases/get_pokemon_list_use_case.dart';
 import 'package:mobile/features/pokemon/domain/usecases/search_pokemon_use_case.dart';
 
-/// Controlador GetX para a lista de Pokemons
 class PokemonListController extends GetxController {
   final PokemonRepository _repository;
   final GetPokemonListUseCase _getPokemonListUseCase;

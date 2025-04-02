@@ -1,131 +1,275 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
-import 'package:mobile/features/pokemon_detail/presentation/widgets/pokemon_ability_chip.dart';
-import 'package:mobile/features/pokemon_detail/presentation/widgets/related_pokemons.dart';
 
-class PokemonDetailPage extends GetView<PokemonDetailController> {
-  final PokemonEntity? initialPokemon;
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
+
+class PokemonDetailPage extends StatelessWidget {
+  final PokemonEntityImpl pokemon;
 
   const PokemonDetailPage({
-    super.key,
-    this.initialPokemon,
-  });
+    Key? key,
+    required this.pokemon,
+  }) : super(key: key);
+
+  Color _getTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'grass':
+        return Colors.green;
+      case 'fire':
+        return Colors.red;
+      case 'water':
+        return Colors.blue;
+      case 'electric':
+        return Colors.yellow;
+      case 'rock':
+        return Colors.brown;
+      case 'ground':
+        return Colors.brown[300]!;
+      case 'poison':
+        return Colors.purple;
+      case 'bug':
+        return Colors.lightGreen;
+      case 'flying':
+        return Colors.lightBlue;
+      case 'psychic':
+        return Colors.pink;
+      case 'fighting':
+        return Colors.orange;
+      case 'ghost':
+        return Colors.deepPurple;
+      case 'ice':
+        return Colors.cyan;
+      case 'dragon':
+        return Colors.indigo;
+      case 'steel':
+        return Colors.blueGrey;
+      case 'dark':
+        return Colors.grey[800]!;
+      case 'fairy':
+        return Colors.pinkAccent;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Atualiza o Pokémon inicial se fornecido
-    if (initialPokemon != null && controller.pokemon.value == null) {
-      controller.updatePokemon(initialPokemon!);
-    }
+    final mainType = pokemon.types.first;
+    final mainColor = _getTypeColor(mainType);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Obx(() => Text(controller.pokemon.value?.name ?? '')),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: Obx(() {
-        final pokemon = controller.pokemon.value;
-        if (pokemon == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Image.network(
-                  pokemon.imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(Icons.error_outline),
-                    );
-                  },
-                ),
+      backgroundColor: mainColor,
+      body: Stack(
+        children: [
+          // Background design elements
+          Positioned(
+            right: -50,
+            top: -50,
+            child: Transform.rotate(
+              angle: 0.4,
+              child: Icon(
+                Icons.catching_pokemon,
+                size: 200,
+                color: Colors.white.withOpacity(0.2),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      pokemon.name,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Height: ${pokemon.height}m',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    Text(
-                      'Weight: ${pokemon.weight}kg',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    Text(
-                      'Base Experience: ${pokemon.baseExperience}',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Types:',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      children: pokemon.types
-                          .map((type) => PokemonAbilityChip(ability: type))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Abilities:',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      children: pokemon.abilities
-                          .map(
-                              (ability) => PokemonAbilityChip(ability: ability))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 16),
-                    RelatedPokemons(
-                      title: 'Pokemons with same type',
-                      pokemons: controller.sameTypePokemons,
-                      onPokemonTap: (pokemon) {
-                        Get.offAndToNamed(
-                          '/pokemon-detail',
-                          arguments: pokemon,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    RelatedPokemons(
-                      title: 'Pokemons with same ability',
-                      pokemons: controller.sameAbilityPokemons,
-                      onPokemonTap: (pokemon) {
-                        Get.offAndToNamed(
-                          '/pokemon-detail',
-                          arguments: pokemon,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        );
-      }),
+
+          // Main content
+          SafeArea(
+            child: Column(
+              children: [
+                // App bar
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Get.offAllNamed('/'),
+                      ),
+                      Text(
+                        '#${pokemon.id.toString().padLeft(3, '0')}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Pokemon name and types
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pokemon.name.capitalize!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: pokemon.types.map((type) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              type.capitalize!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Pokemon image and details
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Pokemon image
+                        Positioned(
+                          top: -100,
+                          left: 0,
+                          right: 0,
+                          child: Hero(
+                            tag: 'pokemon-${pokemon.id}',
+                            child: Image.network(
+                              pokemon.imageUrl,
+                              height: 200,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+
+                        // Pokemon details
+                        Padding(
+                          padding: const EdgeInsets.only(top: 120),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSection('Características'),
+                                _buildInfoRow('Altura', '${pokemon.height} m'),
+                                _buildInfoRow('Peso', '${pokemon.weight} kg'),
+                                _buildInfoRow('Experiência Base',
+                                    pokemon.baseExperience.toString()),
+                                const SizedBox(height: 24),
+                                _buildSection('Habilidades'),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: pokemon.abilities.map((ability) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: mainColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        ability.capitalize!,
+                                        style: TextStyle(
+                                          color: mainColor,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

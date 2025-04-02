@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/domain/errors/pokemon_error.dart';
 import '../../../features/pokemon/domain/entities/pokemon_entity.dart';
 
-/// Classe para gerenciar o cache dos Pokemons
 class PokemonCacheManager {
   static const String _pokemonListKey = 'pokemon_list';
   static const String _pokemonDetailKey = 'pokemon_detail_';

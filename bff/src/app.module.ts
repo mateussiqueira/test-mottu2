@@ -8,7 +8,6 @@ import { PokemonModule } from './pokemon/pokemon.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
     }),
     PokemonModule,
   ],

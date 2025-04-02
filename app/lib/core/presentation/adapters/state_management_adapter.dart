@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Interface para padronizar o gerenciamento de estado e navegação
 abstract class StateManagementAdapter {
   /// Navega para uma rota nomeada e substitui a rota atual
   Future<T?> toNamed<T>(
@@ -77,7 +76,6 @@ abstract class StateManagementAdapter {
   });
 }
 
-/// Posição do snackbar na tela
 enum SnackPosition {
   TOP,
   CENTER,

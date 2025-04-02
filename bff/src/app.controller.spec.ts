@@ -1,4 +1,7 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { Request, Response } from 'express';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { PokemonController } from './controllers/pokemon.controller';
 import { PokemonService } from './services/pokemon.service';
 
@@ -27,7 +30,16 @@ describe('PokemonController', () => {
   describe('getPokemonList', () => {
     it('should return pokemon list with default pagination', async () => {
       const mockPokemons = [
-        { id: 1, name: 'bulbasaur', types: ['grass'], abilities: ['overgrow'], height: 0.7, weight: 6.9, baseExperience: 64, imageUrl: 'url' },
+        {
+          id: 1,
+          name: 'bulbasaur',
+          types: ['grass'],
+          abilities: ['overgrow'],
+          height: 0.7,
+          weight: 6.9,
+          baseExperience: 64,
+          imageUrl: 'url',
+        },
       ];
       mockService.getPokemonList.mockResolvedValue(mockPokemons);
 
@@ -49,7 +61,16 @@ describe('PokemonController', () => {
 
   describe('getPokemonById', () => {
     it('should return pokemon by id', async () => {
-      const mockPokemon = { id: 1, name: 'bulbasaur', types: ['grass'], abilities: ['overgrow'], height: 0.7, weight: 6.9, baseExperience: 64, imageUrl: 'url' };
+      const mockPokemon = {
+        id: 1,
+        name: 'bulbasaur',
+        types: ['grass'],
+        abilities: ['overgrow'],
+        height: 0.7,
+        weight: 6.9,
+        baseExperience: 64,
+        imageUrl: 'url',
+      };
       mockService.getPokemonById.mockResolvedValue(mockPokemon);
       mockReq = { params: { id: '1' } };
 
@@ -73,7 +94,16 @@ describe('PokemonController', () => {
   describe('searchPokemon', () => {
     it('should return pokemons matching search query', async () => {
       const mockPokemons = [
-        { id: 25, name: 'pikachu', types: ['electric'], abilities: ['static'], height: 0.4, weight: 6.0, baseExperience: 112, imageUrl: 'url' },
+        {
+          id: 25,
+          name: 'pikachu',
+          types: ['electric'],
+          abilities: ['static'],
+          height: 0.4,
+          weight: 6.0,
+          baseExperience: 112,
+          imageUrl: 'url',
+        },
       ];
       mockService.searchPokemon.mockResolvedValue(mockPokemons);
       mockReq = { query: { q: 'pikachu' } };
@@ -107,7 +137,16 @@ describe('PokemonController', () => {
   describe('getPokemonsByType', () => {
     it('should return pokemons by type', async () => {
       const mockPokemons = [
-        { id: 4, name: 'charmander', types: ['fire'], abilities: ['blaze'], height: 0.6, weight: 8.5, baseExperience: 62, imageUrl: 'url' },
+        {
+          id: 4,
+          name: 'charmander',
+          types: ['fire'],
+          abilities: ['blaze'],
+          height: 0.6,
+          weight: 8.5,
+          baseExperience: 62,
+          imageUrl: 'url',
+        },
       ];
       mockService.getPokemonsByType.mockResolvedValue(mockPokemons);
       mockReq = { params: { type: 'fire' } };
@@ -132,7 +171,16 @@ describe('PokemonController', () => {
   describe('getPokemonsByAbility', () => {
     it('should return pokemons by ability', async () => {
       const mockPokemons = [
-        { id: 1, name: 'bulbasaur', types: ['grass'], abilities: ['overgrow'], height: 0.7, weight: 6.9, baseExperience: 64, imageUrl: 'url' },
+        {
+          id: 1,
+          name: 'bulbasaur',
+          types: ['grass'],
+          abilities: ['overgrow'],
+          height: 0.7,
+          weight: 6.9,
+          baseExperience: 64,
+          imageUrl: 'url',
+        },
       ];
       mockService.getPokemonsByAbility.mockResolvedValue(mockPokemons);
       mockReq = { params: { ability: 'overgrow' } };
@@ -151,6 +199,27 @@ describe('PokemonController', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    });
+  });
+});
+
+describe('AppController', () => {
+  let appController: AppController;
+  let appService: AppService;
+
+  beforeEach(async () => {
+    const app: TestingModule = await Test.createTestingModule({
+      controllers: [AppController],
+      providers: [AppService],
+    }).compile();
+
+    appController = app.get<AppController>(AppController);
+    appService = app.get<AppService>(AppService);
+  });
+
+  describe('root', () => {
+    it('should return "Hello World!"', () => {
+      expect(appController.getHello()).toBe('Hello World!');
     });
   });
 });

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// Widget de loading para a lista de Pokemons
 class PokemonListLoading extends StatelessWidget {
   const PokemonListLoading({super.key});
 

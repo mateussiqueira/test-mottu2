@@ -1,4 +1,3 @@
-/// Classe para gerenciar as strings localizadas do app
 class AppLocalizations {
   // Pokemon List
   static const String searchPokemon = 'Search Pokemon';

@@ -4,7 +4,6 @@ import 'package:mobile/features/pokemon/data/datasources/pokemon_remote_data_sou
 import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
 import 'package:mobile/features/pokemon/domain/repositories/pokemon_repository.dart';
 
-/// Implementação do repositório de Pokemon
 class PokemonRepositoryImpl implements PokemonRepository {
   final PokemonRemoteDataSource remoteDataSource;
 

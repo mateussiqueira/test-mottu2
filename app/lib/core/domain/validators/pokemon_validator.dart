@@ -1,7 +1,6 @@
 import '../errors/pokemon_error.dart';
 import '../result.dart';
 
-/// Classe para validação de dados de Pokemon
 class PokemonValidator {
   /// Valida o ID do Pokemon
   static Result<int> validateId(int id) {

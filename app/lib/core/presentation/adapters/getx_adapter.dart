@@ -3,7 +3,6 @@ import 'package:get/get.dart' as getx;
 
 import 'state_management_adapter.dart';
 
-/// Implementação do GetX para gerenciamento de estado e navegação
 class GetXAdapter implements StateManagementAdapter {
   static final GetXAdapter _instance = GetXAdapter._internal();
   factory GetXAdapter() => _instance;
