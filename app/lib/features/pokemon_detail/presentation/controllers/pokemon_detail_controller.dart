@@ -13,28 +13,31 @@ class PokemonDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final pokemonId = Get.arguments as int;
-    loadPokemon(pokemonId);
+    final initialPokemon = Get.arguments as PokemonEntity?;
+    if (initialPokemon != null) {
+      pokemon.value = initialPokemon;
+      _loadRelatedPokemons(initialPokemon);
+    }
   }
 
   Future<void> loadPokemon(int id) async {
     try {
-      final result = await _repository.getPokemonById(id);
+      final result = await _repository.getPokemonDetail(id);
       result.fold(
-        (pokemon) {
-          this.pokemon.value = pokemon;
-          _loadRelatedPokemons(pokemon);
-        },
-        (error) => Get.snackbar(
+        (failure) => Get.snackbar(
           'Error',
-          'Failed to load pokemon details',
+          'Failed to load pokemon',
           snackPosition: SnackPosition.BOTTOM,
         ),
+        (pokemonData) {
+          pokemon.value = pokemonData;
+          _loadRelatedPokemons(pokemonData);
+        },
       );
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Failed to load pokemon details',
+        'Failed to load pokemon',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -43,28 +46,27 @@ class PokemonDetailController extends GetxController {
   Future<void> _loadRelatedPokemons(PokemonEntity pokemon) async {
     try {
       // Load pokemons with same type
-      for (final type in pokemon.types) {
-        final result = await _repository.getPokemonsByType(type);
-        result.fold(
-          (pokemons) {
-            sameTypePokemons.value =
-                pokemons.where((p) => p.id != pokemon.id).take(5).toList();
-          },
-          (error) => print('Failed to load pokemons with type $type'),
-        );
-      }
+      final typeResult =
+          await _repository.getPokemonsByType(pokemon.types.first);
+      typeResult.fold(
+        (failure) => print('Failed to load pokemons with same type: $failure'),
+        (pokemons) {
+          sameTypePokemons.value =
+              pokemons.where((p) => p.id != pokemon.id).take(5).toList();
+        },
+      );
 
       // Load pokemons with same ability
-      for (final ability in pokemon.abilities) {
-        final result = await _repository.getPokemonsByAbility(ability);
-        result.fold(
-          (pokemons) {
-            sameAbilityPokemons.value =
-                pokemons.where((p) => p.id != pokemon.id).take(5).toList();
-          },
-          (error) => print('Failed to load pokemons with ability $ability'),
-        );
-      }
+      final abilityResult =
+          await _repository.getPokemonsByAbility(pokemon.abilities.first);
+      abilityResult.fold(
+        (failure) =>
+            print('Failed to load pokemons with same ability: $failure'),
+        (pokemons) {
+          sameAbilityPokemons.value =
+              pokemons.where((p) => p.id != pokemon.id).take(5).toList();
+        },
+      );
     } catch (e) {
       print('Failed to load related pokemons: $e');
     }

@@ -1,23 +1,14 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../../core/domain/errors/pokemon_error.dart';
-import '../../../../core/domain/result.dart';
-import '../../domain/entities/pokemon_entity.dart';
-import '../../domain/repositories/pokemon_repository.dart';
-import '../datasources/pokemon_local_datasource.dart';
-import '../datasources/pokemon_remote_data_source.dart';
+import 'package:mobile/core/domain/errors/pokemon_error.dart';
+import 'package:mobile/core/domain/result.dart';
+import 'package:mobile/features/pokemon/data/datasources/pokemon_remote_data_source.dart';
+import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
+import 'package:mobile/features/pokemon/domain/repositories/pokemon_repository.dart';
 
 /// Implementação do repositório de Pokemon
 class PokemonRepositoryImpl implements PokemonRepository {
   final PokemonRemoteDataSource remoteDataSource;
-  final PokemonLocalDataSource localDataSource;
-  final SharedPreferences prefs;
 
-  PokemonRepositoryImpl({
-    required this.remoteDataSource,
-    required this.localDataSource,
-    required this.prefs,
-  });
+  PokemonRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<Result<List<PokemonEntityImpl>>> getPokemonList({
@@ -25,47 +16,43 @@ class PokemonRepositoryImpl implements PokemonRepository {
     required int offset,
   }) async {
     try {
-      final result = await remoteDataSource.getPokemonList(limit, offset);
-      final pokemons =
-          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
-      return Result.success(pokemons);
+      final pokemons = await remoteDataSource.getPokemons();
+      return Result.success(
+          pokemons.map((p) => p as PokemonEntityImpl).toList());
     } catch (e) {
-      return Result.failure(PokemonUnexpectedError());
+      return Result.failure(const PokemonUnexpectedError());
     }
   }
 
   @override
   Future<Result<PokemonEntityImpl>> getPokemonDetail(int id) async {
     try {
-      final result = await remoteDataSource.getPokemonById(id);
-      final pokemon = PokemonEntityImpl.fromJson(result);
-      return Result.success(pokemon);
+      final pokemon = await remoteDataSource.getPokemonDetail(id);
+      return Result.success(pokemon as PokemonEntityImpl);
     } catch (e) {
-      return Result.failure(PokemonUnexpectedError());
+      return Result.failure(const PokemonUnexpectedError());
     }
   }
 
   @override
   Future<Result<List<PokemonEntityImpl>>> searchPokemon(String query) async {
     try {
-      final result = await remoteDataSource.searchPokemon(query);
-      final pokemons =
-          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
-      return Result.success(pokemons);
+      final pokemons = await remoteDataSource.searchPokemons(query);
+      return Result.success(
+          pokemons.map((p) => p as PokemonEntityImpl).toList());
     } catch (e) {
-      return Result.failure(PokemonUnexpectedError());
+      return Result.failure(const PokemonUnexpectedError());
     }
   }
 
   @override
   Future<Result<List<PokemonEntityImpl>>> getPokemonsByType(String type) async {
     try {
-      final result = await remoteDataSource.getPokemonsByType(type);
-      final pokemons =
-          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
-      return Result.success(pokemons);
+      final pokemons = await remoteDataSource.getPokemonsByType(type);
+      return Result.success(
+          pokemons.map((p) => p as PokemonEntityImpl).toList());
     } catch (e) {
-      return Result.failure(PokemonUnexpectedError());
+      return Result.failure(const PokemonUnexpectedError());
     }
   }
 
@@ -73,12 +60,11 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Future<Result<List<PokemonEntityImpl>>> getPokemonsByAbility(
       String ability) async {
     try {
-      final result = await remoteDataSource.getPokemonsByAbility(ability);
-      final pokemons =
-          result.map((json) => PokemonEntityImpl.fromJson(json)).toList();
-      return Result.success(pokemons);
+      final pokemons = await remoteDataSource.getPokemonsByAbility(ability);
+      return Result.success(
+          pokemons.map((p) => p as PokemonEntityImpl).toList());
     } catch (e) {
-      return Result.failure(PokemonUnexpectedError());
+      return Result.failure(const PokemonUnexpectedError());
     }
   }
 }

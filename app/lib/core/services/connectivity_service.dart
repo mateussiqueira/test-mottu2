@@ -2,9 +2,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class ConnectivityService extends GetxService {
-  static const platform = MethodChannel('connectivity_status');
-  final _isConnected = true.obs;
-  bool get isConnected => _isConnected.value;
+  final EventChannel _channel;
+
+  ConnectivityService({EventChannel? channel})
+      : _channel = channel ?? const EventChannel('connectivity');
 
   @override
   void onInit() {
@@ -14,23 +15,28 @@ class ConnectivityService extends GetxService {
 
   Future<void> _initConnectivity() async {
     try {
-      platform.setMethodCallHandler(_handleMethod);
-      await platform.invokeMethod('getConnectivityStatus');
+      final stream = _channel.receiveBroadcastStream();
+      await stream.first;
     } on PlatformException catch (e) {
       print('Failed to get connectivity status: ${e.message}');
     }
   }
 
-  Future<dynamic> _handleMethod(MethodCall call) async {
-    switch (call.method) {
-      case 'onConnectivityChanged':
-        _isConnected.value = call.arguments == 'connected';
-        break;
-      default:
-        throw PlatformException(
-          code: 'Unimplemented',
-          message: 'Method ${call.method} not implemented',
-        );
+  Future<bool> checkConnectivity() async {
+    try {
+      final stream = _channel.receiveBroadcastStream();
+      return await stream.first as bool;
+    } catch (e) {
+      return true; // Return true on error to allow app to continue
+    }
+  }
+
+  Stream<bool> get onConnectivityChanged {
+    try {
+      return _channel.receiveBroadcastStream().map((event) => event as bool);
+    } catch (e) {
+      return Stream.value(
+          true); // Return true on error to allow app to continue
     }
   }
 }

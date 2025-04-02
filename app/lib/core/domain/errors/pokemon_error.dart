@@ -1,61 +1,46 @@
 /// Classe base para erros do domínio Pokemon
-class PokemonError {
-  final String code;
-  final String? message;
-
-  const PokemonError({
-    required this.code,
-    this.message,
-  });
-
-  @override
-  String toString() => message ?? code;
+abstract class PokemonError {
+  const PokemonError();
 }
 
 /// Erro de rede
 class NetworkError extends PokemonError {
-  NetworkError()
-      : super(code: 'network_error', message: 'Network error occurred');
+  NetworkError() : super();
 }
 
 /// Erro de cache
 class CacheError extends PokemonError {
-  CacheError() : super(code: 'cache_error', message: 'Cache error occurred');
+  CacheError() : super();
 }
 
 /// Erro de validação
 class ValidationError extends PokemonError {
-  ValidationError(String message)
-      : super(code: 'validation_error', message: message);
+  final String message;
+  ValidationError(this.message) : super();
 }
 
 /// Erro desconhecido
 class UnknownError extends PokemonError {
-  UnknownError()
-      : super(code: 'unknown_error', message: 'An unknown error occurred');
+  UnknownError() : super();
 }
 
 /// Erro quando o Pokemon não é encontrado
 class PokemonNotFoundError extends PokemonError {
-  PokemonNotFoundError()
-      : super(code: 'pokemon_not_found', message: 'Pokemon not found');
+  PokemonNotFoundError() : super();
 }
 
 /// Erro de rede ao buscar Pokemon
 class PokemonNetworkError extends PokemonError {
-  PokemonNetworkError()
-      : super(code: 'network_error', message: 'Network error occurred');
+  PokemonNetworkError() : super();
 }
 
 /// Erro inesperado ao buscar Pokemon
 class PokemonUnexpectedError extends PokemonError {
-  PokemonUnexpectedError()
-      : super(
-            code: 'unexpected_error', message: 'An unexpected error occurred');
+  const PokemonUnexpectedError();
 }
 
 /// Erro de validação do Pokemon
 class PokemonValidationError extends PokemonError {
-  PokemonValidationError(String message)
-      : super(code: 'validation_error', message: message);
+  final String message;
+  PokemonValidationError(this.message) : super();
 }

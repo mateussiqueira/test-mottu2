@@ -29,14 +29,14 @@ class AppRouter {
       case pokemonDetail:
         // Verifica se o argumento é do tipo esperado
         final arguments = settings.arguments;
-        if (arguments is PokemonEntityImpl) {
+        if (arguments is PokemonEntity) {
           return GetPageRoute(
-            page: () => PokemonDetailPage(pokemon: arguments),
+            page: () => PokemonDetailPage(initialPokemon: arguments),
             settings: settings,
           );
         } else {
           return _errorRoute(
-            'Argumento inválido para a rota $pokemonDetail. Esperado: PokemonEntityImpl.',
+            'Argumento inválido para a rota $pokemonDetail. Esperado: PokemonEntity.',
           );
         }
       default:

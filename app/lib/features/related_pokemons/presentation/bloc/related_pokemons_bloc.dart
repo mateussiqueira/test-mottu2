@@ -89,14 +89,14 @@ class RelatedPokemonsBloc
       final result = await repository.getPokemonsByType(event.type);
       result.fold(
         (failure) =>
-            emit(RelatedPokemonsError(failure.message ?? 'Unknown error')),
+            emit(const RelatedPokemonsError('Failed to load pokemons by type')),
         (pokemons) => emit(RelatedPokemonsLoaded(
           pokemons: pokemons,
           filterType: event.type,
         )),
       );
     } catch (e) {
-      emit(RelatedPokemonsError(e.toString()));
+      emit(const RelatedPokemonsError('An unexpected error occurred'));
     }
   }
 
@@ -111,15 +111,15 @@ class RelatedPokemonsBloc
 
       final result = await repository.getPokemonsByAbility(event.ability);
       result.fold(
-        (failure) =>
-            emit(RelatedPokemonsError(failure.message ?? 'Unknown error')),
+        (failure) => emit(
+            const RelatedPokemonsError('Failed to load pokemons by ability')),
         (pokemons) => emit(RelatedPokemonsLoaded(
           pokemons: pokemons,
           filterAbility: event.ability,
         )),
       );
     } catch (e) {
-      emit(RelatedPokemonsError(e.toString()));
+      emit(const RelatedPokemonsError('An unexpected error occurred'));
     }
   }
 }

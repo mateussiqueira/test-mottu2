@@ -42,7 +42,7 @@ class PokemonListController extends GetxController {
         offset: _currentPage.value * 20,
       );
       result.fold(
-        (failure) => _error.value = failure.message ?? 'Unknown error',
+        (failure) => _error.value = 'Failed to load pokemons',
         (pokemons) {
           _pokemons.value = pokemons;
           _hasMore.value = pokemons.length == 20;
@@ -69,7 +69,7 @@ class PokemonListController extends GetxController {
     try {
       final result = await repository.searchPokemon(query);
       result.fold(
-        (failure) => _error.value = failure.message ?? 'Unknown error',
+        (failure) => _error.value = 'Failed to search pokemons',
         (pokemons) {
           _pokemons.value = pokemons;
           _hasMore.value = false;

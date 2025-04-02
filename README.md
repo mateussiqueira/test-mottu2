@@ -1,116 +1,216 @@
-# Pokemon API App
+# PokeAPI Mobile App
 
-A Flutter application that consumes the PokeAPI to display and manage Pokemon information.
+Aplicativo Flutter que consome a PokeAPI para exibir informações sobre Pokémon. O projeto pode ser executado de duas formas: consumindo diretamente a API ou através de um BFF (Backend for Frontend).
 
-## Features Implemented
+## 🚀 Funcionalidades Implementadas
 
-### Level 1 ✅
+### Nível 1
+- [x] Listagem de Pokémons com:
+  - Imagem
+  - Nome
+- [x] Tela de detalhes com:
+  - Imagem
+  - Nome
+  - Altura
+  - Peso
 
-- Pokemon list with images and names
-- Pokemon details screen showing:
-  - Image
-  - Name
-  - Height
-  - Weight
+### Nível 2
+- [x] Cache local das consultas à API
+- [x] Filtro por nome na listagem
+- [x] Tela de detalhes expandida com:
+  - Tipos
+  - Habilidades
 
-### Level 2 ✅
+### Nível 3
+- [x] Splash screen customizada
+- [x] Limpeza do cache ao fechar o app
+- [x] Paginação na listagem
+- [x] Pokémons relacionados por tipo e habilidade
+- [x] Navegação para detalhes de pokémons relacionados
+- [x] Testes de unidade para regras de negócio
 
-- Local cache for API queries using SharedPreferences
-- Name filter for the list
-- Additional details in Pokemon screen:
-  - Types
-  - Abilities
+### Pontos Extras
+- [x] Uso do GetX para gerenciamento de estado e navegação
+- [x] Arquitetura Clean Architecture com:
+  - Domain (entities, repositories, use cases)
+  - Data (repositories, data sources)
+  - Presentation (controllers, pages, widgets)
 
-### Level 3 ✅
+## 🏗️ Arquitetura
 
-- Pagination in the list
-- Unit tests for business rules
-- Clean Architecture implementation
-
-### Extra Points ✅
-
-- GetX for state management and dependency injection
-- Clean Architecture with:
-  - Domain Layer (Entities, Use Cases, Repositories)
-  - Data Layer (Models, Data Sources)
-  - Presentation Layer (Pages, Widgets, Controllers)
-
-## How to Run
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/pokeapi.git
-```
-
-2. Navigate to the app directory:
-
-```bash
-cd pokeapi/app
-```
-
-3. Install dependencies:
-
-```bash
-flutter pub get
-```
-
-4. Run the app:
-
-```bash
-flutter run
-```
-
-## Architecture
-
-The project follows Clean Architecture principles with the following structure:
+O projeto utiliza Clean Architecture com as seguintes camadas:
 
 ```
 lib/
 ├── core/
 │   ├── domain/
-│   │   └── errors/
-│   ├── services/
-│   └── data/
-│       └── adapters/
+│   │   ├── entities/
+│   │   ├── errors/
+│   │   ├── repositories/
+│   │   ├── result.dart
+│   │   └── validators/
+│   ├── presentation/
+│   │   ├── adapters/
+│   │   ├── constants/
+│   │   └── routes/
+│   └── config/
 ├── features/
-│   └── pokemon/
+│   ├── pokemon/
+│   │   ├── data/
+│   │   ├── domain/
+│   │   └── presentation/
+│   ├── pokemon_list/
+│   │   ├── data/
+│   │   ├── domain/
+│   │   └── presentation/
+│   └── pokemon_detail/
 │       ├── data/
-│       │   ├── datasources/
-│       │   ├── models/
-│       │   └── repositories/
 │       ├── domain/
-│       │   ├── entities/
-│       │   ├── repositories/
-│       │   └── usecases/
 │       └── presentation/
-│           ├── controllers/
-│           ├── pages/
-│           └── widgets/
 └── main.dart
 ```
 
-## Testing
+## 🛠️ Como Executar
 
-Run the tests using:
+### Pré-requisitos
+- Flutter SDK
+- Dart SDK
+- Node.js (para o BFF)
+- iOS Simulator ou Android Emulator
+
+### Usando o Script de Automação (Recomendado)
+
+O projeto inclui um script de automação que facilita a execução e configuração do ambiente:
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/pokeapi.git
+cd pokeapi
+```
+
+2. Dê permissão de execução ao script:
+```bash
+chmod +x run.sh
+```
+
+3. Execute o script:
+```bash
+./run.sh
+```
+
+O script oferece as seguintes opções:
+- Executar com BFF
+- Executar com API direta
+- Instalar dependências
+- Sair
+
+O script também:
+- Verifica se todos os pré-requisitos estão instalados
+- Instala automaticamente as dependências necessárias
+- Configura o ambiente iOS (quando aplicável)
+- Gerencia o ciclo de vida do BFF
+
+### Executando Manualmente
+
+#### Com BFF
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/pokeapi.git
+cd pokeapi
+```
+
+2. Instale as dependências do BFF:
+```bash
+cd bff
+npm install
+```
+
+3. Inicie o BFF:
+```bash
+npm run start:dev
+```
+
+4. Em outro terminal, instale as dependências do Flutter:
+```bash
+cd app
+flutter pub get
+```
+
+5. Execute o app:
+```bash
+flutter run
+```
+
+#### Com API Direta
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/pokeapi.git
+cd pokeapi
+```
+
+2. Instale as dependências do Flutter:
+```bash
+cd app
+flutter pub get
+```
+
+3. Configure o arquivo `app/lib/core/config/app_config.dart`:
+```dart
+class AppConfig {
+  static const bool useBff = false; // Altere para false para usar a API diretamente
+}
+```
+
+4. Execute o app:
+```bash
+flutter run
+```
+
+## 🧪 Testes
+
+O projeto inclui testes de unidade para as regras de negócio. Para executar os testes:
 
 ```bash
+cd app
 flutter test
 ```
 
-## Dependencies
+## 📱 Plataformas Suportadas
 
-- flutter_dotenv: For environment variables
-- get: For state management and dependency injection
-- http: For API calls
-- shared_preferences: For local storage
-- mockito: For testing
+- iOS
+- Android
 
-## API Reference
+## 🔧 Configuração do Ambiente
 
-The app uses the PokeAPI (https://pokeapi.co/docs/v2) with the following endpoints:
+### iOS
+1. Instale o Xcode
+2. Configure o CocoaPods:
+```bash
+cd ios
+pod install
+```
 
-- List of pokemons: /api/v2/pokemon
-- Pokemon details: /api/v2/pokemon/{name}
-- Types: /api/v2/type
-- Abilities: /api/v2/ability
+### Android
+1. Instale o Android Studio
+2. Configure um emulador Android ou conecte um dispositivo físico
+
+## 📦 Dependências Principais
+
+- GetX: Gerenciamento de estado e navegação
+- Dio: Cliente HTTP
+- SharedPreferences: Cache local
+- Mockito: Testes
+
+## 🤝 Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.

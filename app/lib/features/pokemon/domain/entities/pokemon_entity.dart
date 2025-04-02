@@ -1,23 +1,36 @@
-class PokemonEntity {
+abstract class PokemonEntity {
   final int id;
   final String name;
+  final String imageUrl;
   final List<String> types;
   final List<String> abilities;
   final int height;
   final int weight;
   final int baseExperience;
-  final String imageUrl;
 
-  PokemonEntity({
+  const PokemonEntity({
     required this.id,
     required this.name,
+    required this.imageUrl,
     required this.types,
     required this.abilities,
     required this.height,
     required this.weight,
     required this.baseExperience,
-    required this.imageUrl,
   });
+
+  factory PokemonEntity.fromJson(Map<String, dynamic> json) {
+    return PokemonEntityImpl(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      imageUrl: json['imageUrl'] as String,
+      types: List<String>.from(json['types'] as List),
+      abilities: List<String>.from(json['abilities'] as List),
+      height: json['height'] as int,
+      weight: json['weight'] as int,
+      baseExperience: json['baseExperience'] as int,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -46,15 +59,15 @@ class PokemonEntity {
 }
 
 class PokemonEntityImpl extends PokemonEntity {
-  PokemonEntityImpl({
+  const PokemonEntityImpl({
     required super.id,
     required super.name,
+    required super.imageUrl,
     required super.types,
     required super.abilities,
     required super.height,
     required super.weight,
     required super.baseExperience,
-    required super.imageUrl,
   });
 
   factory PokemonEntityImpl.fromJson(Map<String, dynamic> json) {

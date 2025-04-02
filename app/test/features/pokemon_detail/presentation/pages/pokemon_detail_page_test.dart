@@ -6,7 +6,7 @@ import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
 import 'package:mobile/features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
 
 void main() {
-  final tPokemon = PokemonEntityImpl(
+  const tPokemon = PokemonEntityImpl(
     id: 1,
     name: 'bulbasaur',
     imageUrl: 'https://example.com/bulbasaur.png',
@@ -18,8 +18,8 @@ void main() {
   );
 
   Widget createWidgetUnderTest() {
-    return MaterialApp(
-      home: PokemonDetailPage(pokemon: tPokemon),
+    return const MaterialApp(
+      home: PokemonDetailPage(initialPokemon: tPokemon),
     );
   }
 

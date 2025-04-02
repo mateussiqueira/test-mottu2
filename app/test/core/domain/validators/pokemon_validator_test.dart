@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/core/domain/errors/pokemon_error.dart';
 import 'package:mobile/core/domain/validators/pokemon_validator.dart';
 
 void main() {
@@ -13,13 +14,13 @@ void main() {
       test('should return failure when id is zero', () {
         final result = PokemonValidator.validateId(0);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid ID');
+        expect((result.error as PokemonValidationError).message, 'Invalid ID');
       });
 
       test('should return failure when id is negative', () {
         final result = PokemonValidator.validateId(-1);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid ID');
+        expect((result.error as PokemonValidationError).message, 'Invalid ID');
       });
     });
 
@@ -33,7 +34,8 @@ void main() {
       test('should return failure when name is empty', () {
         final result = PokemonValidator.validateName('');
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid name');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid name');
       });
     });
 
@@ -47,7 +49,8 @@ void main() {
       test('should return failure when type is empty', () {
         final result = PokemonValidator.validateType('');
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid type');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid type');
       });
     });
 
@@ -61,7 +64,8 @@ void main() {
       test('should return failure when ability is empty', () {
         final result = PokemonValidator.validateAbility('');
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid ability');
+        expect((result.error as PokemonValidationError).message,
+            'Invalid ability');
       });
     });
 
@@ -75,13 +79,15 @@ void main() {
       test('should return failure when types list is empty', () {
         final result = PokemonValidator.validateTypes([]);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid types');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid types');
       });
 
       test('should return failure when any type is invalid', () {
         final result = PokemonValidator.validateTypes(['Electric', '']);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid type');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid type');
       });
     });
 
@@ -96,13 +102,15 @@ void main() {
       test('should return failure when abilities list is empty', () {
         final result = PokemonValidator.validateAbilities([]);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid abilities');
+        expect((result.error as PokemonValidationError).message,
+            'Invalid abilities');
       });
 
       test('should return failure when any ability is invalid', () {
         final result = PokemonValidator.validateAbilities(['Static', '']);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid ability');
+        expect((result.error as PokemonValidationError).message,
+            'Invalid ability');
       });
     });
 
@@ -116,13 +124,15 @@ void main() {
       test('should return failure when height is zero', () {
         final result = PokemonValidator.validateHeight(0);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid height');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid height');
       });
 
       test('should return failure when height is negative', () {
         final result = PokemonValidator.validateHeight(-0.4);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid height');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid height');
       });
     });
 
@@ -136,13 +146,15 @@ void main() {
       test('should return failure when weight is zero', () {
         final result = PokemonValidator.validateWeight(0);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid weight');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid weight');
       });
 
       test('should return failure when weight is negative', () {
         final result = PokemonValidator.validateWeight(-6.0);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid weight');
+        expect(
+            (result.error as PokemonValidationError).message, 'Invalid weight');
       });
     });
 
@@ -162,7 +174,8 @@ void main() {
       test('should return failure when base experience is negative', () {
         final result = PokemonValidator.validateBaseExperience(-112);
         expect(result.isFailure, true);
-        expect(result.error?.message, 'Invalid base experience');
+        expect((result.error as PokemonValidationError).message,
+            'Invalid base experience');
       });
     });
   });

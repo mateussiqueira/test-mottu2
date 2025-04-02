@@ -26,22 +26,18 @@ void main() async {
 
   // Register services
   Get.put(ConnectivityService());
-  Get.put(CacheService(prefs));
+  Get.put(CacheService(preferences: prefs));
   Get.put(client);
 
   // Register data sources
-  final pokemonRemoteDataSource = PokemonRemoteDataSourceImpl(client: client);
+  final pokemonRemoteDataSource = PokemonRemoteDataSourceImpl(client);
   Get.put<PokemonRemoteDataSource>(pokemonRemoteDataSource);
 
   final pokemonLocalDataSource = PokemonLocalDataSource(prefs);
   Get.put<PokemonLocalDataSource>(pokemonLocalDataSource);
 
   // Register repository
-  final pokemonRepository = PokemonRepositoryImpl(
-    remoteDataSource: pokemonRemoteDataSource,
-    localDataSource: pokemonLocalDataSource,
-    prefs: prefs,
-  );
+  final pokemonRepository = PokemonRepositoryImpl(pokemonRemoteDataSource);
   Get.put<PokemonRepository>(pokemonRepository);
 
   // Register use cases

@@ -3,12 +3,15 @@ import 'package:get/get.dart';
 import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
 import 'package:mobile/features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
 import 'package:mobile/features/pokemon_detail/presentation/widgets/pokemon_ability_chip.dart';
-import 'package:mobile/features/pokemon_detail/presentation/widgets/pokemon_locations.dart';
 import 'package:mobile/features/pokemon_detail/presentation/widgets/related_pokemons.dart';
-import 'package:mobile/features/pokemon_list/presentation/pages/pokemon_list_page.dart';
 
 class PokemonDetailPage extends GetView<PokemonDetailController> {
-  const PokemonDetailPage({super.key});
+  final PokemonEntity? initialPokemon;
+
+  const PokemonDetailPage({
+    super.key,
+    this.initialPokemon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,13 +92,6 @@ class PokemonDetailPage extends GetView<PokemonDetailController> {
                               (ability) => PokemonAbilityChip(ability: ability))
                           .toList(),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Locations:',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    PokemonLocations(locations: pokemon.locations),
                     const SizedBox(height: 16),
                     RelatedPokemons(
                       title: 'Pokemons with same type',

@@ -32,7 +32,7 @@ class _SplashPageState extends State<SplashPage>
     _controller.forward();
 
     Future.delayed(const Duration(seconds: 3), () {
-      Get.off(() => const PokemonListPage());
+      Get.off(() => PokemonListPage(repository: Get.find()));
     });
   }
 

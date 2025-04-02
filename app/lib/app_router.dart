@@ -16,8 +16,8 @@ class AppRouter {
     GetPage(
       name: pokemonDetail,
       page: () {
-        final pokemon = Get.arguments as PokemonEntityImpl;
-        return PokemonDetailPage(pokemon: pokemon);
+        final pokemon = Get.arguments as PokemonEntity;
+        return PokemonDetailPage(initialPokemon: pokemon);
       },
     ),
   ];
