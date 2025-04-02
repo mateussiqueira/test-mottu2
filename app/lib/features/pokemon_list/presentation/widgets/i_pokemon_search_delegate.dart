@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
-import '../controllers/i_pokemon_list_controller.dart';
+import '../controllers/i_pokemon_search_controller.dart';
 
 /// Interface for Pokemon search delegate
 abstract class IPokemonSearchDelegate extends SearchDelegate<IPokemonEntity?> {
-  final IPokemonListController controller;
+  final IPokemonSearchController controller;
 
   IPokemonSearchDelegate(this.controller);
 

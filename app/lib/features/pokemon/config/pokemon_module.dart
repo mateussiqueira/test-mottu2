@@ -53,23 +53,23 @@ class PokemonModule {
 
     // Use Cases
     getIt.registerLazySingleton<IGetPokemonList>(
-      () => GetPokemonList(getIt()),
+      () => GetPokemonList(getIt<IPokemonRepository>()),
     );
 
     getIt.registerLazySingleton<IGetPokemonDetail>(
-      () => GetPokemonDetail(getIt()),
+      () => GetPokemonDetail(getIt<IPokemonRepository>()),
     );
 
     getIt.registerLazySingleton<IGetPokemonsByType>(
-      () => GetPokemonsByType(getIt()),
+      () => GetPokemonsByType(getIt<IPokemonRepository>()),
     );
 
     getIt.registerLazySingleton<IGetPokemonsByAbility>(
-      () => GetPokemonsByAbility(getIt()),
+      () => GetPokemonsByAbility(getIt<IPokemonRepository>()),
     );
 
     getIt.registerLazySingleton<ISearchPokemon>(
-      () => SearchPokemon(getIt()),
+      () => SearchPokemon(getIt<IPokemonRepository>()),
     );
   }
 }

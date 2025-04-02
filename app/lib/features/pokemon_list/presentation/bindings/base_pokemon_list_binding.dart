@@ -5,6 +5,7 @@ import '../../../../core/performance/i_performance_monitor.dart';
 import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import '../../../pokemon/domain/usecases/get_pokemon_list.dart';
 import '../../../pokemon/domain/usecases/i_get_pokemon_list.dart';
+import '../../../pokemon/domain/usecases/i_search_pokemon.dart';
 import '../../../pokemon/domain/usecases/search_pokemon.dart';
 import 'i_pokemon_list_binding.dart';
 
@@ -34,7 +35,7 @@ abstract class BasePokemonListBinding extends Bindings
       () => GetPokemonList(repository),
     );
 
-    Get.lazyPut<SearchPokemon>(
+    Get.lazyPut<ISearchPokemon>(
       () => SearchPokemon(repository),
     );
   }

@@ -7,12 +7,14 @@ import 'pokemon_grid_item.dart';
 class PokemonGrid extends StatefulWidget {
   final List<IPokemonEntity> pokemons;
   final bool hasMore;
+  final bool isLoading;
   final VoidCallback? onLoadMore;
 
   const PokemonGrid({
     super.key,
     required this.pokemons,
     required this.hasMore,
+    this.isLoading = false,
     this.onLoadMore,
   });
 
@@ -55,7 +57,8 @@ class _PokemonGridState extends State<PokemonGrid> {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: widget.pokemons.length + (widget.hasMore ? 1 : 0),
+      itemCount:
+          widget.pokemons.length + (widget.hasMore && widget.isLoading ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == widget.pokemons.length) {
           return const Center(

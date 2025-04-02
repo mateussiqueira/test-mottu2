@@ -12,6 +12,7 @@ class PokemonSearchController extends BaseStateController
     implements IPokemonSearchController {
   final IPokemonRepository repository;
   final _searchResults = <IPokemonEntity>[].obs;
+  final _lastQuery = ''.obs;
 
   PokemonSearchController({
     required this.repository,
@@ -29,30 +30,45 @@ class PokemonSearchController extends BaseStateController
       return;
     }
 
+    if (query == _lastQuery.value) {
+      return;
+    }
+
+    _lastQuery.value = query;
     setLoading(true);
     try {
       logger.info('Searching Pokemon', data: {'query': query});
       final result = await repository.searchPokemon(query);
       if (result.isSuccess) {
-        _searchResults.value = result.data ?? [];
-        logger.info(
-          'Successfully searched Pokemon',
-          data: {'query': query, 'count': _searchResults.length},
-        );
+        if (query == _lastQuery.value) {
+          _searchResults.value = result.data ?? [];
+          logger.info(
+            'Successfully searched Pokemon',
+            data: {'query': query, 'count': _searchResults.length},
+          );
+        }
       } else {
-        setError(result.error ?? 'Failed to search Pokemon');
+        if (query == _lastQuery.value) {
+          setError(result.error ?? 'Failed to search Pokemon');
+        }
       }
     } catch (e, stackTrace) {
-      logger.error('Error searching Pokemon', error: e, stackTrace: stackTrace);
-      setError('Failed to search Pokemon');
+      if (query == _lastQuery.value) {
+        logger.error('Error searching Pokemon',
+            error: e, stackTrace: stackTrace);
+        setError('Failed to search Pokemon');
+      }
     } finally {
-      setLoading(false);
+      if (query == _lastQuery.value) {
+        setLoading(false);
+      }
     }
   }
 
   @override
   void clearSearch() {
     _searchResults.clear();
+    _lastQuery.value = '';
     setError(null);
   }
 
@@ -65,5 +81,12 @@ class PokemonSearchController extends BaseStateController
         'fromSearch': true,
       },
     );
+  }
+
+  @override
+  void onClose() {
+    _searchResults.close();
+    _lastQuery.close();
+    super.onClose();
   }
 }

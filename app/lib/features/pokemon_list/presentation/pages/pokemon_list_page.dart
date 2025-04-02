@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
 import '../controllers/i_pokemon_list_controller.dart';
+import '../controllers/i_pokemon_search_controller.dart';
 import '../widgets/pokemon_grid.dart';
 import '../widgets/pokemon_list_error.dart';
 import '../widgets/pokemon_list_loading.dart';
@@ -15,6 +16,7 @@ class PokemonListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listController = Get.find<IPokemonListController>();
+    final searchController = Get.find<IPokemonSearchController>();
 
     return Scaffold(
       backgroundColor: Colors.red,
@@ -32,15 +34,11 @@ class PokemonListPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () async {
-              final result = await showSearch<IPokemonEntity?>(
+            onPressed: () {
+              showSearch<IPokemonEntity?>(
                 context: context,
-                delegate: PokemonSearchDelegate(listController),
+                delegate: PokemonSearchDelegate(searchController),
               );
-
-              if (result != null) {
-                listController.navigateToDetail(result);
-              }
             },
           ),
         ],
@@ -53,24 +51,34 @@ class PokemonListPage extends StatelessWidget {
             topRight: Radius.circular(30),
           ),
         ),
-        child: Obx(() {
-          if (listController.isLoading) {
-            return const PokemonListLoading();
-          }
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+          child: Obx(() {
+            if (listController.isLoading && listController.pokemons.isEmpty) {
+              return const PokemonListLoading();
+            }
 
-          if (listController.error?.isNotEmpty ?? false) {
-            return PokemonListError(
-              message: listController.error ?? 'Unknown error',
-              onRetry: () => listController.fetchPokemonList(),
+            if (listController.error?.isNotEmpty ?? false) {
+              return PokemonListError(
+                message: listController.error ?? 'Unknown error',
+                onRetry: () => listController.fetchPokemonList(),
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh: () => listController.fetchPokemonList(),
+              child: PokemonGrid(
+                pokemons: listController.pokemons,
+                hasMore: listController.hasMore,
+                onLoadMore: listController.loadMorePokemons,
+                isLoading: listController.isLoading,
+              ),
             );
-          }
-
-          return PokemonGrid(
-            pokemons: listController.pokemons,
-            hasMore: listController.hasMore,
-            onLoadMore: listController.loadMorePokemons,
-          );
-        }),
+          }),
+        ),
       ),
     );
   }
