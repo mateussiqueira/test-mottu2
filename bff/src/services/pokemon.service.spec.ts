@@ -1,280 +1,319 @@
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import axios from 'axios';
+import { AxiosResponse } from 'axios';
+import { of } from 'rxjs';
+import { Pokemon } from '../domain/entities/pokemon.entity';
+import { PokemonDto } from '../presentation/dtos/pokemon.dto';
 import { PokemonService } from './pokemon.service';
-
-// Mock axios
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('PokemonService', () => {
   let service: PokemonService;
+  let httpService: HttpService;
+  let configService: ConfigService;
+
+  const mockPokemon: Pokemon = {
+    id: 1,
+    name: 'bulbasaur',
+    baseExperience: 64,
+    height: 7,
+    weight: 69,
+    sprites: {
+      frontDefault: 'front_default',
+      backDefault: 'back_default',
+      frontShiny: 'front_shiny',
+      backShiny: 'back_shiny',
+    },
+    types: [
+      {
+        slot: 1,
+        type: {
+          name: 'grass',
+          url: 'grass_url',
+        },
+      },
+    ],
+    abilities: [
+      {
+        ability: {
+          name: 'overgrow',
+          url: 'overgrow_url',
+        },
+        isHidden: false,
+        slot: 1,
+      },
+    ],
+    stats: [
+      {
+        baseStat: 45,
+        effort: 0,
+        stat: {
+          name: 'hp',
+          url: 'hp_url',
+        },
+      },
+    ],
+    moves: [
+      {
+        move: {
+          name: 'tackle',
+          url: 'tackle_url',
+        },
+        versionGroupDetails: [
+          {
+            levelLearnedAt: 1,
+            moveLearnMethod: {
+              name: 'level-up',
+              url: 'level-up_url',
+            },
+            versionGroup: {
+              name: 'red-blue',
+              url: 'red-blue_url',
+            },
+          },
+        ],
+      },
+    ],
+    species: {
+      name: 'bulbasaur',
+      url: 'bulbasaur_url',
+    },
+  };
+
+  const mockPokemonDto: PokemonDto = {
+    id: 1,
+    name: 'bulbasaur',
+    baseExperience: 64,
+    height: 7,
+    weight: 69,
+    sprites: {
+      frontDefault: 'front_default',
+      backDefault: 'back_default',
+      frontShiny: 'front_shiny',
+      backShiny: 'back_shiny',
+    },
+    types: [
+      {
+        slot: 1,
+        type: {
+          name: 'grass',
+          url: 'grass_url',
+        },
+      },
+    ],
+    abilities: [
+      {
+        ability: {
+          name: 'overgrow',
+          url: 'overgrow_url',
+        },
+        isHidden: false,
+        slot: 1,
+      },
+    ],
+    stats: [
+      {
+        baseStat: 45,
+        effort: 0,
+        stat: {
+          name: 'hp',
+          url: 'hp_url',
+        },
+      },
+    ],
+    moves: [
+      {
+        move: {
+          name: 'tackle',
+          url: 'tackle_url',
+        },
+        versionGroupDetails: [
+          {
+            levelLearnedAt: 1,
+            moveLearnMethod: {
+              name: 'level-up',
+              url: 'level-up_url',
+            },
+            versionGroup: {
+              name: 'red-blue',
+              url: 'red-blue_url',
+            },
+          },
+        ],
+      },
+    ],
+    species: {
+      name: 'bulbasaur',
+      url: 'bulbasaur_url',
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PokemonService],
+      providers: [
+        PokemonService,
+        {
+          provide: HttpService,
+          useValue: {
+            get: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<PokemonService>(PokemonService);
+    httpService = module.get<HttpService>(HttpService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getPokemonList', () => {
-    it('should return a list of pokemons', async () => {
-      const mockResponse = {
-        data: {
-          results: [
-            { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
-            { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' },
-          ],
-        },
-      };
-
-      const mockPokemonResponse = {
-        data: {
-          id: 1,
-          name: 'bulbasaur',
-          types: [{ type: { name: 'grass' } }],
-          abilities: [{ ability: { name: 'overgrow' } }],
-          height: 7,
-          weight: 69,
-          base_experience: 64,
-          sprites: {
-            front_default:
-              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
+  it('should get pokemon list', async () => {
+    const limit = 20;
+    const offset = 0;
+    const mockResponse: AxiosResponse = {
+      data: {
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            name: 'bulbasaur',
+            url: 'https://pokeapi.co/api/v2/pokemon/1/',
           },
-        },
-      };
+        ],
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
 
-      mockedAxios.get
-        .mockResolvedValueOnce(mockResponse)
-        .mockResolvedValueOnce(mockPokemonResponse)
-        .mockResolvedValueOnce(mockPokemonResponse);
+    jest.spyOn(configService, 'get').mockReturnValue('https://pokeapi.co/api/v2');
+    jest.spyOn(httpService, 'get').mockReturnValue(of(mockResponse));
 
-      const result = await service.getPokemonList(2, 0);
+    const result = await service.getPokemonList(limit, offset);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        id: 1,
-        name: 'bulbasaur',
-        types: ['grass'],
-        abilities: ['overgrow'],
-        height: 0.7,
-        weight: 6.9,
-        baseExperience: 64,
-        imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-      });
-    });
-
-    it('should handle errors', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(service.getPokemonList()).rejects.toThrow('API Error');
-    });
+    expect(result).toEqual([mockPokemonDto]);
+    expect(httpService.get).toHaveBeenCalledWith(
+      'https://pokeapi.co/api/v2/pokemon?limit=20&offset=0',
+    );
   });
 
-  describe('getPokemonById', () => {
-    it('should return a pokemon by id', async () => {
-      const mockResponse = {
-        data: {
-          id: 1,
-          name: 'bulbasaur',
-          types: [{ type: { name: 'grass' } }],
-          abilities: [{ ability: { name: 'overgrow' } }],
-          height: 7,
-          weight: 69,
-          base_experience: 64,
-          sprites: {
-            front_default:
-              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-          },
-        },
-      };
+  it('should get pokemon by id', async () => {
+    const id = 1;
+    const mockResponse: AxiosResponse = {
+      data: mockPokemon,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
 
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+    jest.spyOn(configService, 'get').mockReturnValue('https://pokeapi.co/api/v2');
+    jest.spyOn(httpService, 'get').mockReturnValue(of(mockResponse));
 
-      const result = await service.getPokemonById(1);
+    const result = await service.getPokemonById(id);
 
-      expect(result).toEqual({
-        id: 1,
-        name: 'bulbasaur',
-        types: ['grass'],
-        abilities: ['overgrow'],
-        height: 0.7,
-        weight: 6.9,
-        baseExperience: 64,
-        imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-      });
-    });
-
-    it('should handle errors', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(service.getPokemonById(1)).rejects.toThrow('API Error');
-    });
+    expect(result).toEqual(mockPokemonDto);
+    expect(httpService.get).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon/1');
   });
 
-  describe('searchPokemon', () => {
-    it('should return pokemons matching the search query', async () => {
-      const mockResponse = {
-        data: {
-          results: [
-            { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
-            { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' },
-          ],
-        },
-      };
-
-      const mockPokemonResponse = {
-        data: {
-          id: 1,
-          name: 'bulbasaur',
-          types: [{ type: { name: 'grass' } }],
-          abilities: [{ ability: { name: 'overgrow' } }],
-          height: 7,
-          weight: 69,
-          base_experience: 64,
-          sprites: {
-            front_default:
-              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
+  it('should search pokemon', async () => {
+    const query = 'bulba';
+    const mockResponse: AxiosResponse = {
+      data: {
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            name: 'bulbasaur',
+            url: 'https://pokeapi.co/api/v2/pokemon/1/',
           },
-        },
-      };
+        ],
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
 
-      mockedAxios.get
-        .mockResolvedValueOnce(mockResponse)
-        .mockResolvedValueOnce(mockPokemonResponse)
-        .mockResolvedValueOnce(mockPokemonResponse);
+    jest.spyOn(configService, 'get').mockReturnValue('https://pokeapi.co/api/v2');
+    jest.spyOn(httpService, 'get').mockReturnValue(of(mockResponse));
 
-      const result = await service.searchPokemon('bulba');
+    const result = await service.searchPokemon(query);
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
-        id: 1,
-        name: 'bulbasaur',
-        types: ['grass'],
-        abilities: ['overgrow'],
-        height: 0.7,
-        weight: 6.9,
-        baseExperience: 64,
-        imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-      });
-    });
-
-    it('should handle errors', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(service.searchPokemon('bulba')).rejects.toThrow('API Error');
-    });
+    expect(result).toEqual([mockPokemonDto]);
+    expect(httpService.get).toHaveBeenCalledWith(
+      'https://pokeapi.co/api/v2/pokemon?limit=151&offset=0',
+    );
   });
 
-  describe('getPokemonsByType', () => {
-    it('should return pokemons of a specific type', async () => {
-      const mockResponse = {
-        data: {
-          pokemon: [
-            { pokemon: { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' } },
-            { pokemon: { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' } },
-          ],
-        },
-      };
-
-      const mockPokemonResponse = {
-        data: {
-          id: 1,
-          name: 'bulbasaur',
-          types: [{ type: { name: 'grass' } }],
-          abilities: [{ ability: { name: 'overgrow' } }],
-          height: 7,
-          weight: 69,
-          base_experience: 64,
-          sprites: {
-            front_default:
-              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
+  it('should get pokemons by type', async () => {
+    const type = 'grass';
+    const mockResponse: AxiosResponse = {
+      data: {
+        pokemon: [
+          {
+            pokemon: {
+              name: 'bulbasaur',
+              url: 'https://pokeapi.co/api/v2/pokemon/1/',
+            },
+            slot: 1,
           },
-        },
-      };
+        ],
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
 
-      mockedAxios.get
-        .mockResolvedValueOnce(mockResponse)
-        .mockResolvedValueOnce(mockPokemonResponse)
-        .mockResolvedValueOnce(mockPokemonResponse);
+    jest.spyOn(configService, 'get').mockReturnValue('https://pokeapi.co/api/v2');
+    jest.spyOn(httpService, 'get').mockReturnValue(of(mockResponse));
 
-      const result = await service.getPokemonsByType('grass');
+    const result = await service.getPokemonsByType(type);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        id: 1,
-        name: 'bulbasaur',
-        types: ['grass'],
-        abilities: ['overgrow'],
-        height: 0.7,
-        weight: 6.9,
-        baseExperience: 64,
-        imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-      });
-    });
-
-    it('should handle errors', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(service.getPokemonsByType('grass')).rejects.toThrow('API Error');
-    });
+    expect(result).toEqual([mockPokemonDto]);
+    expect(httpService.get).toHaveBeenCalledWith('https://pokeapi.co/api/v2/type/grass');
   });
 
-  describe('getPokemonsByAbility', () => {
-    it('should return pokemons with a specific ability', async () => {
-      const mockResponse = {
-        data: {
-          pokemon: [
-            { pokemon: { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' } },
-            { pokemon: { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' } },
-          ],
-        },
-      };
-
-      const mockPokemonResponse = {
-        data: {
-          id: 1,
-          name: 'bulbasaur',
-          types: [{ type: { name: 'grass' } }],
-          abilities: [{ ability: { name: 'overgrow' } }],
-          height: 7,
-          weight: 69,
-          base_experience: 64,
-          sprites: {
-            front_default:
-              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
+  it('should get pokemons by ability', async () => {
+    const ability = 'overgrow';
+    const mockResponse: AxiosResponse = {
+      data: {
+        pokemon: [
+          {
+            pokemon: {
+              name: 'bulbasaur',
+              url: 'https://pokeapi.co/api/v2/pokemon/1/',
+            },
+            isHidden: false,
+            slot: 1,
           },
-        },
-      };
+        ],
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
 
-      mockedAxios.get
-        .mockResolvedValueOnce(mockResponse)
-        .mockResolvedValueOnce(mockPokemonResponse)
-        .mockResolvedValueOnce(mockPokemonResponse);
+    jest.spyOn(configService, 'get').mockReturnValue('https://pokeapi.co/api/v2');
+    jest.spyOn(httpService, 'get').mockReturnValue(of(mockResponse));
 
-      const result = await service.getPokemonsByAbility('overgrow');
+    const result = await service.getPokemonsByAbility(ability);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        id: 1,
-        name: 'bulbasaur',
-        types: ['grass'],
-        abilities: ['overgrow'],
-        height: 0.7,
-        weight: 6.9,
-        baseExperience: 64,
-        imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-      });
-    });
-
-    it('should handle errors', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(service.getPokemonsByAbility('overgrow')).rejects.toThrow('API Error');
-    });
+    expect(result).toEqual([mockPokemonDto]);
+    expect(httpService.get).toHaveBeenCalledWith('https://pokeapi.co/api/v2/ability/overgrow');
   });
 });

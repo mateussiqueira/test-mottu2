@@ -1,48 +1,35 @@
 import 'package:get/get.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_detail/data/datasources/pokemon_detail_remote_datasource.dart';
-import 'package:mobile/features/pokemon_detail/data/repositories/pokemon_detail_repository_impl.dart';
-import 'package:mobile/features/pokemon_detail/domain/repositories/pokemon_detail_repository.dart';
-import 'package:mobile/features/pokemon_detail/domain/usecases/get_pokemon_by_id.dart';
-import 'package:mobile/features/pokemon_detail/domain/usecases/get_pokemons_by_ability.dart';
-import 'package:mobile/features/pokemon_detail/domain/usecases/get_pokemons_by_type.dart';
-import 'package:mobile/features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
+
+import '../../../../core/config/di.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../domain/usecases/get_pokemon_by_id.dart';
+import '../../domain/usecases/get_pokemons_by_ability.dart';
+import '../../domain/usecases/get_pokemons_by_type.dart';
+import '../controllers/pokemon_detail_controller.dart';
 
 class PokemonDetailBinding extends Bindings {
   @override
   void dependencies() {
-    // Datasources
-    Get.lazyPut<PokemonDetailRemoteDataSource>(
-      () => PokemonDetailRemoteDataSourceImpl(),
-    );
-
-    // Repositories
-    Get.lazyPut<PokemonDetailRepository>(
-      () => PokemonDetailRepositoryImpl(
-        remoteDataSource: Get.find(),
-      ),
-    );
-
     // Use Cases
     Get.lazyPut(
       () => GetPokemonById(
-        repository: Get.find(),
+        repository: getIt(),
       ),
     );
 
     Get.lazyPut(
       () => GetPokemonsByType(
-        repository: Get.find(),
+        repository: getIt(),
       ),
     );
 
     Get.lazyPut(
       () => GetPokemonsByAbility(
-        repository: Get.find(),
+        repository: getIt(),
       ),
     );
 
-    // Controllers
+    // Controller
     Get.lazyPut(
       () {
         final controller = PokemonDetailController(
@@ -51,10 +38,10 @@ class PokemonDetailBinding extends Bindings {
           getPokemonsByAbility: Get.find(),
         );
 
-        // Se houver um Pokémon nos argumentos, atualiza o controller
         final arguments = Get.arguments;
-        if (arguments is PokemonEntity) {
-          controller.updatePokemon(arguments);
+        if (arguments is Map<String, dynamic> &&
+            arguments['pokemon'] is PokemonEntity) {
+          controller.updatePokemon(arguments['pokemon'] as PokemonEntity);
         }
 
         return controller;

@@ -51,7 +51,10 @@ class PokemonSearchController extends GetxController {
   void navigateToDetail(PokemonEntityImpl pokemon) {
     _adapter.toNamed(
       '/pokemon-detail',
-      arguments: pokemon,
+      arguments: {
+        'pokemon': pokemon,
+        'fromSearch': true,
+      },
     );
   }
 }

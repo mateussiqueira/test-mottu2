@@ -23,9 +23,10 @@ class PokemonDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final initialPokemon = Get.arguments as PokemonEntity?;
-    if (initialPokemon != null) {
-      updatePokemon(initialPokemon);
+    final arguments = Get.arguments;
+    if (arguments is Map<String, dynamic> &&
+        arguments['pokemon'] is PokemonEntity) {
+      updatePokemon(arguments['pokemon'] as PokemonEntity);
     }
   }
 
@@ -75,6 +76,14 @@ class PokemonDetailController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     }
+  }
+
+  Future<List<PokemonEntity>> fetchPokemonsByType(String type) async {
+    return await getPokemonsByType(type);
+  }
+
+  Future<List<PokemonEntity>> fetchPokemonsByAbility(String ability) async {
+    return await getPokemonsByAbility(ability);
   }
 
   @override

@@ -1,64 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/presentation/routes/app_router.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../controllers/pokemon_detail_controller.dart';
 
 class PokemonDetailPage extends StatelessWidget {
   final PokemonEntityImpl pokemon;
+  final bool fromSearch;
 
   const PokemonDetailPage({
-    Key? key,
+    super.key,
     required this.pokemon,
-  }) : super(key: key);
+    this.fromSearch = false,
+  });
 
   Color _getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'grass':
-        return Colors.green;
-      case 'fire':
-        return Colors.red;
-      case 'water':
-        return Colors.blue;
-      case 'electric':
-        return Colors.yellow;
-      case 'rock':
-        return Colors.brown;
-      case 'ground':
-        return Colors.brown[300]!;
-      case 'poison':
-        return Colors.purple;
-      case 'bug':
-        return Colors.lightGreen;
-      case 'flying':
-        return Colors.lightBlue;
-      case 'psychic':
-        return Colors.pink;
-      case 'fighting':
-        return Colors.orange;
-      case 'ghost':
-        return Colors.deepPurple;
-      case 'ice':
-        return Colors.cyan;
-      case 'dragon':
-        return Colors.indigo;
-      case 'steel':
-        return Colors.blueGrey;
-      case 'dark':
-        return Colors.grey[800]!;
-      case 'fairy':
-        return Colors.pinkAccent;
-      default:
-        return Colors.grey;
-    }
+    return AppConstants.typeColors[type.toLowerCase()] ?? Colors.grey;
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<PokemonDetailController>();
     final mainType = pokemon.types.first;
     final mainColor = _getTypeColor(mainType);
 
     return Scaffold(
       backgroundColor: mainColor,
+      appBar: AppBar(
+        backgroundColor: mainColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (fromSearch) {
+              Get.offAndToNamed(AppRouter.pokemonList);
+            } else {
+              Get.back();
+            }
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home, color: Colors.white),
+            onPressed: () => Get.offAllNamed(AppRouter.pokemonList),
+          ),
+        ],
+        title: Text(
+          pokemon.name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           // Background design elements
@@ -79,62 +76,64 @@ class PokemonDetailPage extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                // App bar
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Get.offAllNamed('/'),
-                      ),
-                      Text(
-                        '#${pokemon.id.toString().padLeft(3, '0')}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                // Pokemon image
+                Hero(
+                  tag: 'pokemon-${pokemon.id}',
+                  child: Image.network(
+                    pokemon.imageUrl,
+                    height: 200,
+                    width: 200,
+                    fit: BoxFit.contain,
                   ),
                 ),
 
                 // Pokemon name and types
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        pokemon.name.capitalize!,
+                        pokemon.name,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 36,
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
+                      Wrap(
+                        spacing: 8,
                         children: pokemon.types.map((type) {
-                          return Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              type.capitalize!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                          return GestureDetector(
+                            onTap: () async {
+                              final pokemons =
+                                  await Get.find<PokemonDetailController>()
+                                      .fetchPokemonsByType(type);
+                              Get.toNamed(
+                                '/related-pokemons',
+                                arguments: {
+                                  'title': 'Pokémons of type $type',
+                                  'pokemons': pokemons,
+                                },
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                type,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           );
@@ -143,13 +142,10 @@ class PokemonDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Pokemon image and details
+                // Pokemon stats and abilities
                 Expanded(
                   child: Container(
-                    width: double.infinity,
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -157,68 +153,79 @@ class PokemonDetailPage extends StatelessWidget {
                         topRight: Radius.circular(30),
                       ),
                     ),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Pokemon image
-                        Positioned(
-                          top: -100,
-                          left: 0,
-                          right: 0,
-                          child: Hero(
-                            tag: 'pokemon-${pokemon.id}',
-                            child: Image.network(
-                              pokemon.imageUrl,
-                              height: 200,
-                              fit: BoxFit.contain,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Height and weight
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildInfoCard(
+                                context,
+                                'Height',
+                                '${pokemon.height}m',
+                                Icons.height,
+                              ),
+                              _buildInfoCard(
+                                context,
+                                'Weight',
+                                '${pokemon.weight}kg',
+                                Icons.monitor_weight,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Abilities
+                          const Text(
+                            'Abilities',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-
-                        // Pokemon details
-                        Padding(
-                          padding: const EdgeInsets.only(top: 120),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildSection('Características'),
-                                _buildInfoRow('Altura', '${pokemon.height} m'),
-                                _buildInfoRow('Peso', '${pokemon.weight} kg'),
-                                _buildInfoRow('Experiência Base',
-                                    pokemon.baseExperience.toString()),
-                                const SizedBox(height: 24),
-                                _buildSection('Habilidades'),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: pokemon.abilities.map((ability) {
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: mainColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        ability.capitalize!,
-                                        style: TextStyle(
-                                          color: mainColor,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: pokemon.abilities.map((ability) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  final pokemons =
+                                      await Get.find<PokemonDetailController>()
+                                          .fetchPokemonsByAbility(ability);
+                                  Get.toNamed(
+                                    '/related-pokemons',
+                                    arguments: {
+                                      'title': 'Pokémons with ability $ability',
+                                      'pokemons': pokemons,
+                                    },
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _getTypeColor(pokemon.types.first)
+                                        .withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    ability,
+                                    style: TextStyle(
+                                      color: _getTypeColor(pokemon.types.first),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
+                              );
+                            }).toList(),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -230,46 +237,34 @@ class PokemonDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(String title) {
+  Widget _buildInfoCard(
+      BuildContext context, String label, String value, IconData icon) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Icon(
+          icon,
+          color: _getTypeColor(pokemon.types.first),
+          size: 40,
+        ),
+        const SizedBox(height: 8),
         Text(
-          title,
+          label,
           style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ],
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

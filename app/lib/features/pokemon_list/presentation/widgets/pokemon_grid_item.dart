@@ -57,9 +57,13 @@ class PokemonGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRouter.pokemonDetail, arguments: pokemon)?.then((_) {
-          Get.until((route) => route.isFirst);
-        });
+        Get.toNamed(
+          AppRouter.pokemonDetail,
+          arguments: {
+            'pokemon': pokemon,
+            'fromSearch': false,
+          },
+        );
       },
       child: Container(
         decoration: BoxDecoration(

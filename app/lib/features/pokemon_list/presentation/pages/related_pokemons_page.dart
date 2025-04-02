@@ -1,69 +1,58 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
-import '../bloc/pokemon_list_bloc.dart';
 import '../widgets/pokemon_grid_item.dart';
 
 class RelatedPokemonsPage extends StatelessWidget {
   final String title;
-  final String type;
-  final bool isType;
+  final List<PokemonEntityImpl> pokemons;
 
   const RelatedPokemonsPage({
     super.key,
     required this.title,
-    required this.type,
-    required this.isType,
+    required this.pokemons,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.red,
       appBar: AppBar(
-        title: Text(title),
-        centerTitle: true,
+        backgroundColor: Colors.red,
+        elevation: 0,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      body: BlocBuilder<PokemonListBloc, PokemonListState>(
-        builder: (context, state) {
-          if (state is PokemonListLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (state is PokemonListError) {
-            return Center(
-              child: Text(state.message),
-            );
-          }
-
-          if (state is PokemonListLoaded) {
-            if (state.pokemons.isEmpty) {
-              return const Center(
-                child: Text('No Pokémon found'),
-              );
-            }
-
-            return GridView.builder(
-              padding: const EdgeInsets.all(16.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-              ),
-              itemCount: state.pokemons.length,
-              itemBuilder: (context, index) {
-                final pokemon = state.pokemons[index];
-                return PokemonGridItem(pokemon: pokemon);
-              },
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: pokemons.length,
+          itemBuilder: (context, index) {
+            final pokemon = pokemons[index];
+            return PokemonGridItem(pokemon: pokemon);
+          },
+        ),
       ),
     );
   }
@@ -82,10 +71,12 @@ class PokemonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
+        Get.toNamed(
           '/pokemon-detail',
-          arguments: pokemon,
+          arguments: {
+            'pokemon': pokemon,
+            'fromSearch': false,
+          },
         );
       },
       child: Card(

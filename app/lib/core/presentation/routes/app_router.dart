@@ -9,18 +9,15 @@ import '../../../features/pokemon_detail/domain/usecases/get_pokemons_by_type.da
 import '../../../features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
 import '../../../features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
 import '../../../features/pokemon_list/presentation/pages/pokemon_list_page.dart';
-import '../../../features/splash/presentation/pages/splash_page.dart';
+import '../../../features/pokemon_list/presentation/pages/related_pokemons_page.dart';
 
 abstract class AppRouter {
-  static const String initial = '/';
+  static const String initial = '/pokemon-list';
   static const String pokemonList = '/pokemon-list';
   static const String pokemonDetail = '/pokemon-detail';
+  static const String relatedPokemons = '/related-pokemons';
 
   static List<GetPage> pages = [
-    GetPage(
-      name: initial,
-      page: () => const SplashPage(),
-    ),
     GetPage(
       name: pokemonList,
       page: () => PokemonListPage(),
@@ -28,31 +25,27 @@ abstract class AppRouter {
     GetPage(
       name: pokemonDetail,
       page: () {
-        final pokemon = Get.arguments as PokemonEntityImpl;
-        if (Get.isRegistered<PokemonDetailController>()) {
-          Get.delete<PokemonDetailController>();
-        }
-
-        Get.put(
-          PokemonDetailController(
-            getPokemonById: getIt<GetPokemonById>(),
-            getPokemonsByType: getIt<GetPokemonsByType>(),
-            getPokemonsByAbility: getIt<GetPokemonsByAbility>(),
-          ),
+        final args = Get.arguments as Map<String, dynamic>;
+        return PokemonDetailPage(
+          pokemon: args['pokemon'] as PokemonEntityImpl,
+          fromSearch: args['fromSearch'] as bool? ?? false,
         );
-
-        return PokemonDetailPage(pokemon: pokemon);
+      },
+    ),
+    GetPage(
+      name: relatedPokemons,
+      page: () {
+        final arguments = Get.arguments as Map<String, dynamic>;
+        return RelatedPokemonsPage(
+          title: arguments['title'] as String,
+          pokemons: arguments['pokemons'] as List<PokemonEntityImpl>,
+        );
       },
     ),
   ];
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case initial:
-        return GetPageRoute(
-          page: () => const SplashPage(),
-          settings: settings,
-        );
       case pokemonList:
         return GetPageRoute(
           page: () => PokemonListPage(),
@@ -80,6 +73,21 @@ abstract class AppRouter {
         } else {
           return _errorRoute(
             'Argumento inválido para a rota $pokemonDetail. Esperado: PokemonEntity.',
+          );
+        }
+      case relatedPokemons:
+        final arguments = settings.arguments;
+        if (arguments is Map<String, dynamic>) {
+          return GetPageRoute(
+            page: () => RelatedPokemonsPage(
+              title: arguments['title'] as String,
+              pokemons: arguments['pokemons'] as List<PokemonEntityImpl>,
+            ),
+            settings: settings,
+          );
+        } else {
+          return _errorRoute(
+            'Argumento inválido para a rota $relatedPokemons. Esperado: Map<String, dynamic>.',
           );
         }
       default:
