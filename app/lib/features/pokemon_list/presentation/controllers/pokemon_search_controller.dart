@@ -1,24 +1,35 @@
 import 'package:get/get.dart';
 
 import '../../../../core/constants/route_names.dart';
-import '../../../../core/logging/i_logger.dart';
-import '../../../../core/performance/i_performance_monitor.dart';
-import '../../../../core/state/base_state_controller.dart';
-import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
-import '../../../../features/pokemon/domain/repositories/i_pokemon_repository.dart';
+import '../../../../core/domain/errors/error_handler.dart';
+import '../../../../core/domain/errors/failure.dart';
+import '../../../../core/domain/errors/logger.dart';
+import '../../../../core/domain/errors/performance_monitor.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../../domain/entities/i_pokemon_entity.dart';
+import '../../domain/repositories/i_pokemon_repository.dart';
+import '../services/pokemon_search_isolate.dart';
 import 'i_pokemon_search_controller.dart';
 
-class PokemonSearchController extends BaseStateController
+class PokemonSearchController extends GetxController
     implements IPokemonSearchController {
-  final IPokemonRepository repository;
-  final _searchResults = <IPokemonEntity>[].obs;
-  final _lastQuery = ''.obs;
+  final IPokemonRepository _repository;
+  final ILogger _logger;
+  final IPerformanceMonitor _performanceMonitor;
+  final IErrorHandler _errorHandler;
+  final RxList<IPokemonEntity> _searchResults = <IPokemonEntity>[].obs;
+  String _lastQuery = '';
+  bool _isSearching = false;
 
   PokemonSearchController({
-    required this.repository,
+    required IPokemonRepository repository,
     required ILogger logger,
     required IPerformanceMonitor performanceMonitor,
-  }) : super(logger: logger, performanceMonitor: performanceMonitor);
+    required IErrorHandler errorHandler,
+  })  : _repository = repository,
+        _logger = logger,
+        _performanceMonitor = performanceMonitor,
+        _errorHandler = errorHandler;
 
   @override
   RxList<IPokemonEntity> get searchResults => _searchResults;
@@ -30,37 +41,39 @@ class PokemonSearchController extends BaseStateController
       return;
     }
 
-    if (query == _lastQuery.value) {
-      return;
-    }
+    if (query == _lastQuery || _isSearching) return;
 
-    _lastQuery.value = query;
-    setLoading(true);
+    _isSearching = true;
+    _lastQuery = query;
+
     try {
-      logger.info('Searching Pokemon', data: {'query': query});
-      final result = await repository.searchPokemon(query);
-      if (result.isSuccess) {
-        if (query == _lastQuery.value) {
-          _searchResults.value = result.data ?? [];
-          logger.info(
-            'Successfully searched Pokemon',
-            data: {'query': query, 'count': _searchResults.length},
-          );
-        }
-      } else {
-        if (query == _lastQuery.value) {
-          setError(result.error ?? 'Failed to search Pokemon');
-        }
+      _logger.info('Searching Pokemon', data: {'query': query});
+      _performanceMonitor.startOperation('search_pokemon');
+
+      final results =
+          await PokemonSearchIsolate.searchPokemons(query, _repository);
+
+      if (query == _lastQuery) {
+        _searchResults.value = results;
+        _logger.info(
+          'Successfully searched Pokemon',
+          data: {'query': query, 'count': _searchResults.length},
+        );
       }
     } catch (e, stackTrace) {
-      if (query == _lastQuery.value) {
-        logger.error('Error searching Pokemon',
-            error: e, stackTrace: stackTrace);
-        setError('Failed to search Pokemon');
+      if (query == _lastQuery) {
+        final failure = _errorHandler.handleError(e);
+        _logger.error(
+          'Error searching Pokemon',
+          error: failure,
+          stackTrace: stackTrace,
+        );
+        _searchResults.clear();
       }
     } finally {
-      if (query == _lastQuery.value) {
-        setLoading(false);
+      if (query == _lastQuery) {
+        _performanceMonitor.endOperation('search_pokemon');
+        _isSearching = false;
       }
     }
   }
@@ -68,25 +81,20 @@ class PokemonSearchController extends BaseStateController
   @override
   void clearSearch() {
     _searchResults.clear();
-    _lastQuery.value = '';
-    setError(null);
+    _lastQuery = '';
   }
 
   @override
   void navigateToDetail(IPokemonEntity pokemon) {
     Get.toNamed(
       RouteNames.pokemonDetail,
-      arguments: {
-        'pokemon': pokemon,
-        'fromSearch': true,
-      },
+      arguments: pokemon,
     );
   }
 
   @override
   void onClose() {
     _searchResults.close();
-    _lastQuery.close();
     super.onClose();
   }
 }

@@ -19,7 +19,13 @@ class PokemonModel implements IPokemonEntity {
   @override
   final Map<String, int> stats;
   @override
-  final int? baseExperience;
+  final int baseExperience;
+  @override
+  final List<String> moves;
+  @override
+  final List<String> evolutions;
+  @override
+  final String description;
 
   PokemonModel({
     required this.id,
@@ -30,7 +36,10 @@ class PokemonModel implements IPokemonEntity {
     required this.height,
     required this.weight,
     required this.stats,
-    this.baseExperience,
+    required this.baseExperience,
+    required this.moves,
+    required this.evolutions,
+    required this.description,
   });
 
   /// Creates a PokemonModel from JSON data
@@ -47,7 +56,12 @@ class PokemonModel implements IPokemonEntity {
           .toList(),
       height: json['height'],
       weight: json['weight'],
-      baseExperience: json['base_experience'],
+      baseExperience: json['base_experience'] ?? 0,
+      moves: (json['moves'] as List)
+          .map((move) => move['move']['name'] as String)
+          .toList(),
+      evolutions: (json['evolutions'] as List?)?.cast<String>() ?? [],
+      description: json['description'] ?? '',
       stats: Map.fromEntries(
         (json['stats'] as List).map(
           (stat) => MapEntry(
@@ -72,6 +86,9 @@ class PokemonModel implements IPokemonEntity {
       'weight': weight,
       'baseExperience': baseExperience,
       'stats': stats,
+      'moves': moves,
+      'evolutions': evolutions,
+      'description': description,
     };
   }
 

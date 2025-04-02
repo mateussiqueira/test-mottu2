@@ -15,11 +15,17 @@ class PokemonEntity implements IPokemonEntity {
   @override
   final int weight;
   @override
-  final int? baseExperience;
+  final int baseExperience;
   @override
   final String imageUrl;
   @override
   final Map<String, int> stats;
+  @override
+  final List<String> moves;
+  @override
+  final List<String> evolutions;
+  @override
+  final String description;
 
   PokemonEntity({
     required this.id,
@@ -28,9 +34,12 @@ class PokemonEntity implements IPokemonEntity {
     required this.abilities,
     required this.height,
     required this.weight,
-    this.baseExperience,
+    required this.baseExperience,
     required this.imageUrl,
     required this.stats,
+    required this.moves,
+    required this.evolutions,
+    required this.description,
   });
 
   @override
@@ -46,7 +55,10 @@ class PokemonEntity implements IPokemonEntity {
           stats == other.stats &&
           height == other.height &&
           weight == other.weight &&
-          baseExperience == other.baseExperience;
+          baseExperience == other.baseExperience &&
+          moves == other.moves &&
+          evolutions == other.evolutions &&
+          description == other.description;
 
   @override
   int get hashCode =>
@@ -58,11 +70,14 @@ class PokemonEntity implements IPokemonEntity {
       stats.hashCode ^
       height.hashCode ^
       weight.hashCode ^
-      baseExperience.hashCode;
+      baseExperience.hashCode ^
+      moves.hashCode ^
+      evolutions.hashCode ^
+      description.hashCode;
 
   @override
   String toString() {
-    return 'PokemonEntity{id: $id, name: $name, imageUrl: $imageUrl, types: $types, abilities: $abilities, stats: $stats, height: $height, weight: $weight, baseExperience: $baseExperience}';
+    return 'PokemonEntity{id: $id, name: $name, imageUrl: $imageUrl, types: $types, abilities: $abilities, stats: $stats, height: $height, weight: $weight, baseExperience: $baseExperience, moves: $moves, evolutions: $evolutions, description: $description}';
   }
 
   factory PokemonEntity.fromJson(Map<String, dynamic> json) {
@@ -75,7 +90,10 @@ class PokemonEntity implements IPokemonEntity {
       stats: Map<String, int>.from(json['stats'] as Map),
       height: json['height'] as int,
       weight: json['weight'] as int,
-      baseExperience: json['base_experience'] as int?,
+      baseExperience: json['base_experience'] as int,
+      moves: List<String>.from(json['moves'] as List),
+      evolutions: List<String>.from(json['evolutions'] as List),
+      description: json['description'] as String,
     );
   }
 
@@ -91,6 +109,9 @@ class PokemonEntity implements IPokemonEntity {
       'base_experience': baseExperience,
       'imageUrl': imageUrl,
       'stats': stats,
+      'moves': moves,
+      'evolutions': evolutions,
+      'description': description,
     };
   }
 
@@ -104,6 +125,9 @@ class PokemonEntity implements IPokemonEntity {
     int? height,
     int? weight,
     int? baseExperience,
+    List<String>? moves,
+    List<String>? evolutions,
+    String? description,
   }) {
     return PokemonEntity(
       id: id ?? this.id,
@@ -115,6 +139,9 @@ class PokemonEntity implements IPokemonEntity {
       height: height ?? this.height,
       weight: weight ?? this.weight,
       baseExperience: baseExperience ?? this.baseExperience,
+      moves: moves ?? this.moves,
+      evolutions: evolutions ?? this.evolutions,
+      description: description ?? this.description,
     );
   }
 }

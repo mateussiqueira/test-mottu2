@@ -10,7 +10,10 @@ class PokemonEntityImpl implements IPokemonEntity {
   final List<String> _abilities;
   final Map<String, int> _stats;
   final Map<String, String?> _sprites;
-  final int? _baseExperience;
+  final int _baseExperience;
+  final List<String> _moves;
+  final List<String> _evolutions;
+  final String _description;
 
   PokemonEntityImpl({
     required int id,
@@ -21,7 +24,10 @@ class PokemonEntityImpl implements IPokemonEntity {
     required List<String> abilities,
     required Map<String, int> stats,
     required Map<String, String?> sprites,
-    int? baseExperience,
+    required int baseExperience,
+    required List<String> moves,
+    required List<String> evolutions,
+    required String description,
   })  : _id = id,
         _name = name,
         _height = height,
@@ -30,7 +36,10 @@ class PokemonEntityImpl implements IPokemonEntity {
         _abilities = abilities,
         _stats = stats,
         _sprites = sprites,
-        _baseExperience = baseExperience;
+        _baseExperience = baseExperience,
+        _moves = moves,
+        _evolutions = evolutions,
+        _description = description;
 
   @override
   int get id => _id;
@@ -57,7 +66,16 @@ class PokemonEntityImpl implements IPokemonEntity {
   Map<String, int> get stats => _stats;
 
   @override
-  int? get baseExperience => _baseExperience;
+  int get baseExperience => _baseExperience;
+
+  @override
+  List<String> get moves => _moves;
+
+  @override
+  List<String> get evolutions => _evolutions;
+
+  @override
+  String get description => _description;
 
   @override
   Map<String, dynamic> toJson() {
@@ -71,6 +89,9 @@ class PokemonEntityImpl implements IPokemonEntity {
       'stats': _stats,
       'sprites': _sprites,
       'baseExperience': _baseExperience,
+      'moves': _moves,
+      'evolutions': _evolutions,
+      'description': _description,
     };
   }
 
