@@ -156,6 +156,82 @@ export class PokemonService {
     }
   }
 
+  async getPokemonsByType(type: string): Promise<PokemonResponse[]> {
+    try {
+      const response = await firstValueFrom<
+        AxiosResponse<{ pokemon: Array<{ pokemon: { url: string } }> }>
+      >(this.httpService.get(`${this.baseUrl}/type/${type}`));
+
+      if (!response?.data?.pokemon) {
+        throw new InternalServerErrorException('Invalid response from Pokemon API');
+      }
+
+      const pokemons = await Promise.all(
+        response.data.pokemon.slice(0, 20).map(async ({ pokemon }) => {
+          const detailResponse = await firstValueFrom<AxiosResponse<PokemonApiResponse>>(
+            this.httpService.get<PokemonApiResponse>(pokemon.url),
+          );
+
+          if (!detailResponse?.data) {
+            throw new InternalServerErrorException('Invalid response from Pokemon API');
+          }
+
+          return this.transformPokemonData(detailResponse.data);
+        }),
+      );
+
+      return pokemons;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new InternalServerErrorException(
+          `Failed to fetch Pokemon by type ${type}: ${error.message}`,
+        );
+      }
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Failed to fetch Pokemon by type ${type}`);
+    }
+  }
+
+  async getPokemonsByAbility(ability: string): Promise<PokemonResponse[]> {
+    try {
+      const response = await firstValueFrom<
+        AxiosResponse<{ pokemon: Array<{ pokemon: { url: string } }> }>
+      >(this.httpService.get(`${this.baseUrl}/ability/${ability}`));
+
+      if (!response?.data?.pokemon) {
+        throw new InternalServerErrorException('Invalid response from Pokemon API');
+      }
+
+      const pokemons = await Promise.all(
+        response.data.pokemon.slice(0, 20).map(async ({ pokemon }) => {
+          const detailResponse = await firstValueFrom<AxiosResponse<PokemonApiResponse>>(
+            this.httpService.get<PokemonApiResponse>(pokemon.url),
+          );
+
+          if (!detailResponse?.data) {
+            throw new InternalServerErrorException('Invalid response from Pokemon API');
+          }
+
+          return this.transformPokemonData(detailResponse.data);
+        }),
+      );
+
+      return pokemons;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new InternalServerErrorException(
+          `Failed to fetch Pokemon by ability ${ability}: ${error.message}`,
+        );
+      }
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Failed to fetch Pokemon by ability ${ability}`);
+    }
+  }
+
   private transformPokemonData(data: PokemonApiResponse): PokemonResponse {
     return {
       id: data.id,
@@ -166,14 +242,6 @@ export class PokemonService {
       weight: data.weight / 10,
       baseExperience: data.base_experience || 0,
       imageUrl: data.sprites.other['official-artwork'].front_default,
-      stats: {
-        hp: data.stats[0].base_stat,
-        attack: data.stats[1].base_stat,
-        defense: data.stats[2].base_stat,
-        specialAttack: data.stats[3].base_stat,
-        specialDefense: data.stats[4].base_stat,
-        speed: data.stats[5].base_stat,
-      },
     };
   }
 }
