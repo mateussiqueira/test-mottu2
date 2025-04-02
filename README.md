@@ -1,6 +1,92 @@
 # PokeAPI Mobile App
 
-Aplicativo Flutter que consome a PokeAPI para exibir informações sobre Pokémon. O projeto pode ser executado de duas formas: consumindo diretamente a API ou através de um BFF (Backend for Frontend).
+Um aplicativo Flutter que consome a PokeAPI, permitindo visualizar uma lista de Pokémon e seus detalhes. O projeto pode ser executado de duas maneiras:
+
+1. Com BFF (Backend for Frontend)
+2. Com API direta (consumindo a PokeAPI diretamente)
+
+## Pré-requisitos
+
+- Flutter SDK
+- Node.js (para rodar o BFF)
+- Git
+
+## Configuração
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/pokeapi.git
+cd pokeapi
+```
+
+2. Instale as dependências do Flutter:
+```bash
+cd app
+flutter pub get
+```
+
+3. Se for usar o BFF, instale as dependências do Node.js:
+```bash
+cd ../bff
+npm install
+```
+
+## Executando o Projeto
+
+O projeto possui um script de execução que facilita o processo. Na raiz do projeto, execute:
+
+```bash
+./run.sh
+```
+
+Você terá as seguintes opções:
+
+1. **Executar com BFF**
+   - Instala as dependências do BFF
+   - Inicia o servidor BFF
+   - Executa o aplicativo Flutter
+
+2. **Executar com API direta**
+   - Executa o aplicativo Flutter consumindo a PokeAPI diretamente
+
+3. **Instalar dependências**
+   - Instala todas as dependências necessárias (Flutter e BFF)
+
+4. **Sair**
+   - Encerra o script
+
+## Estrutura do Projeto
+
+O projeto segue a arquitetura Clean Architecture e está organizado da seguinte forma:
+
+```
+app/
+├── lib/
+│   ├── core/           # Configurações e utilitários
+│   ├── features/       # Módulos da aplicação
+│   │   ├── pokemon/    # Feature de listagem de Pokémon
+│   │   └── pokemon_detail/  # Feature de detalhes do Pokémon
+│   └── main.dart       # Ponto de entrada da aplicação
+bff/
+├── src/               # Código fonte do BFF
+└── package.json       # Dependências do BFF
+```
+
+## Tecnologias Utilizadas
+
+- Flutter
+- GetX (Gerenciamento de Estado e Navegação)
+- Clean Architecture
+- Node.js (BFF)
+- PokeAPI
+
+## Funcionalidades
+
+- Listagem de Pokémon com paginação
+- Busca de Pokémon por nome
+- Visualização detalhada de cada Pokémon
+- Lista de Pokémon relacionados por tipo e habilidade
+- Suporte a modo offline (quando usando BFF)
 
 ## 🚀 Funcionalidades Implementadas
 
@@ -68,104 +154,6 @@ lib/
 │       ├── domain/
 │       └── presentation/
 └── main.dart
-```
-
-## 🛠️ Como Executar
-
-### Pré-requisitos
-- Flutter SDK
-- Dart SDK
-- Node.js (para o BFF)
-- iOS Simulator ou Android Emulator
-
-### Usando o Script de Automação (Recomendado)
-
-O projeto inclui um script de automação que facilita a execução e configuração do ambiente:
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/pokeapi.git
-cd pokeapi
-```
-
-2. Dê permissão de execução ao script:
-```bash
-chmod +x run.sh
-```
-
-3. Execute o script:
-```bash
-./run.sh
-```
-
-O script oferece as seguintes opções:
-- Executar com BFF
-- Executar com API direta
-- Instalar dependências
-- Sair
-
-O script também:
-- Verifica se todos os pré-requisitos estão instalados
-- Instala automaticamente as dependências necessárias
-- Configura o ambiente iOS (quando aplicável)
-- Gerencia o ciclo de vida do BFF
-
-### Executando Manualmente
-
-#### Com BFF
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/pokeapi.git
-cd pokeapi
-```
-
-2. Instale as dependências do BFF:
-```bash
-cd bff
-npm install
-```
-
-3. Inicie o BFF:
-```bash
-npm run start:dev
-```
-
-4. Em outro terminal, instale as dependências do Flutter:
-```bash
-cd app
-flutter pub get
-```
-
-5. Execute o app:
-```bash
-flutter run
-```
-
-#### Com API Direta
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/pokeapi.git
-cd pokeapi
-```
-
-2. Instale as dependências do Flutter:
-```bash
-cd app
-flutter pub get
-```
-
-3. Configure o arquivo `app/lib/core/config/app_config.dart`:
-```dart
-class AppConfig {
-  static const bool useBff = false; // Altere para false para usar a API diretamente
-}
-```
-
-4. Execute o app:
-```bash
-flutter run
 ```
 
 ## 🧪 Testes
