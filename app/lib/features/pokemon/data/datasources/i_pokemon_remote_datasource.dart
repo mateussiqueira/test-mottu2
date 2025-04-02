@@ -1,16 +1,13 @@
-import '../../domain/entities/pokemon_entity.dart';
+import '../../domain/entities/i_pokemon_entity.dart';
 
 abstract class IPokemonRemoteDataSource {
-  Future<List<PokemonEntity>> getPokemonList({
-    required int offset,
-    required int limit,
-  });
+  Future<List<IPokemonEntity>> getPokemons({int? limit, int? offset});
 
-  Future<PokemonEntity> getPokemonDetail(int id);
+  Future<IPokemonEntity> getPokemonDetail(int id);
 
-  Future<List<PokemonEntity>> searchPokemon(String query);
+  Future<List<IPokemonEntity>> getPokemonsByType(String type);
 
-  Future<List<PokemonEntity>> getPokemonsByType(String type);
+  Future<List<IPokemonEntity>> getPokemonsByAbility(String ability);
 
-  Future<List<PokemonEntity>> getPokemonsByAbility(String ability);
+  Future<List<IPokemonEntity>> searchPokemons(String query);
 }

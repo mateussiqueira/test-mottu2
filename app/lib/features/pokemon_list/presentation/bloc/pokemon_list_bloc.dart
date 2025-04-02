@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
 import '../../domain/repositories/pokemon_repository.dart';
 
+/// Events for PokemonListBloc
 abstract class PokemonListEvent {}
 
 class LoadPokemons extends PokemonListEvent {}
@@ -36,6 +37,7 @@ class LoadPokemonsByAbility extends PokemonListEvent {
   String toString() => 'LoadPokemonsByAbility(ability: $ability)';
 }
 
+/// States for PokemonListBloc
 abstract class PokemonListState {}
 
 class PokemonListInitial extends PokemonListState {
@@ -49,7 +51,7 @@ class PokemonListLoading extends PokemonListState {
 }
 
 class PokemonListLoaded extends PokemonListState {
-  final List<PokemonEntityImpl> pokemons;
+  final List<IPokemonEntity> pokemons;
 
   PokemonListLoaded(this.pokemons);
 
@@ -59,7 +61,6 @@ class PokemonListLoaded extends PokemonListState {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-
     return other is PokemonListLoaded && other.pokemons == pokemons;
   }
 
@@ -78,7 +79,6 @@ class PokemonListError extends PokemonListState {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-
     return other is PokemonListError && other.message == message;
   }
 
@@ -86,6 +86,7 @@ class PokemonListError extends PokemonListState {
   int get hashCode => message.hashCode;
 }
 
+/// Bloc for managing Pokemon list state
 class PokemonListBloc extends Bloc<PokemonListEvent, PokemonListState> {
   final PokemonRepository repository;
   Timer? _debounce;

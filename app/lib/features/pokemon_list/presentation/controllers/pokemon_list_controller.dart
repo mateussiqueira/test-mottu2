@@ -1,62 +1,52 @@
 import 'package:get/get.dart';
 
-import '../../../../core/presentation/adapters/getx_adapter.dart';
+import '../../../../core/logging/i_logger.dart';
+import '../../../../core/performance/i_performance_monitor.dart';
 import '../../../../core/state/base_state_controller.dart';
-import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
-import '../../../../features/pokemon/domain/repositories/pokemon_repository.dart';
-import '../../domain/usecases/get_pokemon_list.dart';
-import '../../domain/usecases/search_pokemon.dart';
+import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../features/pokemon/domain/repositories/i_pokemon_repository.dart';
+import '../../../../features/pokemon/domain/usecases/i_get_pokemon_list.dart';
+import '../../../../features/pokemon/domain/usecases/i_search_pokemon.dart';
 import 'i_pokemon_list_controller.dart';
+import 'pokemon_list_state.dart';
 
+/// Controller for managing the Pokemon list page
 class PokemonListController extends BaseStateController
     implements IPokemonListController {
-  final GetPokemonList getPokemonList;
-  final SearchPokemon searchPokemon;
-  final PokemonRepository repository;
-  final _adapter = GetXAdapter();
-
-  final _pokemons = <PokemonEntity>[].obs;
-  final _isLoadingMore = false.obs;
-  final _currentPage = 0.obs;
-  final _hasMore = true.obs;
-  final _searchQuery = ''.obs;
-  final _filterType = ''.obs;
-  final _filterAbility = ''.obs;
-
-  static const int _limit = 20;
+  final IGetPokemonList getPokemonList;
+  final ISearchPokemon searchPokemon;
+  final IPokemonRepository repository;
+  final PokemonListState state;
 
   PokemonListController({
     required this.getPokemonList,
     required this.searchPokemon,
     required this.repository,
-  });
+    required ILogger logger,
+    required IPerformanceMonitor performanceMonitor,
+  })  : state = PokemonListState(),
+        super(logger: logger, performanceMonitor: performanceMonitor);
 
   @override
-  RxList<PokemonEntity> get pokemons => _pokemons;
+  RxList<IPokemonEntity> get pokemons => state.pokemons;
 
   @override
-  RxBool get isLoading => isLoading;
+  bool get isLoadingMore => state.isLoadingMore.value;
 
   @override
-  RxBool get isLoadingMore => _isLoadingMore;
+  int get currentPage => state.currentPage.value;
 
   @override
-  RxString get error => error;
+  bool get hasMore => state.hasMore.value;
 
   @override
-  RxInt get currentPage => _currentPage;
+  String get searchQuery => state.searchQuery.value;
 
   @override
-  RxBool get hasMore => _hasMore;
+  String get filterType => state.filterType.value;
 
   @override
-  RxString get searchQuery => _searchQuery;
-
-  @override
-  RxString get filterType => _filterType;
-
-  @override
-  RxString get filterAbility => _filterAbility;
+  String get filterAbility => state.filterAbility.value;
 
   @override
   void onInit() {
@@ -66,127 +56,173 @@ class PokemonListController extends BaseStateController
 
   @override
   Future<void> fetchPokemonList() async {
-    await trackOperation('list_load', () async {
-      setLoading(true);
-      clearError();
-
+    setLoading(true);
+    try {
       logger.info('Fetching Pokemon list');
-      final result = await getPokemonList();
-      _pokemons.value = result;
-      logger.info(
-        'Successfully fetched Pokemon list',
-        data: {'count': result.length},
+      final result = await getPokemonList(
+        limit: PokemonListState.limit,
+        offset: 0,
       );
-    });
+      if (result.isSuccess) {
+        state.updatePokemons(result.data ?? []);
+        logger.info(
+          'Successfully fetched Pokemon list',
+          data: {'count': result.data?.length ?? 0},
+        );
+      } else {
+        setError(result.error ?? 'Failed to fetch Pokemon list');
+      }
+    } catch (e, stackTrace) {
+      logger.error('Error fetching Pokemon list',
+          error: e, stackTrace: stackTrace);
+      setError('Failed to fetch Pokemon list');
+    } finally {
+      setLoading(false);
+    }
   }
 
   @override
   Future<void> loadMorePokemons() async {
-    if (!_hasMore.value || _isLoadingMore.value) return;
+    if (state.isLoadingMore.value || !state.hasMore.value) return;
 
+    state.isLoadingMore.value = true;
     try {
-      _isLoadingMore.value = true;
-      final result = await repository.getPokemonList(
-        offset: _currentPage.value * _limit,
-        limit: _limit,
+      final nextPage = state.currentPage.value + 1;
+      final result = await getPokemonList(
+        limit: PokemonListState.limit,
+        offset: nextPage * PokemonListState.limit,
       );
-
-      if (result.isSuccess && result.data != null) {
-        if (result.data!.isEmpty) {
-          _hasMore.value = false;
-          return;
+      if (result.isSuccess) {
+        final newPokemons = result.data ?? [];
+        if (newPokemons.isNotEmpty) {
+          state.addPokemons(newPokemons);
+          state.currentPage.value = nextPage;
+          logger.info(
+            'Successfully loaded more Pokemon',
+            data: {'page': nextPage, 'count': newPokemons.length},
+          );
+        } else {
+          state.hasMore.value = false;
         }
-
-        _pokemons.addAll(result.data!);
-        _hasMore.value = result.data!.length == _limit;
-        _currentPage.value++;
       } else {
-        setError(result.error?.toString() ?? 'Unknown error');
+        setError(result.error ?? 'Failed to load more Pokemon');
       }
-    } catch (e) {
-      setError('Error loading more pokemons: $e');
+    } catch (e, stackTrace) {
+      logger.error('Error loading more Pokemon',
+          error: e, stackTrace: stackTrace);
+      setError('Failed to load more Pokemon');
     } finally {
-      _isLoadingMore.value = false;
+      state.isLoadingMore.value = false;
     }
   }
 
   @override
   Future<void> search(String query) async {
-    await trackOperation('search', () async {
-      _searchQuery.value = query;
-      if (query.isEmpty) {
-        _pokemons.clear();
-        _currentPage.value = 0;
-        _hasMore.value = true;
-        await fetchPokemonList();
-        return;
-      }
+    if (query.isEmpty) {
+      clearSearch();
+      return;
+    }
 
+    setLoading(true);
+    try {
+      state.updateSearch(query);
       logger.info('Searching Pokemon', data: {'query': query});
       final result = await searchPokemon(query);
-      _pokemons.value = result;
-      logger.info(
-        'Successfully searched Pokemon',
-        data: {'query': query, 'count': result.length},
-      );
-    });
+      if (result.isSuccess) {
+        state.updatePokemons(result.data ?? []);
+        logger.info(
+          'Successfully searched Pokemon',
+          data: {'query': query, 'count': result.data?.length ?? 0},
+        );
+      } else {
+        setError(result.error ?? 'Failed to search Pokemon');
+      }
+    } catch (e, stackTrace) {
+      logger.error('Error searching Pokemon', error: e, stackTrace: stackTrace);
+      setError('Failed to search Pokemon');
+    } finally {
+      setLoading(false);
+    }
   }
 
   @override
   Future<void> loadPokemonsByType(String type) async {
-    await trackOperation('type_filter', () async {
-      setLoading(true);
-      clearError();
-      _filterType.value = type;
-      _filterAbility.value = '';
+    if (type.isEmpty) {
+      clearFilters();
+      return;
+    }
 
-      final result = await repository.getPokemonList(offset: 0, limit: 20);
-      if (result.isSuccess && result.data != null) {
-        final filteredPokemons = result.data!
-            .where((pokemon) => pokemon.types.contains(type))
-            .toList();
-        _pokemons.value = filteredPokemons;
+    setLoading(true);
+    try {
+      state.updateFilters(type: type);
+      final result = await repository.getPokemonsByType(type);
+      if (result.isSuccess) {
+        state.updatePokemons(result.data ?? []);
+        logger.info(
+          'Successfully loaded Pokemon by type',
+          data: {'type': type, 'count': result.data?.length ?? 0},
+        );
       } else {
-        setError(result.error?.toString() ?? 'Unknown error');
+        setError(result.error ?? 'Failed to load Pokemon by type');
       }
-    });
+    } catch (e, stackTrace) {
+      logger.error('Error loading Pokemon by type',
+          error: e, stackTrace: stackTrace);
+      setError('Failed to load Pokemon by type');
+    } finally {
+      setLoading(false);
+    }
   }
 
   @override
   Future<void> loadPokemonsByAbility(String ability) async {
-    await trackOperation('ability_filter', () async {
-      setLoading(true);
-      clearError();
-      _filterType.value = '';
-      _filterAbility.value = ability;
+    if (ability.isEmpty) {
+      clearFilters();
+      return;
+    }
 
-      final result = await repository.getPokemonList(offset: 0, limit: 20);
-      if (result.isSuccess && result.data != null) {
-        final filteredPokemons = result.data!
-            .where((pokemon) => pokemon.abilities.contains(ability))
-            .toList();
-        _pokemons.value = filteredPokemons;
+    setLoading(true);
+    try {
+      state.updateFilters(ability: ability);
+      final result = await repository.getPokemonsByAbility(ability);
+      if (result.isSuccess) {
+        state.updatePokemons(result.data ?? []);
+        logger.info(
+          'Successfully loaded Pokemon by ability',
+          data: {'ability': ability, 'count': result.data?.length ?? 0},
+        );
       } else {
-        setError(result.error?.toString() ?? 'Unknown error');
+        setError(result.error ?? 'Failed to load Pokemon by ability');
       }
-    });
+    } catch (e, stackTrace) {
+      logger.error('Error loading Pokemon by ability',
+          error: e, stackTrace: stackTrace);
+      setError('Failed to load Pokemon by ability');
+    } finally {
+      setLoading(false);
+    }
   }
 
   @override
   void clearFilters() {
-    _filterType.value = '';
-    _filterAbility.value = '';
-    _pokemons.clear();
-    _currentPage.value = 0;
-    _hasMore.value = true;
+    state.clearFilters();
     fetchPokemonList();
   }
 
   @override
-  void navigateToDetail(PokemonEntity pokemon) {
-    _adapter.toNamed(
+  void clearSearch() {
+    state.clearSearch();
+    fetchPokemonList();
+  }
+
+  @override
+  void navigateToDetail(IPokemonEntity pokemon) {
+    Get.toNamed(
       '/pokemon-detail',
-      arguments: pokemon,
+      arguments: {
+        'pokemon': pokemon,
+        'fromSearch': state.searchQuery.isNotEmpty,
+      },
     );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:get/get.dart';
 
-import '../logging/pokemon_logger.dart';
-import '../performance/performance_monitor.dart';
+import '../logging/i_logger.dart';
+import '../performance/i_performance_monitor.dart';
+import 'i_base_state_controller.dart';
+import 'performance_tracker.dart';
 
-abstract class BaseStateController extends GetxController {
-  final PokemonLogger logger;
-  final PerformanceMonitor performanceMonitor;
+abstract class BaseStateController extends GetxController
+    implements IBaseStateController {
+  final ILogger logger;
+  final IPerformanceMonitor performanceMonitor;
 
   final _isLoading = false.obs;
   final _error = RxnString();
@@ -15,21 +18,28 @@ abstract class BaseStateController extends GetxController {
     required this.performanceMonitor,
   });
 
+  @override
   bool get isLoading => _isLoading.value;
+
+  @override
   String? get error => _error.value;
 
+  @override
   void setLoading(bool value) {
     _isLoading.value = value;
   }
 
+  @override
   void setError(String? message) {
     _error.value = message;
   }
 
+  @override
   void clearError() {
     _error.value = null;
   }
 
+  @override
   Future<T> trackOperation<T>(
     String operation,
     Future<T> Function() action,
@@ -48,6 +58,7 @@ abstract class BaseStateController extends GetxController {
       setError(e.toString());
       rethrow;
     } finally {
+      tracker.stop();
       setLoading(false);
     }
   }

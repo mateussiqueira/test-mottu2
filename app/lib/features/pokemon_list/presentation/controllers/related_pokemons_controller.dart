@@ -1,19 +1,21 @@
 import 'package:get/get.dart';
 
 import '../../../../core/presentation/adapters/getx_adapter.dart';
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
 import '../../domain/repositories/pokemon_repository.dart';
 
+/// Controller for managing related Pokemon
 class RelatedPokemonsController extends GetxController {
   final PokemonRepository _repository;
   final _adapter = GetXAdapter();
-  final RxList<PokemonEntityImpl> relatedPokemons = <PokemonEntityImpl>[].obs;
+  final RxList<IPokemonEntity> relatedPokemons = <IPokemonEntity>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
   RelatedPokemonsController(this._repository);
 
-  Future<void> loadRelatedPokemons(PokemonEntityImpl pokemon) async {
+  /// Loads Pokemon related to the given Pokemon based on types and abilities
+  Future<void> loadRelatedPokemons(IPokemonEntity pokemon) async {
     try {
       isLoading.value = true;
       error.value = '';
@@ -42,7 +44,8 @@ class RelatedPokemonsController extends GetxController {
     }
   }
 
-  void navigateToDetail(PokemonEntityImpl pokemon) {
+  /// Navigates to the Pokemon detail page
+  void navigateToDetail(IPokemonEntity pokemon) {
     _adapter.toNamed(
       '/pokemon-detail',
       arguments: pokemon,

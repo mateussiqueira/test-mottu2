@@ -1,20 +1,40 @@
-import 'package:mobile/core/domain/result.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_list/domain/repositories/pokemon_repository.dart';
+import '../../../../core/domain/result.dart' as core;
+import '../entities/i_pokemon_entity.dart';
+import '../repositories/i_pokemon_repository.dart';
+import 'i_get_pokemon_list_usecase.dart';
 
-class GetPokemonListUseCase {
-  final PokemonRepository _repository;
+/// Implementation of the GetPokemonList use case
+class GetPokemonListUseCase with IGetPokemonListUseCase {
+  final IPokemonRepository _repository;
 
   GetPokemonListUseCase(this._repository);
 
-  /// Executa o caso de uso
-  Future<Result<List<PokemonEntityImpl>>> call({
-    required int offset,
+  @override
+  Future<core.Result<List<IPokemonEntity>>> call({
     required int limit,
+    required int offset,
   }) async {
-    return _repository.getPokemonList(
-      offset: offset,
-      limit: limit,
-    );
+    try {
+      return await _repository.getPokemonList(
+        limit: limit,
+        offset: offset,
+      );
+    } catch (e) {
+      return core.Result.failure('Failed to get Pokemon list: ${e.toString()}');
+    }
   }
+
+  @override
+  String toString() {
+    return 'GetPokemonListUseCase()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is GetPokemonListUseCase && other._repository == _repository;
+  }
+
+  @override
+  int get hashCode => _repository.hashCode;
 }

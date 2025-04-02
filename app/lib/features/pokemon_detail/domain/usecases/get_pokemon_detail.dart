@@ -1,12 +1,15 @@
-import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
-import '../../../../features/pokemon/domain/repositories/pokemon_repository.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
+import 'i_get_pokemon_detail.dart';
 
-class GetPokemonDetail {
-  final PokemonRepository repository;
+/// Use case for getting Pokemon details
+class GetPokemonDetail implements IGetPokemonDetail {
+  final IPokemonRepository repository;
 
   GetPokemonDetail(this.repository);
 
-  Future<PokemonEntity> call(int id) async {
+  @override
+  Future<IPokemonEntity> call(int id) async {
     final result = await repository.getPokemonDetail(id);
     if (result.isSuccess && result.data != null) {
       return result.data!;

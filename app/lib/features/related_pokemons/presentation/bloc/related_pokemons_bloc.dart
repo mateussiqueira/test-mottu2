@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
 import '../../../pokemon/domain/repositories/pokemon_repository.dart';
 
 abstract class RelatedPokemonsEvent extends Equatable {
@@ -41,7 +41,7 @@ class RelatedPokemonsInitial extends RelatedPokemonsState {}
 class RelatedPokemonsLoading extends RelatedPokemonsState {}
 
 class RelatedPokemonsLoaded extends RelatedPokemonsState {
-  final List<PokemonEntityImpl> pokemons;
+  final List<IPokemonEntity> pokemons;
   final String? filterType;
   final String? filterAbility;
 
@@ -64,6 +64,7 @@ class RelatedPokemonsError extends RelatedPokemonsState {
   List<Object?> get props => [message];
 }
 
+/// Bloc for managing related Pokemon state
 class RelatedPokemonsBloc
     extends Bloc<RelatedPokemonsEvent, RelatedPokemonsState> {
   final PokemonRepository repository;

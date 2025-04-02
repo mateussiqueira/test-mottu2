@@ -1,84 +1,82 @@
 import 'package:get/get.dart';
 
-import '../../features/pokemon/domain/entities/pokemon_entity.dart';
-import '../cache/pokemon_cache_manager.dart';
+import '../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import 'app_status.dart';
+import 'base_pokemon_state.dart';
+import 'i_pokemon_cache_handler.dart';
+import 'i_pokemon_search_handler.dart';
+import 'i_pokemon_state_manager.dart';
 
-enum AppStatus { initial, loading, loaded, error }
+class PokemonStateManager extends GetxController
+    implements IPokemonStateManager {
+  final IPokemonCacheHandler _cacheHandler;
+  final IPokemonSearchHandler _searchHandler;
+  final BasePokemonState _state;
 
-class PokemonStateManager extends GetxController {
-  final PokemonCacheManager _cacheManager;
+  PokemonStateManager(this._cacheHandler, this._searchHandler)
+      : _state = BasePokemonState();
 
-  final _status = AppStatus.initial.obs;
-  final _pokemons = <PokemonEntityImpl>[].obs;
-  final _filteredPokemons = <PokemonEntityImpl>[].obs;
-  final _searchQuery = ''.obs;
-  final _error = Rxn<String>();
+  @override
+  AppStatus get status => _state.status;
 
-  PokemonStateManager(this._cacheManager);
+  @override
+  List<IPokemonEntity> get pokemons => _state.pokemons;
 
-  AppStatus get status => _status.value;
-  List<PokemonEntityImpl> get pokemons => _pokemons;
-  List<PokemonEntityImpl> get filteredPokemons => _filteredPokemons;
-  String get searchQuery => _searchQuery.value;
-  String? get error => _error.value;
+  @override
+  List<IPokemonEntity> get filteredPokemons => _state.filteredPokemons;
 
-  void updatePokemons(List<PokemonEntityImpl> newPokemons) {
-    _pokemons.value = newPokemons;
+  @override
+  String get searchQuery => _state.searchQuery;
+
+  @override
+  String? get error => _state.error;
+
+  @override
+  void updatePokemons(List<IPokemonEntity> newPokemons) {
+    _state.updatePokemons(newPokemons);
     _updateFilteredPokemons();
-    _cachePokemons(newPokemons);
+    _cacheHandler.cachePokemons(newPokemons);
   }
 
+  @override
   void updateSearchQuery(String query) {
-    if (query == searchQuery) return;
-    _searchQuery.value = query;
+    _state.updateSearchQuery(query);
     _updateFilteredPokemons();
   }
 
   void _updateFilteredPokemons() {
-    if (searchQuery.isEmpty) {
-      _filteredPokemons.value = _pokemons;
-      return;
-    }
-
-    _filteredPokemons.value = _pokemons
-        .where((pokemon) => _matchesSearch(pokemon, searchQuery))
-        .toList();
-  }
-
-  bool _matchesSearch(PokemonEntityImpl pokemon, String query) {
-    final lowercaseQuery = query.toLowerCase();
-    return pokemon.name.toLowerCase().contains(lowercaseQuery) ||
-        pokemon.types
-            .any((type) => type.toLowerCase().contains(lowercaseQuery));
-  }
-
-  void _cachePokemons(List<PokemonEntityImpl> pokemons) {
-    _cacheManager.set(
-      'pokemon_list',
-      pokemons,
-      duration: const Duration(hours: 1),
+    final filteredPokemons = _searchHandler.filterPokemons(
+      _state.pokemons,
+      _state.searchQuery,
     );
+    _state.updateFilteredPokemons(filteredPokemons);
   }
 
+  @override
   void setError(String? errorMessage) {
-    _error.value = errorMessage;
+    _state.setError(errorMessage);
   }
 
+  @override
   void setStatus(AppStatus newStatus) {
-    _status.value = newStatus;
+    _state.setStatus(newStatus);
+  }
+
+  @override
+  Future<void> initialize() async {
+    await _loadCachedPokemons();
+  }
+
+  Future<void> _loadCachedPokemons() async {
+    final cachedPokemons = await _cacheHandler.loadCachedPokemons();
+    if (cachedPokemons != null) {
+      updatePokemons(cachedPokemons);
+    }
   }
 
   @override
   void onInit() {
     super.onInit();
-    _loadCachedPokemons();
-  }
-
-  void _loadCachedPokemons() {
-    final cachedPokemons =
-        _cacheManager.get<List<PokemonEntityImpl>>('pokemon_list');
-    if (cachedPokemons != null) {
-      updatePokemons(cachedPokemons);
-    }
+    initialize();
   }
 }

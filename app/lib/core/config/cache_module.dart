@@ -1,22 +1,15 @@
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../cache/i_cache_manager.dart';
+import '../cache/pokemon_cache_module.dart';
+import 'base_dependency_module.dart';
 
-class CacheModule {
-  static Future<void> setup(GetIt getIt) async {
-    // SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    getIt.registerLazySingleton(() => prefs);
+class CacheModule extends BaseDependencyModule {
+  final PokemonCacheModule _pokemonCacheModule;
 
-    // Cache
-    getIt.registerLazySingleton<ICacheManager>(
-      () => SharedPreferencesCacheManager(
-        prefs: getIt(),
-        prefix: 'pokemon_cache',
-        fromJson: (json) => json as Map<String, dynamic>,
-        toJson: (value) => value as Map<String, dynamic>,
-      ),
-    );
+  CacheModule(this._pokemonCacheModule, GetIt getIt) : super(getIt);
+
+  @override
+  Future<void> setup(GetIt getIt) async {
+    await _pokemonCacheModule.setup();
   }
 }

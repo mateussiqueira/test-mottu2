@@ -10,6 +10,7 @@ class PokemonEntityImpl extends PokemonEntity {
     required super.weight,
     required super.baseExperience,
     required super.imageUrl,
+    required super.stats,
   });
 
   factory PokemonEntityImpl.fromJson(Map<String, dynamic> json) {
@@ -22,9 +23,11 @@ class PokemonEntityImpl extends PokemonEntity {
       weight: json['weight'] as int,
       baseExperience: json['baseExperience'] as int? ?? 0,
       imageUrl: json['imageUrl'] as String,
+      stats: Map<String, int>.from(json['stats'] as Map),
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -35,6 +38,7 @@ class PokemonEntityImpl extends PokemonEntity {
       'weight': weight,
       'baseExperience': baseExperience,
       'imageUrl': imageUrl,
+      'stats': stats,
     };
   }
 }

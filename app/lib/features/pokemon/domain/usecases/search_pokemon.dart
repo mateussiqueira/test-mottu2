@@ -1,16 +1,15 @@
-import '../entities/pokemon_entity.dart';
+import '../../../../core/domain/result.dart' as core;
+import '../entities/i_pokemon_entity.dart';
 import '../repositories/i_pokemon_repository.dart';
+import 'i_search_pokemon.dart';
 
-class SearchPokemon {
-  final IPokemonRepository repository;
+class SearchPokemon implements ISearchPokemon {
+  final IPokemonRepository _repository;
 
-  SearchPokemon(this.repository);
+  SearchPokemon(this._repository);
 
-  Future<List<PokemonEntity>> call(String query) async {
-    final result = await repository.searchPokemon(query);
-    if (result.isSuccess && result.data != null) {
-      return result.data!;
-    }
-    throw Exception(result.error?.toString() ?? 'Unknown error');
+  @override
+  Future<core.Result<List<IPokemonEntity>>> call(String query) async {
+    return _repository.searchPokemon(query);
   }
 }

@@ -1,16 +1,15 @@
-import '../entities/pokemon_entity.dart';
+import '../../../../core/domain/result.dart' as core;
+import '../entities/i_pokemon_entity.dart';
 import '../repositories/i_pokemon_repository.dart';
+import 'i_get_pokemons_by_ability.dart';
 
-class GetPokemonsByAbility {
-  final IPokemonRepository repository;
+class GetPokemonsByAbility implements IGetPokemonsByAbility {
+  final IPokemonRepository _repository;
 
-  GetPokemonsByAbility(this.repository);
+  GetPokemonsByAbility(this._repository);
 
-  Future<List<PokemonEntity>> call(String ability) async {
-    final result = await repository.getPokemonsByAbility(ability);
-    if (result.isSuccess && result.data != null) {
-      return result.data!;
-    }
-    throw Exception(result.error?.toString() ?? 'Unknown error');
+  @override
+  Future<core.Result<List<IPokemonEntity>>> call(String ability) async {
+    return _repository.getPokemonsByAbility(ability);
   }
 }

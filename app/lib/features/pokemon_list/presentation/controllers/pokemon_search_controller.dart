@@ -1,56 +1,65 @@
 import 'package:get/get.dart';
 
-import '../../../../core/presentation/adapters/getx_adapter.dart';
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
-import '../../../pokemon/domain/repositories/pokemon_repository.dart';
+import '../../../../core/constants/route_names.dart';
+import '../../../../core/logging/i_logger.dart';
+import '../../../../core/performance/i_performance_monitor.dart';
+import '../../../../core/state/base_state_controller.dart';
+import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../features/pokemon/domain/repositories/i_pokemon_repository.dart';
+import 'i_pokemon_search_controller.dart';
 
-class PokemonSearchController extends GetxController {
-  final PokemonRepository _repository;
-  final _adapter = GetXAdapter();
-  final RxList<PokemonEntityImpl> searchResults = <PokemonEntityImpl>[].obs;
-  final RxBool isLoading = false.obs;
-  final RxString error = ''.obs;
-  final RxString searchQuery = ''.obs;
+class PokemonSearchController extends BaseStateController
+    implements IPokemonSearchController {
+  final IPokemonRepository repository;
+  final _searchResults = <IPokemonEntity>[].obs;
 
-  PokemonSearchController(this._repository);
+  PokemonSearchController({
+    required this.repository,
+    required ILogger logger,
+    required IPerformanceMonitor performanceMonitor,
+  }) : super(logger: logger, performanceMonitor: performanceMonitor);
 
-  Future<void> searchPokemon(String query) async {
+  @override
+  RxList<IPokemonEntity> get searchResults => _searchResults;
+
+  @override
+  Future<void> search(String query) async {
     if (query.isEmpty) {
-      searchResults.clear();
+      clearSearch();
       return;
     }
 
+    setLoading(true);
     try {
-      isLoading.value = true;
-      error.value = '';
-      searchQuery.value = query;
-
-      final result = await _repository.searchPokemon(query);
-      if (result.isSuccess && result.data != null) {
-        searchResults.value = result.data!;
+      logger.info('Searching Pokemon', data: {'query': query});
+      final result = await repository.searchPokemon(query);
+      if (result.isSuccess) {
+        _searchResults.value = result.data ?? [];
+        logger.info(
+          'Successfully searched Pokemon',
+          data: {'query': query, 'count': _searchResults.length},
+        );
       } else {
-        error.value = result.error?.toString() ?? 'Unknown error';
+        setError(result.error ?? 'Failed to search Pokemon');
       }
-    } catch (e) {
-      error.value = 'Error searching pokemons: $e';
-      _adapter.showSnackbar(
-        title: 'Error',
-        message: 'Failed to search pokemons. Please try again.',
-      );
+    } catch (e, stackTrace) {
+      logger.error('Error searching Pokemon', error: e, stackTrace: stackTrace);
+      setError('Failed to search Pokemon');
     } finally {
-      isLoading.value = false;
+      setLoading(false);
     }
   }
 
+  @override
   void clearSearch() {
-    searchQuery.value = '';
-    searchResults.clear();
-    error.value = '';
+    _searchResults.clear();
+    setError(null);
   }
 
-  void navigateToDetail(PokemonEntityImpl pokemon) {
-    _adapter.toNamed(
-      '/pokemon-detail',
+  @override
+  void navigateToDetail(IPokemonEntity pokemon) {
+    Get.toNamed(
+      RouteNames.pokemonDetail,
       arguments: {
         'pokemon': pokemon,
         'fromSearch': true,

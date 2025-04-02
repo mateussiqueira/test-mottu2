@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
-import '../../../../features/pokemon/presentation/widgets/pokemon_grid_item.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../widgets/pokemon_grid_item.dart';
 
 class RelatedPokemonsPage extends StatelessWidget {
   final String title;
-  final List<PokemonEntity> pokemons;
+  final List<IPokemonEntity> pokemons;
 
   const RelatedPokemonsPage({
     super.key,
@@ -18,19 +18,24 @@ class RelatedPokemonsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        backgroundColor: Colors.red,
+        elevation: 0,
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
           childAspectRatio: 0.75,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
         itemCount: pokemons.length,
         itemBuilder: (context, index) {
           final pokemon = pokemons[index];
-          return PokemonGridItem(pokemon: pokemon);
+          return Hero(
+            tag: 'pokemon-${pokemon.id}',
+            child: PokemonGridItem(pokemon: pokemon),
+          );
         },
       ),
     );

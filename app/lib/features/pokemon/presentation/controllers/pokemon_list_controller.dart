@@ -1,33 +1,40 @@
 import 'package:get/get.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon/domain/repositories/pokemon_repository.dart';
-import 'package:mobile/features/pokemon/domain/usecases/get_pokemon_list_use_case.dart';
-import 'package:mobile/features/pokemon/domain/usecases/search_pokemon_use_case.dart';
 
+import '../../domain/entities/i_pokemon_entity.dart';
+import '../../domain/usecases/i_get_pokemon_list.dart';
+import '../../domain/usecases/i_get_pokemons_by_ability.dart';
+import '../../domain/usecases/i_get_pokemons_by_type.dart';
+import '../../domain/usecases/i_search_pokemon.dart';
+
+/// Controller for Pokemon list page
 class PokemonListController extends GetxController {
-  final PokemonRepository _repository;
-  final GetPokemonListUseCase _getPokemonListUseCase;
-  final SearchPokemonUseCase _searchPokemonUseCase;
+  final IGetPokemonList _getPokemonList;
+  final ISearchPokemon _searchPokemon;
+  final IGetPokemonsByType _getPokemonsByType;
+  final IGetPokemonsByAbility _getPokemonsByAbility;
 
-  PokemonListController(this._repository)
-      : _getPokemonListUseCase = GetPokemonListUseCase(_repository),
-        _searchPokemonUseCase = SearchPokemonUseCase(_repository);
+  PokemonListController(
+    this._getPokemonList,
+    this._searchPokemon,
+    this._getPokemonsByType,
+    this._getPokemonsByAbility,
+  );
 
-  // Estado
-  final _pokemons = <PokemonEntityImpl>[].obs;
-  final _isLoading = false.obs;
-  final _error = Rxn<String>();
-  final _hasMore = true.obs;
-  final _currentPage = 0.obs;
-  final _searchQuery = ''.obs;
+  final RxList<IPokemonEntity> _pokemons = <IPokemonEntity>[].obs;
+  final RxList<IPokemonEntity> _filteredPokemons = <IPokemonEntity>[].obs;
+  final RxString _searchQuery = ''.obs;
+  final RxBool _isLoading = false.obs;
+  final RxBool _hasMore = true.obs;
+  final RxInt _currentPage = 0.obs;
+  final RxString _error = ''.obs;
 
-  // Getters
-  List<PokemonEntity> get pokemons => _pokemons;
+  List<IPokemonEntity> get pokemons => _pokemons;
+  List<IPokemonEntity> get filteredPokemons => _filteredPokemons;
+  String get searchQuery => _searchQuery.value;
   bool get isLoading => _isLoading.value;
-  String? get error => _error.value;
   bool get hasMore => _hasMore.value;
   int get currentPage => _currentPage.value;
-  String get searchQuery => _searchQuery.value;
+  String? get error => _error.value.isEmpty ? null : _error.value;
 
   @override
   void onInit() {
@@ -35,84 +42,94 @@ class PokemonListController extends GetxController {
     loadPokemons();
   }
 
-  /// Carrega a lista de Pokemons
+  /// Loads the initial list of Pokemon
   Future<void> loadPokemons() async {
-    if (_isLoading.value) return;
-
     _isLoading.value = true;
-    _error.value = null;
-
+    _error.value = '';
     try {
-      final result = await _repository.getPokemonList(
-        limit: 20,
-        offset: _currentPage.value * 20,
+      final result = await _getPokemonList(limit: 151, offset: 0);
+      result.fold(
+        (pokemons) => _pokemons.value = pokemons,
+        (error) => _error.value = error,
       );
-
-      if (result.isSuccess && result.data != null) {
-        if (result.data!.isEmpty) {
-          _hasMore.value = false;
-          return;
-        }
-        _pokemons.addAll(result.data!);
-        _hasMore.value = result.data!.length == 20;
-        _currentPage.value++;
-      } else if (result.error != null) {
-        _error.value = result.error!.toString();
-      } else {
-        _error.value = 'Erro ao carregar pokémons';
-      }
     } catch (e) {
-      _error.value = 'Erro ao carregar pokémons';
+      _error.value = 'Failed to load Pokemon: $e';
+    } finally {
+      _isLoading.value = false;
     }
-
-    _isLoading.value = false;
   }
 
-  /// Busca Pokemons por nome
-  Future<void> searchPokemons(String query) async {
+  /// Searches for Pokemon by name
+  Future<void> searchPokemon(String query) async {
     if (query.isEmpty) {
-      await resetSearch();
+      loadPokemons();
       return;
     }
 
     _isLoading.value = true;
-    _error.value = null;
-    _searchQuery.value = query;
-
+    _error.value = '';
     try {
-      final result = await _repository.searchPokemon(query);
-
-      if (result.isSuccess && result.data != null) {
-        _pokemons.clear();
-        _pokemons.addAll(result.data!);
-        _hasMore.value = false;
-      } else if (result.error != null) {
-        _error.value = result.error!.toString();
-      } else {
-        _error.value = 'Erro ao buscar pokémons';
-      }
+      final result = await _searchPokemon(query);
+      result.fold(
+        (pokemons) => _pokemons.value = pokemons,
+        (error) => _error.value = error,
+      );
     } catch (e) {
-      _error.value = 'Erro ao buscar pokémons';
+      _error.value = 'Failed to search Pokemon: $e';
+    } finally {
+      _isLoading.value = false;
     }
-
-    _isLoading.value = false;
   }
 
-  /// Reseta a busca
-  Future<void> resetSearch() async {
+  /// Filters Pokemon by type
+  Future<void> filterByType(String type) async {
+    _isLoading.value = true;
+    _error.value = '';
+    try {
+      final result = await _getPokemonsByType(type);
+      result.fold(
+        (pokemons) => _pokemons.value = pokemons,
+        (error) => _error.value = error,
+      );
+    } catch (e) {
+      _error.value = 'Failed to filter Pokemon by type: $e';
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  /// Filters Pokemon by ability
+  Future<void> filterByAbility(String ability) async {
+    _isLoading.value = true;
+    _error.value = '';
+    try {
+      final result = await _getPokemonsByAbility(ability);
+      result.fold(
+        (pokemons) => _pokemons.value = pokemons,
+        (error) => _error.value = error,
+      );
+    } catch (e) {
+      _error.value = 'Failed to filter Pokemon by ability: $e';
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  void clearFilters() {
+    _filteredPokemons.value = _pokemons;
+    _hasMore.value = true;
+  }
+
+  void clearSearch() {
     _searchQuery.value = '';
+    _filteredPokemons.value = _pokemons;
     _hasMore.value = true;
-    _currentPage.value = 0;
-    _pokemons.clear();
-    await loadPokemons();
   }
 
-  /// Atualiza a lista de Pokemons
-  @override
-  Future<void> refresh() async {
-    _pokemons.clear();
-    _hasMore.value = true;
-    _currentPage.value = 0;
-    await loadPokemons();
+  void navigateToDetail(IPokemonEntity pokemon) {
+    Get.toNamed(
+      '/pokemon/detail',
+      arguments: pokemon,
+    );
   }
 }

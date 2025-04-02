@@ -1,115 +1,75 @@
-import '../../../../core/domain/errors/result.dart';
-import '../../../../core/logging/pokemon_logger.dart';
-import '../../domain/entities/pokemon_entity.dart';
+import '../../../../core/domain/result.dart' as core;
+import '../../domain/entities/i_pokemon_entity.dart';
 import '../../domain/repositories/i_pokemon_repository.dart';
 import '../datasources/i_pokemon_remote_datasource.dart';
 
+/// Implementation of the Pokemon repository
 class PokemonRepositoryImpl implements IPokemonRepository {
-  final IPokemonRemoteDataSource remoteDataSource;
-  final PokemonLogger logger;
+  final IPokemonRemoteDataSource _remoteDataSource;
 
-  PokemonRepositoryImpl({
-    required this.remoteDataSource,
-    required this.logger,
-  });
+  PokemonRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<Result<List<PokemonEntity>>> getPokemonList({
-    int offset = 0,
-    int limit = 20,
+  Future<core.Result<List<IPokemonEntity>>> getPokemonList({
+    required int limit,
+    required int offset,
   }) async {
     try {
-      logger.info('Getting Pokemon list',
-          data: {'offset': offset, 'limit': limit});
-      final result =
-          await remoteDataSource.getPokemonList(offset: offset, limit: limit);
-      logger.info('Successfully got Pokemon list',
-          data: {'count': result.length});
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      logger.error(
-        'Error getting Pokemon list',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'offset': offset, 'limit': limit},
+      final pokemons = await _remoteDataSource.getPokemons(
+        limit: limit,
+        offset: offset,
       );
-      return Result.failure(e.toString());
+      return core.Result.success(pokemons);
+    } catch (e) {
+      return core.Result.failure(
+          'Failed to fetch Pokemon list: ${e.toString()}');
     }
   }
 
   @override
-  Future<Result<PokemonEntity>> getPokemonDetail(int id) async {
+  Future<core.Result<IPokemonEntity>> getPokemonDetail(int id) async {
     try {
-      logger.info('Getting Pokemon detail', data: {'id': id});
-      final result = await remoteDataSource.getPokemonDetail(id);
-      logger.info('Successfully got Pokemon detail', data: {'id': id});
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      logger.error(
-        'Error getting Pokemon detail',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'id': id},
-      );
-      return Result.failure(e.toString());
+      final pokemon = await _remoteDataSource.getPokemonDetail(id);
+      return core.Result.success(pokemon);
+    } catch (e) {
+      return core.Result.failure(
+          'Failed to fetch Pokemon details: ${e.toString()}');
     }
   }
 
   @override
-  Future<Result<List<PokemonEntity>>> searchPokemon(String query) async {
+  Future<core.Result<List<IPokemonEntity>>> searchPokemon(String query) async {
     try {
-      logger.info('Searching Pokemon', data: {'query': query});
-      final result = await remoteDataSource.searchPokemon(query);
-      logger.info('Successfully searched Pokemon',
-          data: {'query': query, 'count': result.length});
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      logger.error(
-        'Error searching Pokemon',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'query': query},
-      );
-      return Result.failure(e.toString());
+      final pokemons = await _remoteDataSource.searchPokemons(query);
+      return core.Result.success(pokemons);
+    } catch (e) {
+      return core.Result.failure('Failed to search Pokemon: ${e.toString()}');
     }
   }
 
   @override
-  Future<Result<List<PokemonEntity>>> getPokemonsByType(String type) async {
+  Future<core.Result<List<IPokemonEntity>>> getPokemonsByType(
+    String type,
+  ) async {
     try {
-      logger.info('Getting Pokemon by type', data: {'type': type});
-      final result = await remoteDataSource.getPokemonsByType(type);
-      logger.info('Successfully got Pokemon by type',
-          data: {'type': type, 'count': result.length});
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      logger.error(
-        'Error getting Pokemon by type',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'type': type},
-      );
-      return Result.failure(e.toString());
+      final pokemons = await _remoteDataSource.getPokemonsByType(type);
+      return core.Result.success(pokemons);
+    } catch (e) {
+      return core.Result.failure(
+          'Failed to fetch Pokemon by type: ${e.toString()}');
     }
   }
 
   @override
-  Future<Result<List<PokemonEntity>>> getPokemonsByAbility(
-      String ability) async {
+  Future<core.Result<List<IPokemonEntity>>> getPokemonsByAbility(
+    String ability,
+  ) async {
     try {
-      logger.info('Getting Pokemon by ability', data: {'ability': ability});
-      final result = await remoteDataSource.getPokemonsByAbility(ability);
-      logger.info('Successfully got Pokemon by ability',
-          data: {'ability': ability, 'count': result.length});
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      logger.error(
-        'Error getting Pokemon by ability',
-        error: e,
-        stackTrace: stackTrace,
-        data: {'ability': ability},
-      );
-      return Result.failure(e.toString());
+      final pokemons = await _remoteDataSource.getPokemonsByAbility(ability);
+      return core.Result.success(pokemons);
+    } catch (e) {
+      return core.Result.failure(
+          'Failed to fetch Pokemon by ability: ${e.toString()}');
     }
   }
 
@@ -121,11 +81,10 @@ class PokemonRepositoryImpl implements IPokemonRepository {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-
     return other is PokemonRepositoryImpl &&
-        other.remoteDataSource == remoteDataSource;
+        other._remoteDataSource == _remoteDataSource;
   }
 
   @override
-  int get hashCode => remoteDataSource.hashCode;
+  int get hashCode => _remoteDataSource.hashCode;
 }

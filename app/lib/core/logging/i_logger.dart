@@ -1,7 +1,11 @@
 abstract class ILogger {
-  void debug(String message, [dynamic error, StackTrace? stackTrace]);
-  void info(String message, [dynamic error, StackTrace? stackTrace]);
-  void warning(String message, [dynamic error, StackTrace? stackTrace]);
-  void error(String message, [dynamic error, StackTrace? stackTrace]);
-  void verbose(String message, [dynamic error, StackTrace? stackTrace]);
+  void debug(String message, {Map<String, dynamic>? data});
+  void info(String message, {Map<String, dynamic>? data});
+  void warning(String message, {Map<String, dynamic>? data});
+  void error(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? data,
+  });
 }

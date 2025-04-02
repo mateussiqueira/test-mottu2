@@ -1,23 +1,27 @@
-import '../../../../core/domain/result.dart' as core;
-import '../entities/pokemon_entity.dart';
+import 'package:dartz/dartz.dart';
 
+import '../entities/i_pokemon_entity.dart';
+import '../errors/failures.dart';
+
+/// Repository interface for Pokemon operations
 abstract class PokemonRepository {
-  /// Busca a lista de Pokemons
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonList({
-    required int limit,
+  /// Get a list of Pokemon with pagination
+  Future<Either<Failure, List<IPokemonEntity>>> getPokemonList({
     required int offset,
+    required int limit,
   });
 
-  /// Busca os detalhes de um Pokemon
-  Future<core.Result<PokemonEntityImpl>> getPokemonDetail(int id);
+  /// Get Pokemon by type
+  Future<Either<Failure, List<IPokemonEntity>>> getPokemonsByType(String type);
 
-  /// Busca Pokemons por nome
-  Future<core.Result<List<PokemonEntityImpl>>> searchPokemon(String query);
+  /// Get Pokemon by ability
+  Future<Either<Failure, List<IPokemonEntity>>> getPokemonsByAbility(
+    String ability,
+  );
 
-  /// Busca Pokemons por tipo
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonsByType(String type);
+  /// Search Pokemon by name
+  Future<Either<Failure, List<IPokemonEntity>>> searchPokemon(String query);
 
-  /// Busca Pokemons por habilidade
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonsByAbility(
-      String ability);
+  /// Get Pokemon detail by ID
+  Future<Either<Failure, IPokemonEntity>> getPokemonDetail(int id);
 }

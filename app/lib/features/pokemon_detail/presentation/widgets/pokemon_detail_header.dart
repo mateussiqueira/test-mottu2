@@ -1,73 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class PokemonDetailHeader extends StatelessWidget {
-  final String imageUrl;
-  final List<String> types;
+import '../../../../core/constants/route_names.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+
+class PokemonDetailHeader extends StatelessWidget
+    implements PreferredSizeWidget {
+  final IPokemonEntity pokemon;
+  final Color backgroundColor;
+  final bool fromSearch;
 
   const PokemonDetailHeader({
     super.key,
-    required this.imageUrl,
-    required this.types,
+    required this.pokemon,
+    required this.backgroundColor,
+    this.fromSearch = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            _getTypeColor(types.first),
-            Colors.white,
-          ],
-        ),
+    return AppBar(
+      backgroundColor: backgroundColor,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          if (fromSearch) {
+            Get.offAndToNamed(RouteNames.pokemonList);
+          } else {
+            Get.back();
+          }
+        },
       ),
-      child: Center(
-        child: imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.error_outline,
-                    size: 48,
-                    color: Colors.red,
-                  );
-                },
-              )
-            : const Icon(
-                Icons.image_not_supported,
-                size: 48,
-                color: Colors.grey,
-              ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.home, color: Colors.white),
+          onPressed: () => Get.offAllNamed(RouteNames.pokemonList),
+        ),
+      ],
+      title: Text(
+        pokemon.name,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  Color _getTypeColor(String type) {
-    final Map<String, Color> typeColors = {
-      'normal': Colors.grey,
-      'fire': Colors.red,
-      'water': Colors.blue,
-      'electric': Colors.yellow,
-      'grass': Colors.green,
-      'ice': Colors.lightBlue,
-      'fighting': Colors.orange,
-      'poison': Colors.purple,
-      'ground': Colors.brown,
-      'flying': Colors.indigo,
-      'psychic': Colors.pink,
-      'bug': Colors.lightGreen,
-      'rock': Colors.grey[700]!,
-      'ghost': Colors.deepPurple,
-      'dragon': Colors.deepPurple[700]!,
-      'dark': Colors.grey[900]!,
-      'steel': Colors.blueGrey,
-      'fairy': Colors.pinkAccent,
-    };
-
-    return typeColors[type.toLowerCase()] ?? Colors.grey;
-  }
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

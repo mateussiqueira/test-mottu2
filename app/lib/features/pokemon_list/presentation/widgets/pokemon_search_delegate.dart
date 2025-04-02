@@ -3,32 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/pokemon_list_controller.dart';
-import 'pokemon_grid_item.dart';
+import 'i_pokemon_search_delegate.dart';
 
-class PokemonSearchDelegate extends SearchDelegate<String> {
-  final PokemonListController controller;
-  final _debouncer = Debouncer(milliseconds: 300);
-
-  PokemonSearchDelegate(this.controller);
-
-  @override
-  ThemeData appBarTheme(BuildContext context) {
-    return Theme.of(context).copyWith(
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.red,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      inputDecorationTheme: const InputDecorationTheme(
-        hintStyle: TextStyle(color: Colors.white70),
-        border: InputBorder.none,
-      ),
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(color: Colors.white, fontSize: 18),
-      ),
-    );
-  }
+/// Implementation of Pokemon search delegate
+class PokemonSearchDelegate extends IPokemonSearchDelegate {
+  PokemonSearchDelegate(super.controller);
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -37,7 +16,6 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
         icon: const Icon(Icons.clear),
         onPressed: () {
           query = '';
-          controller.searchPokemon('');
         },
       ),
     ];
@@ -48,7 +26,7 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        close(context, '');
+        close(context, null);
       },
     );
   }
@@ -60,51 +38,51 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    if (query.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Digite o nome de um Pokémon',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    _debouncer.run(() {
-      controller.searchPokemon(query);
-    });
-
     return _buildSearchResults();
   }
 
   Widget _buildSearchResults() {
     return Obx(() {
-      if (controller.isLoading.value) {
+      if (controller.isLoading) {
         return const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-          ),
+          child: CircularProgressIndicator(),
         );
       }
 
-      if (controller.pokemons.isEmpty) {
+      if (controller.error?.isNotEmpty ?? false) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.catching_pokemon, size: 64, color: Colors.grey[400]),
+              Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
               const SizedBox(height: 16),
               Text(
-                'Nenhum Pokémon encontrado',
+                controller.error ?? 'Unknown error',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+
+      final results = controller.pokemons
+          .where((pokemon) =>
+              pokemon.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+
+      if (results.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'No Pokemon found',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 16,
@@ -115,35 +93,26 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
         );
       }
 
-      return Container(
-        color: Colors.grey[100],
-        child: GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: controller.pokemons.length,
-          itemBuilder: (context, index) {
-            final pokemon = controller.pokemons[index];
-            return Hero(
-              tag: 'pokemon-${pokemon.id}',
-              child: Material(
-                child: PokemonGridItem(pokemon: pokemon),
-              ),
-            );
-          },
-        ),
+      return ListView.builder(
+        itemCount: results.length,
+        itemBuilder: (context, index) {
+          final pokemon = results[index];
+          return ListTile(
+            leading: Image.network(
+              pokemon.imageUrl,
+              width: 50,
+              height: 50,
+              fit: BoxFit.contain,
+            ),
+            title: Text(pokemon.name),
+            subtitle: Text(pokemon.types.join(', ')),
+            onTap: () {
+              close(context, pokemon);
+            },
+          );
+        },
       );
     });
-  }
-
-  @override
-  void dispose() {
-    _debouncer.dispose();
-    super.dispose();
   }
 }
 

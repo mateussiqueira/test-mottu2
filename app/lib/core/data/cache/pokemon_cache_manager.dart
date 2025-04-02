@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/domain/errors/pokemon_error.dart';
-import '../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../features/pokemon/data/models/pokemon_model.dart';
+import '../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import 'i_pokemon_cache_manager.dart';
 
-class PokemonCacheManager {
+class PokemonCacheManager implements IPokemonCacheManager {
   static const String _pokemonListKey = 'pokemon_list';
   static const String _pokemonDetailKey = 'pokemon_detail_';
   static const Duration _cacheDuration = Duration(hours: 1);
@@ -14,8 +16,8 @@ class PokemonCacheManager {
 
   PokemonCacheManager(this._prefs);
 
-  /// Salva a lista de Pokemons no cache
-  Future<void> savePokemonList(List<PokemonEntityImpl> pokemons) async {
+  @override
+  Future<void> savePokemonList(List<IPokemonEntity> pokemons) async {
     try {
       final jsonList = pokemons.map((pokemon) => pokemon.toJson()).toList();
       await _prefs.setString(_pokemonListKey, jsonEncode(jsonList));
@@ -28,8 +30,8 @@ class PokemonCacheManager {
     }
   }
 
-  /// Recupera a lista de Pokemons do cache
-  Future<List<PokemonEntityImpl>?> getPokemonList() async {
+  @override
+  Future<List<IPokemonEntity>?> getPokemonList() async {
     try {
       final jsonString = _prefs.getString(_pokemonListKey);
       final timestampString = _prefs.getString('${_pokemonListKey}_timestamp');
@@ -45,14 +47,14 @@ class PokemonCacheManager {
       }
 
       final jsonList = jsonDecode(jsonString) as List;
-      return jsonList.map((json) => PokemonEntityImpl.fromJson(json)).toList();
+      return jsonList.map((json) => PokemonModel.fromJson(json)).toList();
     } catch (e) {
       throw CacheError();
     }
   }
 
-  /// Salva os detalhes de um Pokemon no cache
-  Future<void> savePokemonDetail(PokemonEntityImpl pokemon) async {
+  @override
+  Future<void> savePokemonDetail(IPokemonEntity pokemon) async {
     try {
       final key = '$_pokemonDetailKey${pokemon.id}';
       await _prefs.setString(key, jsonEncode(pokemon.toJson()));
@@ -65,8 +67,8 @@ class PokemonCacheManager {
     }
   }
 
-  /// Recupera os detalhes de um Pokemon do cache
-  Future<PokemonEntityImpl?> getPokemonDetail(int id) async {
+  @override
+  Future<IPokemonEntity?> getPokemonDetail(int id) async {
     try {
       final key = '$_pokemonDetailKey$id';
       final jsonString = _prefs.getString(key);
@@ -83,13 +85,13 @@ class PokemonCacheManager {
       }
 
       final json = jsonDecode(jsonString);
-      return PokemonEntityImpl.fromJson(json);
+      return PokemonModel.fromJson(json);
     } catch (e) {
       throw CacheError();
     }
   }
 
-  /// Limpa a lista de Pokemons do cache
+  @override
   Future<void> clearPokemonList() async {
     try {
       await _prefs.remove(_pokemonListKey);
@@ -99,7 +101,7 @@ class PokemonCacheManager {
     }
   }
 
-  /// Limpa os detalhes de um Pokemon do cache
+  @override
   Future<void> clearPokemonDetail(int id) async {
     try {
       final key = '$_pokemonDetailKey$id';
@@ -110,7 +112,7 @@ class PokemonCacheManager {
     }
   }
 
-  /// Limpa todo o cache
+  @override
   Future<void> clearAll() async {
     try {
       await _prefs.clear();

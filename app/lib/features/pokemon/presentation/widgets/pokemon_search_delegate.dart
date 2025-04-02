@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../domain/entities/pokemon_entity.dart';
 import '../controllers/pokemon_list_controller.dart';
-import 'pokemon_grid_item.dart';
+import 'pokemon_search_results.dart';
 
+/// Search delegate for Pokemon list
 class PokemonSearchDelegate extends SearchDelegate<String> {
   final PokemonListController controller = Get.find<PokemonListController>();
 
@@ -32,65 +32,17 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return _buildSearchResults();
+    return PokemonSearchResults(
+      controller: controller,
+      query: query,
+    );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return _buildSearchResults();
-  }
-
-  Widget _buildSearchResults() {
-    if (query.isEmpty) {
-      return const Center(
-        child: Text('Enter a Pokemon name to search'),
-      );
-    }
-
-    return Obx(() {
-      if (controller.isLoading) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-
-      final error = controller.error;
-      if (error != null && error.isNotEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(error),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => controller.searchPokemons(query),
-                child: const Text('Try again'),
-              ),
-            ],
-          ),
-        );
-      }
-
-      if (controller.pokemons.isEmpty) {
-        return const Center(
-          child: Text('No Pokemon found'),
-        );
-      }
-
-      return GridView.builder(
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
-        ),
-        itemCount: controller.pokemons.length,
-        itemBuilder: (context, index) {
-          final pokemon = controller.pokemons[index] as PokemonEntityImpl;
-          return PokemonGridItem(pokemon: pokemon);
-        },
-      );
-    });
+    return PokemonSearchResults(
+      controller: controller,
+      query: query,
+    );
   }
 }

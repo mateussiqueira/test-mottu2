@@ -4,31 +4,24 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../features/pokemon/data/models/pokemon_model.dart';
-import '../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import 'i_poke_api_adapter.dart';
+import 'poke_api_urls.dart';
 
-abstract class PokemonRepository {
-  Future<List<PokemonEntityImpl>> getPokemons({int offset = 0, int limit = 20});
-  Future<PokemonEntityImpl> getPokemonById(int id);
-  Future<List<PokemonEntityImpl>> searchPokemons(String query);
-  Future<List<PokemonEntityImpl>> getPokemonsByType(String type);
-  Future<List<PokemonEntityImpl>> getPokemonsByAbility(String ability);
-}
-
-class PokeApiAdapter {
+class PokeApiAdapter implements IPokeApiAdapter {
   final http.Client client;
   final SharedPreferences prefs;
-  static const String baseUrl = 'https://pokeapi.co/api/v2';
 
   PokeApiAdapter({
     required this.client,
     required this.prefs,
   });
 
-  Future<List<PokemonModel>> getPokemons(
+  @override
+  Future<List<IPokemonEntity>> getPokemons(
       {int offset = 0, int limit = 20}) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/pokemon?offset=$offset&limit=$limit'),
-    );
+    final response = await client
+        .get(Uri.parse(PokeApiUrls.getPokemons(offset: offset, limit: limit)));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -42,10 +35,10 @@ class PokeApiAdapter {
     }
   }
 
-  Future<PokemonModel> getPokemonById(int id) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/pokemon/$id'),
-    );
+  @override
+  Future<IPokemonEntity> getPokemonById(int id) async {
+    final response =
+        await client.get(Uri.parse(PokeApiUrls.getPokemonById(id)));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -55,10 +48,10 @@ class PokeApiAdapter {
     }
   }
 
-  Future<PokemonModel> getPokemonByName(String name) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/pokemon/$name'),
-    );
+  @override
+  Future<IPokemonEntity> getPokemonByName(String name) async {
+    final response =
+        await client.get(Uri.parse(PokeApiUrls.getPokemonByName(name)));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -68,10 +61,9 @@ class PokeApiAdapter {
     }
   }
 
-  Future<List<PokemonModel>> searchPokemons(String query) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/pokemon?limit=1118'),
-    );
+  @override
+  Future<List<IPokemonEntity>> searchPokemons(String query) async {
+    final response = await client.get(Uri.parse(PokeApiUrls.getAllPokemons()));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -90,10 +82,10 @@ class PokeApiAdapter {
     }
   }
 
-  Future<List<PokemonModel>> getPokemonsByType(String type) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/type/$type'),
-    );
+  @override
+  Future<List<IPokemonEntity>> getPokemonsByType(String type) async {
+    final response =
+        await client.get(Uri.parse(PokeApiUrls.getPokemonsByType(type)));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -107,10 +99,10 @@ class PokeApiAdapter {
     }
   }
 
-  Future<List<PokemonModel>> getPokemonsByAbility(String ability) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/ability/$ability'),
-    );
+  @override
+  Future<List<IPokemonEntity>> getPokemonsByAbility(String ability) async {
+    final response =
+        await client.get(Uri.parse(PokeApiUrls.getPokemonsByAbility(ability)));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -124,6 +116,7 @@ class PokeApiAdapter {
     }
   }
 
+  @override
   Future<void> clearCache() async {
     await prefs.clear();
   }

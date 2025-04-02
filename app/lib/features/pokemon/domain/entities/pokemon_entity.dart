@@ -1,12 +1,25 @@
-class PokemonEntity {
+import 'i_pokemon_entity.dart';
+
+/// Implementation of IPokemonEntity
+class PokemonEntity implements IPokemonEntity {
+  @override
   final int id;
+  @override
   final String name;
+  @override
   final List<String> types;
+  @override
   final List<String> abilities;
+  @override
   final int height;
+  @override
   final int weight;
-  final int baseExperience;
+  @override
+  final int? baseExperience;
+  @override
   final String imageUrl;
+  @override
+  final Map<String, int> stats;
 
   PokemonEntity({
     required this.id,
@@ -15,8 +28,9 @@ class PokemonEntity {
     required this.abilities,
     required this.height,
     required this.weight,
-    required this.baseExperience,
+    this.baseExperience,
     required this.imageUrl,
+    required this.stats,
   });
 
   @override
@@ -26,55 +40,46 @@ class PokemonEntity {
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
+          imageUrl == other.imageUrl &&
           types == other.types &&
           abilities == other.abilities &&
+          stats == other.stats &&
           height == other.height &&
           weight == other.weight &&
-          baseExperience == other.baseExperience &&
-          imageUrl == other.imageUrl;
+          baseExperience == other.baseExperience;
 
   @override
   int get hashCode =>
       id.hashCode ^
       name.hashCode ^
+      imageUrl.hashCode ^
       types.hashCode ^
       abilities.hashCode ^
+      stats.hashCode ^
       height.hashCode ^
       weight.hashCode ^
-      baseExperience.hashCode ^
-      imageUrl.hashCode;
+      baseExperience.hashCode;
 
   @override
   String toString() {
-    return 'PokemonEntity{id: $id, name: $name, types: $types, abilities: $abilities, height: $height, weight: $weight, baseExperience: $baseExperience, imageUrl: $imageUrl}';
+    return 'PokemonEntity{id: $id, name: $name, imageUrl: $imageUrl, types: $types, abilities: $abilities, stats: $stats, height: $height, weight: $weight, baseExperience: $baseExperience}';
   }
-}
 
-class PokemonEntityImpl extends PokemonEntity {
-  const PokemonEntityImpl({
-    required super.id,
-    required super.name,
-    required super.imageUrl,
-    required super.types,
-    required super.abilities,
-    required super.height,
-    required super.weight,
-    required super.baseExperience,
-  });
-
-  factory PokemonEntityImpl.fromJson(Map<String, dynamic> json) {
-    return PokemonEntityImpl(
-      id: json['id'],
-      name: json['name'],
-      types: List<String>.from(json['types']),
-      abilities: List<String>.from(json['abilities']),
-      height: json['height'].toInt(),
-      weight: json['weight'].toInt(),
-      baseExperience: json['baseExperience'].toInt(),
-      imageUrl: json['imageUrl'],
+  factory PokemonEntity.fromJson(Map<String, dynamic> json) {
+    return PokemonEntity(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      imageUrl: json['imageUrl'] as String,
+      types: List<String>.from(json['types'] as List),
+      abilities: List<String>.from(json['abilities'] as List),
+      stats: Map<String, int>.from(json['stats'] as Map),
+      height: json['height'] as int,
+      weight: json['weight'] as int,
+      baseExperience: json['base_experience'] as int?,
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -83,30 +88,33 @@ class PokemonEntityImpl extends PokemonEntity {
       'abilities': abilities,
       'height': height,
       'weight': weight,
-      'baseExperience': baseExperience,
+      'base_experience': baseExperience,
       'imageUrl': imageUrl,
+      'stats': stats,
     };
   }
 
-  PokemonEntityImpl copyWith({
+  PokemonEntity copyWith({
     int? id,
     String? name,
+    String? imageUrl,
     List<String>? types,
     List<String>? abilities,
+    Map<String, int>? stats,
     int? height,
     int? weight,
     int? baseExperience,
-    String? imageUrl,
   }) {
-    return PokemonEntityImpl(
+    return PokemonEntity(
       id: id ?? this.id,
       name: name ?? this.name,
+      imageUrl: imageUrl ?? this.imageUrl,
       types: types ?? this.types,
       abilities: abilities ?? this.abilities,
+      stats: stats ?? this.stats,
       height: height ?? this.height,
       weight: weight ?? this.weight,
       baseExperience: baseExperience ?? this.baseExperience,
-      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

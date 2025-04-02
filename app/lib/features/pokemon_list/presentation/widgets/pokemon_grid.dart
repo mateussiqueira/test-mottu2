@@ -1,52 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/constants/app_constants.dart';
-import '../bloc/pokemon_list_bloc.dart';
+import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
 import 'pokemon_grid_item.dart';
 
-class PokemonGrid extends StatelessWidget {
-  const PokemonGrid({super.key});
+/// Widget for displaying a grid of Pokemon
+class PokemonGrid extends StatefulWidget {
+  final List<IPokemonEntity> pokemons;
+  final bool hasMore;
+  final VoidCallback? onLoadMore;
+
+  const PokemonGrid({
+    super.key,
+    required this.pokemons,
+    required this.hasMore,
+    this.onLoadMore,
+  });
+
+  @override
+  State<PokemonGrid> createState() => _PokemonGridState();
+}
+
+class _PokemonGridState extends State<PokemonGrid> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.hasMore) {
+      _scrollController.addListener(_onScroll);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      widget.onLoadMore?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PokemonListBloc, PokemonListState>(
-      builder: (context, state) {
-        if (state is PokemonListLoading) {
+    return GridView.builder(
+      controller: widget.hasMore ? _scrollController : null,
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: widget.pokemons.length + (widget.hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == widget.pokemons.length) {
           return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (state is PokemonListError) {
-          return Center(
-            child: Text(
-              state.message,
-              style: const TextStyle(
-                fontSize: AppConstants.bodyLargeSize,
-                color: Colors.red,
-              ),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
             ),
           );
         }
 
-        if (state is PokemonListLoaded) {
-          return GridView.builder(
-            padding: const EdgeInsets.all(AppConstants.spacingLarge),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: AppConstants.gridCrossAxisCount,
-              childAspectRatio: AppConstants.gridChildAspectRatio,
-              crossAxisSpacing: AppConstants.gridSpacing,
-              mainAxisSpacing: AppConstants.gridSpacing,
-            ),
-            itemCount: state.pokemons.length,
-            itemBuilder: (context, index) {
-              return PokemonGridItem(pokemon: state.pokemons[index]);
-            },
-          );
-        }
-
-        return const SizedBox.shrink();
+        final pokemon = widget.pokemons[index];
+        return Hero(
+          tag: 'pokemon-${pokemon.id}',
+          child: PokemonGridItem(pokemon: pokemon),
+        );
       },
     );
   }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../domain/entities/pokemon_entity.dart';
+import '../../domain/entities/i_pokemon_entity.dart';
 
+/// Widget that displays a Pokemon in a grid item
 class PokemonGridItem extends StatelessWidget {
-  final PokemonEntity pokemon;
+  final IPokemonEntity pokemon;
 
   const PokemonGridItem({
     super.key,

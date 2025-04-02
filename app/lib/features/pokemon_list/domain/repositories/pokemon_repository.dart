@@ -1,11 +1,17 @@
 import '../../../../core/domain/result.dart' as core;
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
 
+/// Repository for Pokemon operations
 abstract class PokemonRepository {
-  Future<core.Result<List<PokemonEntityImpl>>> getPokemonList({
+  /// Gets a list of Pokemon with pagination
+  Future<core.Result<List<IPokemonEntity>>> getPokemonList({
     required int limit,
     required int offset,
   });
-  Future<core.Result<PokemonEntityImpl>> getPokemonDetail(int id);
-  Future<core.Result<List<PokemonEntityImpl>>> searchPokemon(String query);
+
+  /// Gets details of a specific Pokemon
+  Future<core.Result<IPokemonEntity>> getPokemonDetail(int id);
+
+  /// Searches for Pokemon by name
+  Future<core.Result<List<IPokemonEntity>>> searchPokemon(String query);
 }

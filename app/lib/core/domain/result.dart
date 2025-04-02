@@ -1,31 +1,47 @@
-import 'package:mobile/core/domain/errors/pokemon_error.dart';
-
+/// A class that represents the result of an operation that can either succeed with a value of type [T]
+/// or fail with an error message.
 class Result<T> {
-  final T? data;
-  final PokemonError? error;
+  final T? _data;
+  final String? _error;
+  final bool _isSuccess;
 
-  const Result._({
-    this.data,
-    this.error,
-  });
+  Result._(this._data, this._error, this._isSuccess);
 
-  factory Result.success(T data) => Result._(data: data);
+  /// Creates a successful result with the given [data].
+  factory Result.success(T data) => Result._(data, null, true);
 
-  factory Result.failure(PokemonError error) => Result._(error: error);
+  /// Creates a failed result with the given [error] message.
+  factory Result.failure(String error) => Result._(null, error, false);
 
-  bool get isSuccess => data != null && error == null;
-  bool get isFailure => error != null;
+  /// Whether this result represents a successful operation.
+  bool get isSuccess => _isSuccess;
 
-  R fold<R>(
-    R Function(PokemonError) onFailure,
-    R Function(T) onSuccess,
-  ) {
-    if (isSuccess && data != null) {
-      return onSuccess(data as T);
-    } else if (error != null) {
-      return onFailure(error as PokemonError);
-    } else {
-      throw StateError('Invalid Result state');
+  /// Whether this result represents a failed operation.
+  bool get isFailure => !_isSuccess;
+
+  /// The data of this result, if it represents a successful operation.
+  T? get data => _data;
+
+  /// The error message of this result, if it represents a failed operation.
+  String? get error => _error;
+
+  /// Maps this result to a new result with a different type [U] using the given [transform] function.
+  Result<U> map<U>(U Function(T data) transform) {
+    if (isSuccess && _data != null) {
+      return Result.success(transform(_data as T));
     }
+    return Result.failure(_error ?? 'Unknown error');
+  }
+
+  /// Returns the result of calling [onSuccess] with the data if this result is successful,
+  /// or [onFailure] with the error message if this result is a failure.
+  R fold<R>(
+    R Function(T data) onSuccess,
+    R Function(String error) onFailure,
+  ) {
+    if (isSuccess && _data != null) {
+      return onSuccess(_data as T);
+    }
+    return onFailure(_error ?? 'Unknown error');
   }
 }

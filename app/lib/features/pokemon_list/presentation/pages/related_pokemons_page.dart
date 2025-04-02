@@ -2,12 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
 import '../widgets/pokemon_grid_item.dart';
 
+/// Page for displaying related Pokemon
 class RelatedPokemonsPage extends StatelessWidget {
   final String title;
-  final List<PokemonEntityImpl> pokemons;
+  final List<IPokemonEntity> pokemons;
 
   const RelatedPokemonsPage({
     super.key,
@@ -59,7 +60,7 @@ class RelatedPokemonsPage extends StatelessWidget {
 }
 
 class PokemonCard extends StatelessWidget {
-  final PokemonEntityImpl pokemon;
+  final IPokemonEntity pokemon;
 
   const PokemonCard({super.key, required this.pokemon});
 

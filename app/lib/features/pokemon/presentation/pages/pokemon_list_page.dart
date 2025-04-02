@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../domain/entities/pokemon_entity.dart';
 import '../controllers/pokemon_list_controller.dart';
 import '../widgets/pokemon_grid_item.dart';
 import '../widgets/pokemon_list_error.dart';
 import '../widgets/pokemon_list_loading.dart';
 import '../widgets/pokemon_search_delegate.dart';
 
+/// Page that displays a grid of Pokemon
 class PokemonListPage extends StatelessWidget {
   const PokemonListPage({super.key});
 
@@ -36,7 +36,7 @@ class PokemonListPage extends StatelessWidget {
         }
 
         final error = controller.error;
-        if (error != null && error.isNotEmpty) {
+        if (error != null) {
           return PokemonListError(
             message: error,
             onRetry: controller.loadPokemons,
@@ -59,7 +59,7 @@ class PokemonListPage extends StatelessWidget {
           ),
           itemCount: controller.pokemons.length,
           itemBuilder: (context, index) {
-            final pokemon = controller.pokemons[index] as PokemonEntityImpl;
+            final pokemon = controller.pokemons[index];
             return PokemonGridItem(pokemon: pokemon);
           },
         );

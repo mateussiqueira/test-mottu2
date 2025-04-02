@@ -1,14 +1,20 @@
-import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
-import '../../../../features/pokemon/domain/repositories/pokemon_repository.dart';
+import '../../../../core/domain/result.dart' as core;
+import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../features/pokemon/domain/repositories/i_pokemon_repository.dart';
 
+/// Use case for searching Pokemon
 class SearchPokemon {
-  final PokemonRepository repository;
+  final IPokemonRepository repository;
 
   SearchPokemon({
     required this.repository,
   });
 
-  Future<List<PokemonEntity>> call(String query) async {
-    return await repository.searchPokemon(query);
+  /// Searches for Pokemon by name
+  ///
+  /// [query] - The search query to find Pokemon
+  /// Returns a [Result] containing a list of [IPokemonEntity] that match the search criteria
+  Future<core.Result<List<IPokemonEntity>>> call(String query) {
+    return repository.searchPokemon(query);
   }
 }
