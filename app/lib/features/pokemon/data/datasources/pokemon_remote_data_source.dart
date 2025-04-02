@@ -5,7 +5,7 @@ import 'package:mobile/core/config/app_config.dart';
 import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
 
 abstract class PokemonRemoteDataSource {
-  Future<List<PokemonEntity>> getPokemons();
+  Future<List<PokemonEntity>> getPokemons({int? limit, int? offset});
   Future<PokemonEntity> getPokemonDetail(int id);
   Future<List<PokemonEntity>> getPokemonsByType(String type);
   Future<List<PokemonEntity>> getPokemonsByAbility(String ability);
@@ -18,14 +18,23 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   PokemonRemoteDataSourceImpl(this.client);
 
   @override
-  Future<List<PokemonEntity>> getPokemons() async {
+  Future<List<PokemonEntity>> getPokemons({int? limit, int? offset}) async {
     final response = await client.get(
-      Uri.parse('${AppConfig.baseUrl}/pokemon'),
+      Uri.parse(
+          '${AppConfig.baseUrl}/pokemon?limit=${limit ?? 20}&offset=${offset ?? 0}'),
     );
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body)['results'];
-      return jsonList.map((json) => PokemonEntity.fromJson(json)).toList();
+      final List<PokemonEntity> pokemons = [];
+
+      for (var pokemon in jsonList) {
+        final id = int.parse(pokemon['url'].toString().split('/')[6]);
+        final detail = await getPokemonDetail(id);
+        pokemons.add(detail);
+      }
+
+      return pokemons;
     } else {
       throw Exception('Failed to load pokemons');
     }
@@ -39,7 +48,20 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      return PokemonEntity.fromJson(json);
+      return PokemonEntityImpl(
+        id: json['id'],
+        name: json['name'],
+        types: (json['types'] as List)
+            .map((t) => t['type']['name'] as String)
+            .toList(),
+        abilities: (json['abilities'] as List)
+            .map((a) => a['ability']['name'] as String)
+            .toList(),
+        height: json['height'],
+        weight: json['weight'],
+        baseExperience: json['base_experience'] ?? 0,
+        imageUrl: json['sprites']['front_default'] ?? '',
+      );
     } else {
       throw Exception('Failed to load pokemon details');
     }
@@ -53,9 +75,16 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body)['pokemon'];
-      return jsonList
-          .map((json) => PokemonEntity.fromJson(json['pokemon']))
-          .toList();
+      final List<PokemonEntity> pokemons = [];
+
+      for (var pokemon in jsonList) {
+        final id =
+            int.parse(pokemon['pokemon']['url'].toString().split('/')[6]);
+        final detail = await getPokemonDetail(id);
+        pokemons.add(detail);
+      }
+
+      return pokemons;
     } else {
       throw Exception('Failed to load pokemons by type');
     }
@@ -69,9 +98,16 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body)['pokemon'];
-      return jsonList
-          .map((json) => PokemonEntity.fromJson(json['pokemon']))
-          .toList();
+      final List<PokemonEntity> pokemons = [];
+
+      for (var pokemon in jsonList) {
+        final id =
+            int.parse(pokemon['pokemon']['url'].toString().split('/')[6]);
+        final detail = await getPokemonDetail(id);
+        pokemons.add(detail);
+      }
+
+      return pokemons;
     } else {
       throw Exception('Failed to load pokemons by ability');
     }
@@ -79,15 +115,33 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
 
   @override
   Future<List<PokemonEntity>> searchPokemons(String query) async {
-    final response = await client.get(
-      Uri.parse('${AppConfig.baseUrl}/pokemon?search=$query'),
-    );
+    try {
+      final response = await client.get(
+        Uri.parse('${AppConfig.baseUrl}/pokemon/$query'),
+      );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonList = json.decode(response.body)['results'];
-      return jsonList.map((json) => PokemonEntity.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to search pokemons');
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final pokemon = PokemonEntityImpl(
+          id: json['id'],
+          name: json['name'],
+          types: (json['types'] as List)
+              .map((t) => t['type']['name'] as String)
+              .toList(),
+          abilities: (json['abilities'] as List)
+              .map((a) => a['ability']['name'] as String)
+              .toList(),
+          height: json['height'],
+          weight: json['weight'],
+          baseExperience: json['base_experience'] ?? 0,
+          imageUrl: json['sprites']['front_default'] ?? '',
+        );
+        return [pokemon];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 }

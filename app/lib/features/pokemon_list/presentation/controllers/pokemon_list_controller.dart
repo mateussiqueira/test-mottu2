@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/presentation/adapters/getx_adapter.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
-import '../../domain/repositories/pokemon_repository.dart';
+import '../../../pokemon/domain/repositories/pokemon_repository.dart';
 
 class PokemonListController extends GetxController {
   final PokemonRepository _repository;
@@ -118,7 +118,7 @@ class PokemonListController extends GetxController {
       error.value = 'Error searching pokemons: $e';
       _adapter.showSnackbar(
         title: 'Error',
-        message: 'Failed to search pokemons. Please try again.',
+        message: 'Error searching pokemons: $e',
       );
     } finally {
       isLoading.value = false;

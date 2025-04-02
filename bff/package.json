@@ -8,9 +8,25 @@
   "scripts": {
     "mobile": "cd packages/mobile && flutter run",
     "bff": "cd packages/bff && npm run dev",
-    "dev": "concurrently \"npm run mobile\" \"npm run bff\""
+    "dev": "concurrently \"npm run mobile\" \"npm run bff\"",
+    "start:dev": "nest start --watch"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@nestjs/axios": "^4.0.0",
+    "@nestjs/common": "^11.0.12",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.12",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.17",
+    "axios": "^1.8.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2"
   }
-} 
+}

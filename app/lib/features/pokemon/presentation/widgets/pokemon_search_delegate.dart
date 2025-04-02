@@ -54,15 +54,16 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
         );
       }
 
-      if (controller.error.isNotEmpty) {
+      final error = controller.error;
+      if (error != null && error.isNotEmpty) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(controller.error),
+              Text(error),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => controller.searchPokemon(query),
+                onPressed: () => controller.searchPokemons(query),
                 child: const Text('Try again'),
               ),
             ],

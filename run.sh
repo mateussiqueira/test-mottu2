@@ -1,120 +1,85 @@
 #!/bin/bash
 
 # Cores para output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-# Função para exibir mensagens
-print_message() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Verifica se o Flutter está instalado
-check_flutter() {
-    if ! command -v flutter &>/dev/null; then
-        print_error "Flutter não está instalado. Por favor, instale o Flutter primeiro."
+# Função para verificar se um comando está instalado
+check_command() {
+    if ! command -v $1 &>/dev/null; then
+        echo -e "${RED}Erro: $1 não está instalado${NC}"
         exit 1
     fi
 }
 
-# Verifica se o Node.js está instalado
-check_node() {
-    if ! command -v node &>/dev/null; then
-        print_error "Node.js não está instalado. Por favor, instale o Node.js primeiro."
-        exit 1
-    fi
-}
-
-# Verifica se o CocoaPods está instalado (para iOS)
-check_cocoapods() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        if ! command -v pod &>/dev/null; then
-            print_error "CocoaPods não está instalado. Por favor, instale o CocoaPods primeiro."
-            exit 1
-        fi
-    fi
-}
-
-# Instala dependências do Flutter
+# Função para instalar dependências do Flutter
 install_flutter_deps() {
-    print_message "Instalando dependências do Flutter..."
+    echo -e "${YELLOW}[INFO] Instalando dependências do Flutter...${NC}"
     cd app
     flutter pub get
     cd ..
 }
 
-# Instala dependências do BFF
+# Função para instalar dependências do BFF
 install_bff_deps() {
-    print_message "Instalando dependências do BFF..."
+    echo -e "${YELLOW}[INFO] Instalando dependências do BFF...${NC}"
     cd bff
     npm install
     cd ..
 }
 
-# Configura o ambiente iOS
+# Função para configurar ambiente iOS
 setup_ios() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        print_message "Configurando ambiente iOS..."
-        cd app/ios
-        pod install
-        cd ../..
-    fi
+    echo -e "${YELLOW}[INFO] Configurando ambiente iOS...${NC}"
+    cd app/ios
+    pod install
+    cd ../..
 }
 
-# Inicia o BFF
+# Função para iniciar o BFF
 start_bff() {
-    print_message "Iniciando BFF..."
+    echo -e "${YELLOW}[INFO] Iniciando BFF...${NC}"
     cd bff
     npm run start:dev &
     BFF_PID=$!
     cd ..
 }
 
-# Para o BFF
+# Função para parar o BFF
 stop_bff() {
+    echo -e "${YELLOW}[INFO] Parando BFF...${NC}"
     if [ ! -z "$BFF_PID" ]; then
-        print_message "Parando BFF..."
-        kill $BFF_PID
+        kill $BFF_PID 2>/dev/null || true
     fi
 }
 
-# Executa o app Flutter
+# Função para executar o app Flutter
 run_flutter_app() {
-    print_message "Executando aplicativo Flutter..."
+    echo -e "${YELLOW}[INFO] Executando aplicativo Flutter...${NC}"
     cd app
     flutter run
     cd ..
 }
 
-# Função principal
-main() {
-    # Verifica pré-requisitos
-    check_flutter
-    check_node
-    check_cocoapods
+# Verificar pré-requisitos
+check_command "flutter"
+check_command "node"
+check_command "pod"
 
-    # Menu principal
-    echo -e "\n${BLUE}=== PokeAPI Mobile App ===${NC}"
+# Menu principal
+while true; do
+    echo -e "\n=== PokeAPI Mobile App ==="
     echo "1. Executar com BFF"
     echo "2. Executar com API direta"
     echo "3. Instalar dependências"
     echo "4. Sair"
-    echo -e "\nEscolha uma opção: "
-    read option
+    echo
+    read -p "Escolha uma opção: " choice
 
-    case $option in
+    case $choice in
     1)
-        # Executa com BFF
         install_bff_deps
         install_flutter_deps
         setup_ios
@@ -123,28 +88,23 @@ main() {
         stop_bff
         ;;
     2)
-        # Executa com API direta
         install_flutter_deps
         setup_ios
         run_flutter_app
         ;;
     3)
-        # Instala todas as dependências
         install_bff_deps
         install_flutter_deps
         setup_ios
-        print_success "Todas as dependências foram instaladas com sucesso!"
+        echo -e "${GREEN}[SUCCESS] Dependências instaladas com sucesso!${NC}"
         ;;
     4)
-        print_message "Saindo..."
+        stop_bff
+        echo -e "${GREEN}[INFO] Saindo...${NC}"
         exit 0
         ;;
     *)
-        print_error "Opção inválida!"
-        exit 1
+        echo -e "${RED}[ERROR] Opção inválida${NC}"
         ;;
     esac
-}
-
-# Executa o script
-main
+done

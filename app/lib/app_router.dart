@@ -11,7 +11,7 @@ class AppRouter {
   static final List<GetPage> routes = [
     GetPage(
       name: pokemonList,
-      page: () => PokemonListPage(repository: Get.find()),
+      page: () => PokemonListPage(),
     ),
     GetPage(
       name: pokemonDetail,

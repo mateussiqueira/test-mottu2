@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/services/cache_service.dart';
-import 'core/services/connectivity_service.dart';
-import 'features/pokemon/data/datasources/pokemon_local_datasource.dart';
-import 'features/pokemon/data/datasources/pokemon_remote_data_source.dart';
-import 'features/pokemon/data/repositories/pokemon_repository_impl.dart';
-import 'features/pokemon/domain/repositories/pokemon_repository.dart';
-import 'features/pokemon/domain/usecases/get_pokemon_list_use_case.dart';
-import 'features/pokemon/domain/usecases/search_pokemon_use_case.dart';
-import 'features/pokemon/presentation/controllers/pokemon_list_controller.dart';
+import 'core/config/di.dart';
+import 'core/presentation/routes/app_router.dart';
+import 'features/pokemon_detail/domain/usecases/get_pokemon_by_id.dart';
+import 'features/pokemon_detail/domain/usecases/get_pokemons_by_ability.dart';
+import 'features/pokemon_detail/domain/usecases/get_pokemons_by_type.dart';
 import 'features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
-import 'features/splash/presentation/pages/splash_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,31 +16,19 @@ void main() async {
 
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
-  final client = http.Client();
+  getIt.registerSingleton(prefs);
 
-  // Register services
-  Get.put(ConnectivityService());
-  Get.put(CacheService(preferences: prefs));
-  Get.put(client);
-
-  // Register data sources
-  final pokemonRemoteDataSource = PokemonRemoteDataSourceImpl(client);
-  Get.put<PokemonRemoteDataSource>(pokemonRemoteDataSource);
-
-  final pokemonLocalDataSource = PokemonLocalDataSource(prefs);
-  Get.put<PokemonLocalDataSource>(pokemonLocalDataSource);
-
-  // Register repository
-  final pokemonRepository = PokemonRepositoryImpl(pokemonRemoteDataSource);
-  Get.put<PokemonRepository>(pokemonRepository);
-
-  // Register use cases
-  Get.put(GetPokemonListUseCase(pokemonRepository));
-  Get.put(SearchPokemonUseCase(pokemonRepository));
+  // Setup dependencies
+  await setupDependencies();
 
   // Register controllers
-  Get.put(PokemonListController(pokemonRepository));
-  Get.put(PokemonDetailController(pokemonRepository));
+  Get.lazyPut(
+    () => PokemonDetailController(
+      getPokemonById: getIt<GetPokemonById>(),
+      getPokemonsByType: getIt<GetPokemonsByType>(),
+      getPokemonsByAbility: getIt<GetPokemonsByAbility>(),
+    ),
+  );
 
   runApp(const MyApp());
 }
@@ -57,12 +39,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Pokemon App',
+      title: 'PokeAPI',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SplashPage(),
+      initialRoute: AppRouter.splash,
+      onGenerateRoute: AppRouter.generateRoute,
+      defaultTransition: Transition.fade,
     );
   }
 }

@@ -6,12 +6,10 @@ import 'package:get/get.dart';
 import '../../../../core/presentation/adapters/getx_adapter.dart';
 import '../controllers/pokemon_list_controller.dart';
 import 'pokemon_grid_item.dart';
-import 'pokemon_grid_item_skeleton.dart';
 
 class PokemonSearchDelegate extends SearchDelegate<void> {
   final _adapter = GetXAdapter();
-  final PokemonListController controller =
-      GetXAdapter().find<PokemonListController>();
+  final PokemonListController controller = Get.find<PokemonListController>();
   final _debouncer = Debouncer(milliseconds: 500);
 
   @override
@@ -52,55 +50,41 @@ class PokemonSearchDelegate extends SearchDelegate<void> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return buildSuggestions(context);
+    return _buildSearchResults();
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
-      return const Center(
-        child: Text('Type to search for Pokémon'),
-      );
+      return _buildSearchResults();
     }
 
     _debouncer.run(() {
       controller.searchPokemon(query);
     });
 
+    return _buildSearchResults();
+  }
+
+  Widget _buildSearchResults() {
     return Obx(() {
       if (controller.isLoading.value) {
-        return GridView.builder(
-          padding: const EdgeInsets.all(16.0),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 16.0,
-            mainAxisSpacing: 16.0,
-          ),
-          itemCount: 6,
-          itemBuilder: (context, index) => const PokemonGridItemSkeleton(),
-        );
-      }
-
-      if (controller.error.value.isNotEmpty) {
-        return Center(
-          child: Text(controller.error.value),
-        );
+        return const Center(child: CircularProgressIndicator());
       }
 
       if (controller.pokemons.isEmpty) {
         return const Center(
-          child: Text('No Pokémon found'),
+          child: Text('Nenhum Pokémon encontrado'),
         );
       }
 
       return GridView.builder(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.75,
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
         itemCount: controller.pokemons.length,
         itemBuilder: (context, index) {

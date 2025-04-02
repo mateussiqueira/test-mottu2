@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/presentation/adapters/getx_adapter.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
-import '../../domain/repositories/pokemon_repository.dart';
+import '../../../pokemon/domain/repositories/pokemon_repository.dart';
 
 class PokemonSearchController extends GetxController {
   final PokemonRepository _repository;

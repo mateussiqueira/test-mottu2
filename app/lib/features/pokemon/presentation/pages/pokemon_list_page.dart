@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../domain/entities/pokemon_entity.dart';
 import '../controllers/pokemon_list_controller.dart';
 import '../widgets/pokemon_grid_item.dart';
 import '../widgets/pokemon_list_error.dart';
@@ -34,9 +35,10 @@ class PokemonListPage extends StatelessWidget {
           return const PokemonListLoading();
         }
 
-        if (controller.error.isNotEmpty) {
+        final error = controller.error;
+        if (error != null && error.isNotEmpty) {
           return PokemonListError(
-            message: controller.error,
+            message: error,
             onRetry: controller.loadPokemons,
           );
         }
@@ -57,7 +59,7 @@ class PokemonListPage extends StatelessWidget {
           ),
           itemCount: controller.pokemons.length,
           itemBuilder: (context, index) {
-            final pokemon = controller.pokemons[index];
+            final pokemon = controller.pokemons[index] as PokemonEntityImpl;
             return PokemonGridItem(pokemon: pokemon);
           },
         );

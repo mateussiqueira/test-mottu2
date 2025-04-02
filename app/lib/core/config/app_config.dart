@@ -1,7 +1,7 @@
 class AppConfig {
   static const bool useBFF = bool.fromEnvironment(
     'USE_BFF',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   static const String bffBaseUrl = String.fromEnvironment(

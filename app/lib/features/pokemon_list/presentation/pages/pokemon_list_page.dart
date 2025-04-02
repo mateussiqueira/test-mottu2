@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile/core/config/di.dart';
+import 'package:mobile/features/pokemon/domain/repositories/pokemon_repository.dart';
 
-import '../../domain/repositories/pokemon_repository.dart';
 import '../controllers/pokemon_list_controller.dart';
 import '../controllers/pokemon_search_controller.dart';
 import '../widgets/pokemon_grid_item.dart';
@@ -9,12 +10,10 @@ import '../widgets/pokemon_grid_item_skeleton.dart';
 import '../widgets/pokemon_search_delegate.dart';
 
 class PokemonListPage extends StatelessWidget {
-  final PokemonRepository repository;
   final ScrollController _scrollController = ScrollController();
 
   PokemonListPage({
     super.key,
-    required this.repository,
   }) {
     _scrollController.addListener(_onScroll);
   }
@@ -32,8 +31,8 @@ class PokemonListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize controllers with repository
-    Get.put(PokemonListController(repository));
-    Get.put(PokemonSearchController(repository));
+    Get.put(PokemonListController(getIt<PokemonRepository>()));
+    Get.put(PokemonSearchController(getIt<PokemonRepository>()));
 
     final listController = Get.find<PokemonListController>();
     final searchController = Get.find<PokemonSearchController>();
@@ -98,12 +97,10 @@ class PokemonListPage extends StatelessWidget {
           itemBuilder: (context, index) {
             if (index == listController.pokemons.length) {
               return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: CircularProgressIndicator(),
-                ),
+                child: CircularProgressIndicator(),
               );
             }
+
             final pokemon = listController.pokemons[index];
             return PokemonGridItem(pokemon: pokemon);
           },

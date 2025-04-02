@@ -15,6 +15,11 @@ class PokemonDetailPage extends GetView<PokemonDetailController> {
 
   @override
   Widget build(BuildContext context) {
+    // Atualiza o Pokémon inicial se fornecido
+    if (initialPokemon != null && controller.pokemon.value == null) {
+      controller.updatePokemon(initialPokemon!);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Obx(() => Text(controller.pokemon.value?.name ?? '')),
@@ -97,8 +102,10 @@ class PokemonDetailPage extends GetView<PokemonDetailController> {
                       title: 'Pokemons with same type',
                       pokemons: controller.sameTypePokemons,
                       onPokemonTap: (pokemon) {
-                        controller.loadPokemon(pokemon.id);
-                        Get.to(() => const PokemonDetailPage());
+                        Get.offAndToNamed(
+                          '/pokemon-detail',
+                          arguments: pokemon,
+                        );
                       },
                     ),
                     const SizedBox(height: 16),
@@ -106,8 +113,10 @@ class PokemonDetailPage extends GetView<PokemonDetailController> {
                       title: 'Pokemons with same ability',
                       pokemons: controller.sameAbilityPokemons,
                       onPokemonTap: (pokemon) {
-                        controller.loadPokemon(pokemon.id);
-                        Get.to(() => const PokemonDetailPage());
+                        Get.offAndToNamed(
+                          '/pokemon-detail',
+                          arguments: pokemon,
+                        );
                       },
                     ),
                   ],

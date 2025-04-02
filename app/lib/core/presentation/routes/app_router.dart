@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile/core/config/di.dart';
 
 import '../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../features/pokemon_detail/domain/usecases/get_pokemon_by_id.dart';
+import '../../../features/pokemon_detail/domain/usecases/get_pokemons_by_ability.dart';
+import '../../../features/pokemon_detail/domain/usecases/get_pokemons_by_type.dart';
+import '../../../features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
 import '../../../features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
-import '../../../features/pokemon_list/domain/repositories/pokemon_repository.dart'
-    as pokemon_list;
 import '../../../features/pokemon_list/presentation/pages/pokemon_list_page.dart';
 import '../../presentation/pages/splash_page.dart';
 
@@ -22,14 +25,27 @@ class AppRouter {
         );
       case pokemonList:
         return GetPageRoute(
-          page: () => PokemonListPage(
-              repository: Get.find<pokemon_list.PokemonRepository>()),
+          page: () => PokemonListPage(),
           settings: settings,
         );
       case pokemonDetail:
         // Verifica se o argumento é do tipo esperado
         final arguments = settings.arguments;
         if (arguments is PokemonEntity) {
+          // Remove o controller antigo se existir
+          if (Get.isRegistered<PokemonDetailController>()) {
+            Get.delete<PokemonDetailController>();
+          }
+
+          // Registra um novo controller com as dependências necessárias
+          Get.put(
+            PokemonDetailController(
+              getPokemonById: getIt<GetPokemonById>(),
+              getPokemonsByType: getIt<GetPokemonsByType>(),
+              getPokemonsByAbility: getIt<GetPokemonsByAbility>(),
+            ),
+          );
+
           return GetPageRoute(
             page: () => PokemonDetailPage(initialPokemon: arguments),
             settings: settings,
