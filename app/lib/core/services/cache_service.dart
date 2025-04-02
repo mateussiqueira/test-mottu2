@@ -41,4 +41,17 @@ class CacheService {
     await preferences.remove(_pokemonsKey);
     await preferences.remove(_pokemonsTimestampKey);
   }
+
+  Future<void> clearCache() async {
+    final keys = preferences.getKeys();
+    for (final key in keys) {
+      if (key.startsWith('pokemon_') || key.startsWith('pokemons_')) {
+        await preferences.remove(key);
+      }
+    }
+  }
+
+  Future<void> clearAll() async {
+    await preferences.clear();
+  }
 }
