@@ -192,8 +192,21 @@ class PokemonListController extends GetxController
   }
 
   @override
-  Future<void> search(String query) async {
+  void search(String query) {
     state.searchQuery.value = query;
+    if (query.isEmpty) {
+      state.searchResults.clear();
+      return;
+    }
+
+    state.isLoading.value = true;
+    final filteredPokemons = state.pokemons.where((pokemon) {
+      final name = pokemon.name.toLowerCase();
+      final searchQuery = query.toLowerCase();
+      return name.contains(searchQuery);
+    }).toList();
+    state.searchResults.assignAll(filteredPokemons);
+    state.isLoading.value = false;
   }
 
   @override
@@ -254,6 +267,7 @@ class PokemonListController extends GetxController
   @override
   void clearSearch() {
     state.searchQuery.value = '';
+    state.searchResults.clear();
   }
 
   @override

@@ -1,34 +1,41 @@
 import 'package:get/get.dart';
 
-import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 
 /// State class for PokemonListController
 class PokemonListState {
-  final RxList<IPokemonEntity> pokemons = <IPokemonEntity>[].obs;
-  final RxBool isLoadingMore = false.obs;
-  final RxInt currentPage = 0.obs;
-  final RxBool hasMore = true.obs;
-  final RxString searchQuery = ''.obs;
-  final RxString filterType = ''.obs;
-  final RxString filterAbility = ''.obs;
+  static const int limit = 10;
 
-  static const int limit = 20;
+  final pokemons = RxList<PokemonEntity>([]);
+  final searchResults = RxList<PokemonEntity>([]);
+  final isLoading = RxBool(false);
+  final isLoadingMore = RxBool(false);
+  final hasMore = RxBool(true);
+  final error = RxnString();
+  final searchQuery = RxString('');
+  final offset = RxInt(0);
+  final filterAbility = RxString('');
+  final filterType = RxString('');
 
   void reset() {
     pokemons.clear();
-    currentPage.value = 0;
+    searchResults.clear();
+    isLoading.value = false;
+    isLoadingMore.value = false;
     hasMore.value = true;
+    error.value = null;
     searchQuery.value = '';
+    offset.value = 0;
     filterType.value = '';
     filterAbility.value = '';
   }
 
-  void updatePokemons(List<IPokemonEntity> newPokemons) {
+  void updatePokemons(List<PokemonEntity> newPokemons) {
     pokemons.value = newPokemons;
     hasMore.value = newPokemons.length >= limit;
   }
 
-  void addPokemons(List<IPokemonEntity> newPokemons) {
+  void addPokemons(List<PokemonEntity> newPokemons) {
     pokemons.addAll(newPokemons);
     hasMore.value = newPokemons.length >= limit;
   }
