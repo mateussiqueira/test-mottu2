@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_list/presentation/widgets/pokemon_card.dart';
+
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../../features/pokemon_list/presentation/widgets/pokemon_card.dart';
 
 class RelatedPokemons extends StatelessWidget {
   final String title;
@@ -38,11 +39,9 @@ class RelatedPokemons extends StatelessWidget {
               final pokemon = pokemons[index];
               return Padding(
                 padding: const EdgeInsets.only(right: 16.0),
-                child: GestureDetector(
+                child: PokemonCard(
+                  pokemon: pokemon,
                   onTap: () => onPokemonTap(pokemon),
-                  child: PokemonCard(
-                    pokemon: pokemon,
-                  ),
                 ),
               );
             },

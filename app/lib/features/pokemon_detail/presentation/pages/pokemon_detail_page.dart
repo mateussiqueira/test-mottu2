@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../controllers/i_pokemon_detail_controller.dart';
 import '../widgets/pokemon_detail_header.dart';
 import '../widgets/pokemon_info_card.dart';
@@ -11,7 +11,7 @@ import '../widgets/pokemon_type_ability_section.dart';
 
 /// Page that displays detailed information about a Pokemon
 class PokemonDetailPage extends StatelessWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntity pokemon;
   final bool fromSearch;
 
   const PokemonDetailPage({
@@ -27,7 +27,7 @@ class PokemonDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<IPokemonDetailController>();
-    final mainType = pokemon.types.first;
+    final mainType = pokemon.types.isEmpty ? 'normal' : pokemon.types.first;
     final mainColor = _getTypeColor(mainType);
 
     return Scaffold(
@@ -106,7 +106,7 @@ class PokemonDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Height, weight and base experience
+                          // Height and weight
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -119,12 +119,6 @@ class PokemonDetailPage extends StatelessWidget {
                                 title: 'Weight',
                                 value: '${pokemon.weight}kg',
                                 icon: Icons.monitor_weight,
-                              ),
-                              PokemonInfoCard(
-                                title: 'Base XP',
-                                value:
-                                    pokemon.baseExperience?.toString() ?? 'N/A',
-                                icon: Icons.star,
                               ),
                             ],
                           ),

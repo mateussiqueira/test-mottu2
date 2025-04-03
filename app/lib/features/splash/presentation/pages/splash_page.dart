@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile/features/pokemon_list/presentation/pages/pokemon_list_page.dart';
+
+import '../../../../core/constants/app_routes.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -32,7 +33,7 @@ class _SplashPageState extends State<SplashPage>
     _controller.forward();
 
     Future.delayed(const Duration(seconds: 3), () {
-      Get.off(() => PokemonListPage());
+      Get.offNamed(AppRoutes.pokemonList);
     });
   }
 
