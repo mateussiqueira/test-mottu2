@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,8 +12,15 @@ import 'i_pokemon_search_delegate.dart';
 class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
     implements IPokemonSearchDelegate {
   final IPokemonSearchController controller;
+  Timer? _debounce;
 
   PokemonSearchDelegate(this.controller);
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
 
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
@@ -80,12 +89,6 @@ class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
   }
 
   @override
-  Widget buildResults(BuildContext context) {
-    controller.search(query);
-    return _buildSearchResults();
-  }
-
-  @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
       return const Center(
@@ -93,15 +96,51 @@ class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
       );
     }
 
-    controller.search(query);
+    // Perform search on every keystroke
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.search(query);
+    });
+
     return _buildSearchResults();
   }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return _buildSearchResults();
+  }
+
+  @override
+  String get searchFieldLabel => 'Search Pokemon by name or type';
+
+  @override
+  TextInputType get keyboardType => TextInputType.text;
+
+  @override
+  TextStyle get searchFieldStyle => const TextStyle(
+        fontSize: 16,
+        color: Colors.black,
+      );
+
+  @override
+  InputDecorationTheme get searchFieldDecorationTheme =>
+      const InputDecorationTheme(
+        hintStyle: TextStyle(color: Colors.grey),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      );
 
   Widget _buildSearchResults() {
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(
-          child: CircularProgressIndicator(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Searching...'),
+            ],
+          ),
         );
       }
 

@@ -16,6 +16,7 @@ class PokemonSearchIsolate {
   static Future<List<PokemonEntity>> searchPokemons(String query) async {
     final startTime = DateTime.now();
     try {
+      // First, get all Pokemon names that match the query
       final response = await http.get(
         Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=1118'),
       );
@@ -23,18 +24,26 @@ class PokemonSearchIsolate {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final results = data['results'] as List;
-        final pokemons = <PokemonEntity>[];
 
-        for (final result in results) {
-          if (result['name']
-              .toString()
-              .toLowerCase()
-              .contains(query.toLowerCase())) {
+        // Filter results based on query
+        final matchingPokemons = results.where((result) {
+          final name = result['name'].toString().toLowerCase();
+          return name.contains(query.toLowerCase());
+        }).toList();
+
+        // Get details for matching Pokemons in parallel
+        final pokemons = <PokemonEntity>[];
+        await Future.wait(
+          matchingPokemons.map((result) async {
             final id = int.parse(result['url'].split('/')[6]);
-            final pokemon = await _getPokemonById(id);
-            pokemons.add(pokemon);
-          }
-        }
+            try {
+              final pokemon = await _getPokemonById(id);
+              pokemons.add(pokemon);
+            } catch (e) {
+              _logger.error('Error loading Pokemon details', e);
+            }
+          }),
+        );
 
         _performanceMonitor.end('searchPokemons');
         return pokemons;

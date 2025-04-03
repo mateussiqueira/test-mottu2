@@ -7,16 +7,16 @@ import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 class PokemonListState {
   static const int limit = AppConstants.pokemonPerPage;
 
-  final pokemons = RxList<PokemonEntity>([]);
-  final searchResults = RxList<PokemonEntity>([]);
-  final isLoading = RxBool(false);
-  final isLoadingMore = RxBool(false);
-  final hasMore = RxBool(true);
-  final error = RxnString();
-  final searchQuery = RxString('');
-  final offset = RxInt(0);
-  final filterAbility = RxString('');
-  final filterType = RxString('');
+  final RxList<PokemonEntity> pokemons = <PokemonEntity>[].obs;
+  final RxList<PokemonEntity> searchResults = <PokemonEntity>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasMore = true.obs;
+  final RxString error = ''.obs;
+  final RxString searchQuery = ''.obs;
+  final RxInt offset = 0.obs;
+  final RxString filterType = ''.obs;
+  final RxString filterAbility = ''.obs;
 
   void reset() {
     pokemons.clear();
@@ -24,7 +24,7 @@ class PokemonListState {
     isLoading.value = false;
     isLoadingMore.value = false;
     hasMore.value = true;
-    error.value = null;
+    error.value = '';
     searchQuery.value = '';
     offset.value = 0;
     filterType.value = '';

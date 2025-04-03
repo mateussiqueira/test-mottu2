@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/constants/app_colors.dart';
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import 'package:get/get.dart';
+import 'package:pokemon_list/features/pokemon_list/domain/entities/pokemon_entity.dart';
 
 /// Widget for displaying a Pokemon card
 class PokemonCard extends StatelessWidget {
@@ -14,85 +13,186 @@ class PokemonCard extends StatelessWidget {
     required this.onTap,
   }) : super(key: key);
 
-  Color _getTypeColor() {
-    if (pokemon.types.isEmpty) return AppColors.typeColors['normal']!;
-    return AppColors.typeColors[pokemon.types.first.toLowerCase()]!;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: _getTypeColor().withOpacity(0.8),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: _getTypeColor().withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Hero(
-              tag: 'pokemon_image_${pokemon.id}',
-              child: Image.network(
-                pokemon.imageUrl,
-                height: 100,
-                width: 100,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '#${pokemon.id.toString().padLeft(3, '0')}',
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              pokemon.name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: pokemon.types.map((type) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Image.network(
+                    pokemon.imageUrl,
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.contain,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    type,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          pokemon.name.capitalizeFirst!,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          children: pokemon.types
+                              .map((type) => Chip(
+                                    label: Text(type.capitalizeFirst!),
+                                    backgroundColor: _getTypeColor(type),
+                                  ))
+                              .toList(),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (pokemon.typeRelations.value != null) ...[
+                Text(
+                  'Type Relations:',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                _buildTypeRelations(context),
+              ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildTypeRelations(BuildContext context) {
+    final relations = pokemon.typeRelations.value!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (relations.doubleDamageTo.isNotEmpty) ...[
+          const Text('Double Damage To:'),
+          Wrap(
+            spacing: 8,
+            children: relations.doubleDamageTo
+                .map((type) => Chip(
+                      label: Text(type.capitalizeFirst!),
+                      backgroundColor: _getTypeColor(type),
+                    ))
+                .toList(),
+          ),
+        ],
+        if (relations.doubleDamageFrom.isNotEmpty) ...[
+          const Text('Double Damage From:'),
+          Wrap(
+            spacing: 8,
+            children: relations.doubleDamageFrom
+                .map((type) => Chip(
+                      label: Text(type.capitalizeFirst!),
+                      backgroundColor: _getTypeColor(type),
+                    ))
+                .toList(),
+          ),
+        ],
+        if (relations.halfDamageTo.isNotEmpty) ...[
+          const Text('Half Damage To:'),
+          Wrap(
+            spacing: 8,
+            children: relations.halfDamageTo
+                .map((type) => Chip(
+                      label: Text(type.capitalizeFirst!),
+                      backgroundColor: _getTypeColor(type),
+                    ))
+                .toList(),
+          ),
+        ],
+        if (relations.halfDamageFrom.isNotEmpty) ...[
+          const Text('Half Damage From:'),
+          Wrap(
+            spacing: 8,
+            children: relations.halfDamageFrom
+                .map((type) => Chip(
+                      label: Text(type.capitalizeFirst!),
+                      backgroundColor: _getTypeColor(type),
+                    ))
+                .toList(),
+          ),
+        ],
+        if (relations.noDamageTo.isNotEmpty) ...[
+          const Text('No Damage To:'),
+          Wrap(
+            spacing: 8,
+            children: relations.noDamageTo
+                .map((type) => Chip(
+                      label: Text(type.capitalizeFirst!),
+                      backgroundColor: _getTypeColor(type),
+                    ))
+                .toList(),
+          ),
+        ],
+        if (relations.noDamageFrom.isNotEmpty) ...[
+          const Text('No Damage From:'),
+          Wrap(
+            spacing: 8,
+            children: relations.noDamageFrom
+                .map((type) => Chip(
+                      label: Text(type.capitalizeFirst!),
+                      backgroundColor: _getTypeColor(type),
+                    ))
+                .toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Color _getTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'normal':
+        return Colors.grey;
+      case 'fire':
+        return Colors.red;
+      case 'water':
+        return Colors.blue;
+      case 'electric':
+        return Colors.yellow;
+      case 'grass':
+        return Colors.green;
+      case 'ice':
+        return Colors.lightBlue;
+      case 'fighting':
+        return Colors.orange;
+      case 'poison':
+        return Colors.purple;
+      case 'ground':
+        return Colors.brown;
+      case 'flying':
+        return Colors.lightBlueAccent;
+      case 'psychic':
+        return Colors.pink;
+      case 'bug':
+        return Colors.lightGreen;
+      case 'rock':
+        return Colors.brown.shade300;
+      case 'ghost':
+        return Colors.purple.shade300;
+      case 'dragon':
+        return Colors.indigo;
+      case 'dark':
+        return Colors.black54;
+      case 'steel':
+        return Colors.grey.shade400;
+      case 'fairy':
+        return Colors.pink.shade200;
+      default:
+        return Colors.grey;
+    }
   }
 }

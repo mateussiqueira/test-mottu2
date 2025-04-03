@@ -1,8 +1,8 @@
-name: pokeapi
-description: A new Flutter project.
+name: pokemon_list
+description: A Flutter application for browsing Pokémon with infinite scroll and caching.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: "none" # Remove this line if you wish to publish to pub.dev
+publish_to: "none"
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.1.0
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -38,9 +38,10 @@ dependencies:
   shared_preferences: ^2.2.2
   shimmer: ^3.0.0
   intl: ^0.19.0
+  json_annotation: ^4.8.1
 
   # State Management
-  get_it: ^7.6.7
+  get_it: ^7.7.0
 
   # Utils
   equatable: ^2.0.5
@@ -54,7 +55,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   dartz: ^0.10.1
 
-  dio: ^5.0.0
+  dio: ^5.4.0
 
   flutter_riverpod: ^2.0.0
 
@@ -71,7 +72,7 @@ dev_dependencies:
 
   mockito: ^5.4.4
 
-  build_runner: ^2.4.8
+  build_runner: ^2.4.6
 
   json_serializable: ^6.7.1
 

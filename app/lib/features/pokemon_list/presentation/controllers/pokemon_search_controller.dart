@@ -42,10 +42,6 @@ class PokemonSearchController extends GetxController
       return;
     }
 
-    if (query == lastQuery.value) {
-      return;
-    }
-
     lastQuery.value = query;
     isLoading.value = true;
     _error.value = '';
@@ -65,7 +61,22 @@ class PokemonSearchController extends GetxController
       isolate.kill();
 
       if (result is List<PokemonEntity>) {
-        searchResults.value = result;
+        // Filter results based on query
+        final filteredResults = result.where((pokemon) {
+          final name = pokemon.name.toLowerCase();
+          final searchQuery = query.toLowerCase();
+
+          // Check if name contains the query
+          if (name.contains(searchQuery)) {
+            return true;
+          }
+
+          // Check if any type matches the query
+          return pokemon.types
+              .any((type) => type.toLowerCase().contains(searchQuery));
+        }).toList();
+
+        searchResults.value = filteredResults;
       } else if (result is Exception) {
         _error.value = result.toString();
         _logger.error('Error searching Pokemon', result);
