@@ -9,11 +9,12 @@ import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import '../../../pokemon/domain/usecases/i_get_pokemon_list.dart';
 import '../../../pokemon/domain/usecases/i_search_pokemon.dart';
 import 'i_pokemon_list_controller.dart';
+import 'i_pokemon_search_controller.dart';
 import 'pokemon_list_state.dart';
 
 /// Controller for managing the Pokemon list page
 class PokemonListController extends GetxController
-    implements IPokemonListController {
+    implements IPokemonListController, IPokemonSearchController {
   final IGetPokemonList getPokemonList;
   final ISearchPokemon searchPokemon;
   final IPokemonRepository repository;
@@ -21,7 +22,6 @@ class PokemonListController extends GetxController
   final IPerformanceMonitor _performanceMonitor;
   @override
   final PokemonListState state = PokemonListState();
-  Worker? _searchWorker;
 
   PokemonListController({
     required this.getPokemonList,
@@ -35,23 +35,23 @@ class PokemonListController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    _setupSearchWorker();
     fetchPokemonList();
   }
 
   @override
-  void onClose() {
-    _searchWorker?.dispose();
-    super.onClose();
-  }
+  RxList<PokemonEntity> get searchResults => state.pokemons;
 
-  void _setupSearchWorker() {
-    _searchWorker = debounce(
-      state.searchQuery,
-      (String query) => _performSearch(query),
-      time: const Duration(milliseconds: 500),
-    );
-  }
+  @override
+  RxString get lastQuery => state.searchQuery;
+
+  @override
+  RxBool get isLoading => state.isLoading;
+
+  @override
+  String? get error => state.error.value;
+
+  @override
+  bool get hasError => state.error.value != null;
 
   Future<void> _performSearch(String query) async {
     if (query.isEmpty) {
@@ -98,9 +98,6 @@ class PokemonListController extends GetxController
   bool get isLoadingMore => state.isLoadingMore.value;
 
   @override
-  bool get isLoading => state.isLoading.value;
-
-  @override
   int get currentPage => state.offset.value ~/ PokemonListState.limit;
 
   @override
@@ -116,14 +113,8 @@ class PokemonListController extends GetxController
   String get filterAbility => state.filterAbility.value;
 
   @override
-  bool get hasError => error != null;
-
-  @override
-  String? get error => state.error.value;
-
-  @override
   void clearError() {
-    state.error.value = null;
+    state.error.value = '';
   }
 
   @override
@@ -246,23 +237,26 @@ class PokemonListController extends GetxController
   }
 
   @override
-  void search(String query) {
+  Future<void> search(String query) async {
     state.searchQuery.value = query;
-    if (query.isEmpty) {
-      state.searchResults.clear();
-      return;
-    }
+    await _performSearch(query);
+  }
 
-    state.isLoading.value = true;
-    final filteredPokemons = state.pokemons.where((pokemon) {
-      final name = pokemon.name.toLowerCase();
-      final searchQuery = query.toLowerCase();
-      return name.contains(searchQuery);
-    }).toList();
+  @override
+  void clearSearch() {
+    state.searchQuery.value = '';
+    fetchPokemonList();
+  }
 
-    state.searchResults.clear();
-    state.searchResults.addAll(filteredPokemons);
-    state.isLoading.value = false;
+  @override
+  void navigateToDetail(PokemonEntity pokemon) {
+    Get.toNamed(
+      RouteNames.pokemonDetail,
+      arguments: {
+        'pokemon': pokemon,
+        'fromSearch': true,
+      },
+    );
   }
 
   @override
@@ -352,22 +346,5 @@ class PokemonListController extends GetxController
     state.filterType.value = '';
     state.filterAbility.value = '';
     fetchPokemonList();
-  }
-
-  @override
-  void clearSearch() {
-    state.searchQuery.value = '';
-    state.searchResults.clear();
-  }
-
-  @override
-  void navigateToDetail(PokemonEntity pokemon) {
-    Get.toNamed(
-      '${RouteNames.pokemonDetail}/${pokemon.id}',
-      arguments: {
-        'pokemon': pokemon,
-        'fromSearch': state.searchQuery.isNotEmpty,
-      },
-    );
   }
 }

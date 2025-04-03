@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../controllers/pokemon_list_controller.dart';
 import '../widgets/pokemon_grid_item.dart';
+import '../widgets/pokemon_search_delegate.dart';
 
 /// Page for displaying related Pokemon
 class RelatedPokemonsPage extends StatelessWidget {
@@ -18,6 +20,8 @@ class RelatedPokemonsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<PokemonListController>();
+
     return Scaffold(
       backgroundColor: Colors.red,
       appBar: AppBar(
@@ -31,6 +35,17 @@ class RelatedPokemonsPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: PokemonSearchDelegate(controller),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -40,20 +55,25 @@ class RelatedPokemonsPage extends StatelessWidget {
             topRight: Radius.circular(30),
           ),
         ),
-        child: GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: pokemons.length,
-          itemBuilder: (context, index) {
-            final pokemon = pokemons[index];
-            return PokemonGridItem(pokemon: pokemon);
-          },
-        ),
+        child: Obx(() {
+          final displayPokemons =
+              controller.searchQuery.isEmpty ? pokemons : controller.pokemons;
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.75,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: displayPokemons.length,
+            itemBuilder: (context, index) {
+              final pokemon = displayPokemons[index];
+              return PokemonGridItem(pokemon: pokemon);
+            },
+          );
+        }),
       ),
     );
   }

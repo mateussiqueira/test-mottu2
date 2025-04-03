@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,7 +10,6 @@ import 'i_pokemon_search_delegate.dart';
 class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
     implements IPokemonSearchDelegate {
   final IPokemonSearchController controller;
-  final _debouncer = Debouncer(milliseconds: 500);
 
   PokemonSearchDelegate(this.controller);
 
@@ -84,9 +81,7 @@ class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
 
   @override
   Widget buildResults(BuildContext context) {
-    if (query.isNotEmpty) {
-      _debouncer.run(() => controller.search(query));
-    }
+    controller.search(query);
     return _buildSearchResults();
   }
 
@@ -98,7 +93,7 @@ class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
       );
     }
 
-    _debouncer.run(() => controller.search(query));
+    controller.search(query);
     return _buildSearchResults();
   }
 
@@ -110,10 +105,11 @@ class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
         );
       }
 
-      if (controller.error.isNotEmpty) {
+      final error = controller.error;
+      if (error != null && error.isNotEmpty) {
         return Center(
           child: Text(
-            controller.error.value,
+            error,
             style: const TextStyle(color: Colors.red),
           ),
         );
@@ -144,27 +140,5 @@ class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
   @override
   void navigateToDetail(PokemonEntity pokemon) {
     controller.navigateToDetail(pokemon);
-  }
-
-  @override
-  void dispose() {
-    _debouncer.dispose();
-    super.dispose();
-  }
-}
-
-class Debouncer {
-  final int milliseconds;
-  Timer? _timer;
-
-  Debouncer({required this.milliseconds});
-
-  void run(VoidCallback action) {
-    _timer?.cancel();
-    _timer = Timer(Duration(milliseconds: milliseconds), action);
-  }
-
-  void dispose() {
-    _timer?.cancel();
   }
 }

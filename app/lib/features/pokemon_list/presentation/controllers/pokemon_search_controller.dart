@@ -20,10 +20,12 @@ class PokemonSearchController extends GetxController
   final RxList<PokemonEntity> searchResults = <PokemonEntity>[].obs;
   @override
   final RxBool isLoading = false.obs;
-  @override
-  final RxString error = ''.obs;
+  final RxString _error = ''.obs;
   @override
   final RxString lastQuery = ''.obs;
+
+  @override
+  String? get error => _error.value.isEmpty ? null : _error.value;
 
   PokemonSearchController({
     required ErrorHandler errorHandler,
@@ -46,7 +48,7 @@ class PokemonSearchController extends GetxController
 
     lastQuery.value = query;
     isLoading.value = true;
-    error.value = '';
+    _error.value = '';
 
     try {
       final receivePort = ReceivePort();
@@ -65,11 +67,11 @@ class PokemonSearchController extends GetxController
       if (result is List<PokemonEntity>) {
         searchResults.value = result;
       } else if (result is Exception) {
-        error.value = result.toString();
+        _error.value = result.toString();
         _logger.error('Error searching Pokemon', result);
       }
     } catch (e, stackTrace) {
-      error.value = e.toString();
+      _error.value = e.toString();
       _logger.error('Error searching Pokemon', e, stackTrace);
     } finally {
       isLoading.value = false;
@@ -80,7 +82,7 @@ class PokemonSearchController extends GetxController
   void clearSearch() {
     searchResults.clear();
     lastQuery.value = '';
-    error.value = '';
+    _error.value = '';
   }
 
   @override
