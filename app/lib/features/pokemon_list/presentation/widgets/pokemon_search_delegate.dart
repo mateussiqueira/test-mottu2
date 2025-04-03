@@ -3,13 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../controllers/i_pokemon_search_controller.dart';
+import '../widgets/pokemon_card.dart';
 import 'i_pokemon_search_delegate.dart';
 
 /// Implementation of Pokemon search delegate
-class PokemonSearchDelegate extends IPokemonSearchDelegate {
+class PokemonSearchDelegate extends SearchDelegate<PokemonEntity?>
+    implements IPokemonSearchDelegate {
+  final IPokemonSearchController controller;
   final _debouncer = Debouncer(milliseconds: 500);
 
-  PokemonSearchDelegate(super.controller);
+  PokemonSearchDelegate(this.controller);
 
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
@@ -79,86 +84,44 @@ class PokemonSearchDelegate extends IPokemonSearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
+    if (query.isNotEmpty) {
+      _debouncer.run(() => controller.search(query));
+    }
     return _buildSearchResults();
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    _debouncer.run(() {
-      if (query.isNotEmpty) {
-        controller.search(query);
-      }
-    });
+    if (query.isEmpty) {
+      return const Center(
+        child: Text('Start typing to search Pokemon'),
+      );
+    }
+
+    _debouncer.run(() => controller.search(query));
     return _buildSearchResults();
   }
 
   Widget _buildSearchResults() {
     return Obx(() {
-      if (controller.isLoading) {
+      if (controller.isLoading.value) {
         return const Center(
           child: CircularProgressIndicator(),
         );
       }
 
-      if (controller.error?.isNotEmpty ?? false) {
+      if (controller.error.isNotEmpty) {
         return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-              const SizedBox(height: 16),
-              Text(
-                controller.error ?? 'Unknown error',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      }
-
-      if (query.isEmpty) {
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.search,
-                size: 64,
-                color: Colors.grey,
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Type to search for Pokemon',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-              ),
-            ],
+          child: Text(
+            controller.error.value,
+            style: const TextStyle(color: Colors.red),
           ),
         );
       }
 
       if (controller.searchResults.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              Text(
-                'No Pokemon found',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
+        return const Center(
+          child: Text('No Pokemon found'),
         );
       }
 
@@ -166,75 +129,21 @@ class PokemonSearchDelegate extends IPokemonSearchDelegate {
         itemCount: controller.searchResults.length,
         itemBuilder: (context, index) {
           final pokemon = controller.searchResults[index];
-          final primaryType =
-              pokemon.types.isNotEmpty ? pokemon.types.first : 'normal';
-          final typeColor = _getTypeColor(primaryType);
-
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            elevation: 2,
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(8),
-              leading: Container(
-                width: 60,
-                height: 60,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: typeColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Image.network(
-                  pokemon.imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.error),
-                ),
-              ),
-              title: Text(
-                pokemon.name.toUpperCase(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: typeColor,
-                ),
-              ),
-              subtitle: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: typeColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      primaryType.toUpperCase(),
-                      style: TextStyle(
-                        color: typeColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '#${pokemon.id.toString().padLeft(3, '0')}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              onTap: () {
-                controller.navigateToDetail(pokemon);
-                close(context, pokemon);
-              },
-            ),
+          return PokemonCard(
+            pokemon: pokemon,
+            onTap: () {
+              controller.navigateToDetail(pokemon);
+              close(context, pokemon);
+            },
           );
         },
       );
     });
+  }
+
+  @override
+  void navigateToDetail(PokemonEntity pokemon) {
+    controller.navigateToDetail(pokemon);
   }
 
   @override

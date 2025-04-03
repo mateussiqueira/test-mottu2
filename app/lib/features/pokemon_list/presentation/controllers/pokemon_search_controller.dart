@@ -1,38 +1,37 @@
+import 'dart:isolate';
+
 import 'package:get/get.dart';
 
 import '../../../../core/constants/route_names.dart';
 import '../../../../core/domain/errors/error_handler.dart';
-import '../../../../core/domain/errors/failure.dart';
-import '../../../../core/domain/errors/logger.dart';
+import '../../../../core/domain/errors/i_logger.dart';
 import '../../../../core/domain/errors/performance_monitor.dart';
-import '../../../../core/domain/errors/result.dart';
-import '../../domain/entities/i_pokemon_entity.dart';
-import '../../domain/repositories/i_pokemon_repository.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 import '../services/pokemon_search_isolate.dart';
 import 'i_pokemon_search_controller.dart';
 
 class PokemonSearchController extends GetxController
     implements IPokemonSearchController {
-  final IPokemonRepository _repository;
+  final ErrorHandler _errorHandler;
+  final PerformanceMonitor _performanceMonitor;
   final ILogger _logger;
-  final IPerformanceMonitor _performanceMonitor;
-  final IErrorHandler _errorHandler;
-  final RxList<IPokemonEntity> _searchResults = <IPokemonEntity>[].obs;
-  String _lastQuery = '';
-  bool _isSearching = false;
-
-  PokemonSearchController({
-    required IPokemonRepository repository,
-    required ILogger logger,
-    required IPerformanceMonitor performanceMonitor,
-    required IErrorHandler errorHandler,
-  })  : _repository = repository,
-        _logger = logger,
-        _performanceMonitor = performanceMonitor,
-        _errorHandler = errorHandler;
 
   @override
-  RxList<IPokemonEntity> get searchResults => _searchResults;
+  final RxList<PokemonEntity> searchResults = <PokemonEntity>[].obs;
+  @override
+  final RxBool isLoading = false.obs;
+  @override
+  final RxString error = ''.obs;
+  @override
+  final RxString lastQuery = ''.obs;
+
+  PokemonSearchController({
+    required ErrorHandler errorHandler,
+    required PerformanceMonitor performanceMonitor,
+    required ILogger logger,
+  })  : _errorHandler = errorHandler,
+        _performanceMonitor = performanceMonitor,
+        _logger = logger;
 
   @override
   Future<void> search(String query) async {
@@ -41,60 +40,63 @@ class PokemonSearchController extends GetxController
       return;
     }
 
-    if (query == _lastQuery || _isSearching) return;
+    if (query == lastQuery.value) {
+      return;
+    }
 
-    _isSearching = true;
-    _lastQuery = query;
+    lastQuery.value = query;
+    isLoading.value = true;
+    error.value = '';
 
     try {
-      _logger.info('Searching Pokemon', data: {'query': query});
-      _performanceMonitor.startOperation('search_pokemon');
+      final receivePort = ReceivePort();
+      final isolate = await Isolate.spawn(
+        PokemonSearchIsolate.searchInIsolate,
+        receivePort.sendPort,
+      );
 
-      final results =
-          await PokemonSearchIsolate.searchPokemons(query, _repository);
+      final isolateSendPort = await receivePort.first as SendPort;
+      isolateSendPort.send(query);
 
-      if (query == _lastQuery) {
-        _searchResults.value = results;
-        _logger.info(
-          'Successfully searched Pokemon',
-          data: {'query': query, 'count': _searchResults.length},
-        );
+      final result = await receivePort.first;
+      receivePort.close();
+      isolate.kill();
+
+      if (result is List<PokemonEntity>) {
+        searchResults.value = result;
+      } else if (result is Exception) {
+        error.value = result.toString();
+        _logger.error('Error searching Pokemon', result);
       }
     } catch (e, stackTrace) {
-      if (query == _lastQuery) {
-        final failure = _errorHandler.handleError(e);
-        _logger.error(
-          'Error searching Pokemon',
-          error: failure,
-          stackTrace: stackTrace,
-        );
-        _searchResults.clear();
-      }
+      error.value = e.toString();
+      _logger.error('Error searching Pokemon', e, stackTrace);
     } finally {
-      if (query == _lastQuery) {
-        _performanceMonitor.endOperation('search_pokemon');
-        _isSearching = false;
-      }
+      isLoading.value = false;
     }
   }
 
   @override
   void clearSearch() {
-    _searchResults.clear();
-    _lastQuery = '';
+    searchResults.clear();
+    lastQuery.value = '';
+    error.value = '';
   }
 
   @override
-  void navigateToDetail(IPokemonEntity pokemon) {
+  void navigateToDetail(PokemonEntity pokemon) {
     Get.toNamed(
       RouteNames.pokemonDetail,
-      arguments: pokemon,
+      arguments: {
+        'pokemon': pokemon,
+        'fromSearch': true,
+      },
     );
   }
 
   @override
   void onClose() {
-    _searchResults.close();
+    searchResults.close();
     super.onClose();
   }
 }

@@ -8,22 +8,50 @@ class PokemonEntityImpl extends PokemonEntity {
     required super.abilities,
     required super.height,
     required super.weight,
-    required super.baseExperience,
     required super.imageUrl,
     required super.stats,
+    required super.moves,
+    required super.description,
   });
 
   factory PokemonEntityImpl.fromJson(Map<String, dynamic> json) {
+    final sprites = json['sprites'] as Map<String, dynamic>;
+    final officialArtwork =
+        sprites['other']?['official-artwork'] as Map<String, dynamic>;
+    final imageUrl = officialArtwork['front_default'] as String? ?? '';
+
+    final types = (json['types'] as List)
+        .map((type) => (type['type']['name'] as String))
+        .toList();
+
+    final abilities = (json['abilities'] as List)
+        .map((ability) => (ability['ability']['name'] as String))
+        .toList();
+
+    final stats = Map<String, int>.fromEntries(
+      (json['stats'] as List).map(
+        (stat) => MapEntry(
+          stat['stat']['name'] as String,
+          stat['base_stat'] as int,
+        ),
+      ),
+    );
+
+    final moves = (json['moves'] as List)
+        .map((move) => (move['move']['name'] as String))
+        .toList();
+
     return PokemonEntityImpl(
       id: json['id'] as int,
-      name: json['name'] as String,
-      types: List<String>.from(json['types'] as List),
-      abilities: List<String>.from(json['abilities'] as List),
+      name: (json['name'] as String).replaceAll('-', ' '),
+      types: types,
+      abilities: abilities,
       height: json['height'] as int,
       weight: json['weight'] as int,
-      baseExperience: json['baseExperience'] as int? ?? 0,
-      imageUrl: json['imageUrl'] as String,
-      stats: Map<String, int>.from(json['stats'] as Map),
+      imageUrl: imageUrl,
+      stats: stats,
+      moves: moves,
+      description: '', // We need to fetch this separately
     );
   }
 
@@ -36,9 +64,10 @@ class PokemonEntityImpl extends PokemonEntity {
       'abilities': abilities,
       'height': height,
       'weight': weight,
-      'baseExperience': baseExperience,
       'imageUrl': imageUrl,
       'stats': stats,
+      'moves': moves,
+      'description': description,
     };
   }
 }

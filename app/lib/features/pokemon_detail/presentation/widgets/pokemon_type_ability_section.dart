@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../controllers/i_pokemon_detail_controller.dart';
 
 class PokemonTypeAbilitySection extends StatelessWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntity pokemon;
   final IPokemonDetailController controller;
 
   const PokemonTypeAbilitySection({

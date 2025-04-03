@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 
 class PokemonStatsSection extends StatelessWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntity pokemon;
   final Color mainColor;
 
   const PokemonStatsSection({

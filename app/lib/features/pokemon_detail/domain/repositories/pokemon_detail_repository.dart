@@ -1,7 +1,8 @@
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
 
 abstract class PokemonDetailRepository {
-  Future<PokemonEntity> getPokemonById(int id);
-  Future<List<PokemonEntity>> getPokemonsByType(String type);
-  Future<List<PokemonEntity>> getPokemonsByAbility(String ability);
+  Future<Result<IPokemonEntity>> getPokemonById(int id);
+  Future<Result<List<IPokemonEntity>>> getPokemonsByType(String type);
+  Future<Result<List<IPokemonEntity>>> getPokemonsByAbility(String ability);
 }

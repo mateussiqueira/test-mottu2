@@ -42,7 +42,7 @@ class PokeApiAdapter implements IPokeApiAdapter {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return PokemonModel.fromJson(data);
+      return PokemonModel.fromJson(data) as IPokemonEntity;
     } else {
       throw Exception('Failed to load pokemon');
     }
@@ -55,7 +55,7 @@ class PokeApiAdapter implements IPokeApiAdapter {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return PokemonModel.fromJson(data);
+      return PokemonModel.fromJson(data) as IPokemonEntity;
     } else {
       throw Exception('Failed to load pokemon');
     }

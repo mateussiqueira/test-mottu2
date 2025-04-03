@@ -4,7 +4,7 @@ import '../../../../core/constants/route_names.dart';
 import '../../../../core/logging/i_logger.dart';
 import '../../../../core/performance/i_performance_monitor.dart';
 import '../../../../core/state/base_state_controller.dart';
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import 'i_pokemon_detail_controller.dart';
 
@@ -12,9 +12,9 @@ import 'i_pokemon_detail_controller.dart';
 class PokemonDetailController extends BaseStateController
     implements IPokemonDetailController {
   final IPokemonRepository repository;
-  final _sameTypePokemons = <IPokemonEntity>[].obs;
-  final _sameAbilityPokemons = <IPokemonEntity>[].obs;
-  final _pokemon = Rx<IPokemonEntity?>(null);
+  final _sameTypePokemons = <PokemonEntity>[].obs;
+  final _sameAbilityPokemons = <PokemonEntity>[].obs;
+  final _pokemon = Rx<PokemonEntity?>(null);
 
   PokemonDetailController({
     required this.repository,
@@ -23,10 +23,10 @@ class PokemonDetailController extends BaseStateController
   }) : super(logger: logger, performanceMonitor: performanceMonitor);
 
   @override
-  IPokemonEntity? get pokemon => _pokemon.value;
+  PokemonEntity? get pokemon => _pokemon.value;
 
   @override
-  void setPokemon(IPokemonEntity pokemon) {
+  void setPokemon(PokemonEntity pokemon) {
     _pokemon.value = pokemon;
     // Load related Pokemon
     if (pokemon.types.isNotEmpty) {
@@ -38,10 +38,10 @@ class PokemonDetailController extends BaseStateController
   }
 
   @override
-  RxList<IPokemonEntity> get sameTypePokemons => _sameTypePokemons;
+  RxList<PokemonEntity> get sameTypePokemons => _sameTypePokemons;
 
   @override
-  RxList<IPokemonEntity> get sameAbilityPokemons => _sameAbilityPokemons;
+  RxList<PokemonEntity> get sameAbilityPokemons => _sameAbilityPokemons;
 
   @override
   Future<void> fetchPokemonsByType(String type) async {
@@ -56,7 +56,7 @@ class PokemonDetailController extends BaseStateController
           data: {'type': type, 'count': _sameTypePokemons.length},
         );
       } else {
-        setError(result.error ?? 'Failed to fetch Pokemon by type');
+        setError(result.error?.message ?? 'Failed to fetch Pokemon by type');
       }
     } catch (e, stackTrace) {
       logger.error('Error fetching Pokemon by type',
@@ -80,7 +80,7 @@ class PokemonDetailController extends BaseStateController
           data: {'ability': ability, 'count': _sameAbilityPokemons.length},
         );
       } else {
-        setError(result.error ?? 'Failed to fetch Pokemon by ability');
+        setError(result.error?.message ?? 'Failed to fetch Pokemon by ability');
       }
     } catch (e, stackTrace) {
       logger.error('Error fetching Pokemon by ability',
@@ -92,7 +92,7 @@ class PokemonDetailController extends BaseStateController
   }
 
   @override
-  void navigateToRelatedPokemons(List<IPokemonEntity> pokemons, String title) {
+  void navigateToRelatedPokemons(List<PokemonEntity> pokemons, String title) {
     Get.toNamed(
       RouteNames.pokemonType,
       arguments: {

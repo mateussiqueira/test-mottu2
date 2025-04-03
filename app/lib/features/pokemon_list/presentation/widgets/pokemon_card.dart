@@ -1,110 +1,94 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 
 /// Widget for displaying a Pokemon card
 class PokemonCard extends StatelessWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntity pokemon;
+  final VoidCallback onTap;
 
-  const PokemonCard({super.key, required this.pokemon});
+  const PokemonCard({
+    Key? key,
+    required this.pokemon,
+    required this.onTap,
+  }) : super(key: key);
 
-  String get _imageUrl => pokemon.imageUrl;
-
-  List<String> get _types => pokemon.types;
+  Color _getTypeColor() {
+    if (pokemon.types.isEmpty) return AppColors.typeColors['normal']!;
+    return AppColors.typeColors[pokemon.types.first.toLowerCase()]!;
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Get.toNamed(
-          '/pokemon-detail',
-          arguments: {
-            'pokemon': pokemon,
-            'fromSearch': false,
-          },
-        );
-      },
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _getTypeColor().withOpacity(0.8),
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: _getTypeColor().withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: _imageUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: _imageUrl,
-                            fit: BoxFit.contain,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
-                          )
-                        : const Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              size: 48,
-                              color: Colors.grey,
-                            ),
-                          ),
-                  ),
-                  if (_types.isNotEmpty)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _types.first.toUpperCase(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+            Hero(
+              tag: 'pokemon_image_${pokemon.id}',
+              child: Image.network(
+                pokemon.imageUrl,
+                height: 100,
+                width: 100,
+                fit: BoxFit.contain,
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(16)),
+            const SizedBox(height: 8),
+            Text(
+              '#${pokemon.id.toString().padLeft(3, '0')}',
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    pokemon.name.toUpperCase(),
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '#${pokemon.id.toString().padLeft(3, '0')}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              pokemon.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: pokemon.types.map((type) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    type,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

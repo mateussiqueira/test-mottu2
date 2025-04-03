@@ -1,12 +1,11 @@
-import '../../domain/entities/i_pokemon_entity.dart';
-import '../../domain/entities/pokemon_entity_impl.dart';
+import '../../domain/entities/pokemon_entity.dart';
 import '../models/pokemon_model.dart';
 import '../validators/pokemon_response_validator.dart';
 
 /// Handles Pokemon data transformations
 class PokemonMapper {
   /// Maps a list of Pokemon data to Pokemon entities
-  static Future<List<IPokemonEntity>> mapToEntities(
+  static Future<List<PokemonEntity>> mapToEntities(
     List<dynamic> results,
     Future<Map<String, dynamic>> Function(String url) fetchDetails,
   ) async {
@@ -16,13 +15,13 @@ class PokemonMapper {
           throw Exception('Invalid pokemon data: missing url');
         }
         final response = await fetchDetails(pokemon['url']);
-        return PokemonModel.fromJson(response);
+        return PokemonModel.fromJson(response) as PokemonEntity;
       }),
     );
   }
 
   /// Maps a list of Pokemon data from type/ability responses to Pokemon entities
-  static Future<List<IPokemonEntity>> mapTypeResultsToEntities(
+  static Future<List<PokemonEntity>> mapTypeResultsToEntities(
     List<dynamic> results,
     Future<Map<String, dynamic>> Function(String url) fetchDetails,
   ) async {
@@ -32,7 +31,7 @@ class PokemonMapper {
           throw Exception('Invalid pokemon data: missing url');
         }
         final response = await fetchDetails(pokemon['pokemon']['url']);
-        return PokemonModel.fromJson(response);
+        return PokemonModel.fromJson(response) as PokemonEntity;
       }),
     );
   }
@@ -49,7 +48,7 @@ class PokemonMapper {
   }
 
   /// Converts JSON data to a Pokemon entity
-  static IPokemonEntity fromJson(Map<String, dynamic> json) {
+  static PokemonEntity fromJson(Map<String, dynamic> json) {
     final stats = <String, int>{};
     for (final stat in json['stats'] as List) {
       final name = stat['stat']['name'] as String;
@@ -57,7 +56,7 @@ class PokemonMapper {
       stats[name] = value;
     }
 
-    return PokemonEntityImpl(
+    return PokemonEntity(
       id: json['id'] as int,
       name: json['name'] as String,
       height: json['height'] as int,
@@ -69,12 +68,13 @@ class PokemonMapper {
           .map((ability) => ability['ability']['name'] as String)
           .toList(),
       stats: stats,
-      sprites: {
-        'front_default': json['sprites']['front_default'] as String?,
-        'back_default': json['sprites']['back_default'] as String?,
-        'front_shiny': json['sprites']['front_shiny'] as String?,
-        'back_shiny': json['sprites']['back_shiny'] as String?,
-      },
+      imageUrl: json['sprites']['other']['official-artwork']['front_default']
+              as String? ??
+          '',
+      moves: (json['moves'] as List)
+          .map((move) => move['move']['name'] as String)
+          .toList(),
+      description: '',
     );
   }
 }

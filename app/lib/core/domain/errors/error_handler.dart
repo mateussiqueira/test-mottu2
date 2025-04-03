@@ -1,40 +1,74 @@
+import 'package:logging/logging.dart' as logging;
+
 import 'failure.dart';
+import 'i_logger.dart';
+import 'logger.dart';
 
-abstract class IErrorHandler {
-  Failure handleError(dynamic error);
-  String getErrorMessage(dynamic error);
-}
+class ErrorHandler {
+  static final logging.Logger _logger = logging.Logger('ErrorHandler');
+  static final ILogger _loggerInstance = Logger();
 
-class ErrorHandler implements IErrorHandler {
-  @override
-  Failure handleError(dynamic error) {
+  static Failure handleError(Object error, StackTrace? stackTrace) {
+    print('Error occurred: $error');
+    if (stackTrace != null) {
+      print('Stack trace: $stackTrace');
+    }
+
     if (error is Failure) {
       return error;
     }
 
-    if (error is Exception) {
-      return ServerFailure(
-        message: error.toString(),
-        error: error,
-      );
-    }
-
-    return UnknownFailure(
-      message: 'An unexpected error occurred',
+    return Failure(
+      message: error.toString(),
       error: error,
+      stackTrace: stackTrace,
     );
   }
 
-  @override
-  String getErrorMessage(dynamic error) {
-    if (error is Failure) {
-      return error.message;
+  static void logError(String message,
+      {Object? error, StackTrace? stackTrace}) {
+    print('Error: $message');
+    if (error != null) {
+      print('Error details: $error');
     }
-
-    if (error is Exception) {
-      return error.toString();
+    if (stackTrace != null) {
+      print('Stack trace: $stackTrace');
     }
+    _loggerInstance.error(message, error, stackTrace);
+  }
 
-    return 'An unexpected error occurred';
+  static void logWarning(String message,
+      {Object? error, StackTrace? stackTrace}) {
+    print('Warning: $message');
+    if (error != null) {
+      print('Warning details: $error');
+    }
+    if (stackTrace != null) {
+      print('Stack trace: $stackTrace');
+    }
+    _loggerInstance.warning(message);
+  }
+
+  static void logInfo(String message, {Object? error, StackTrace? stackTrace}) {
+    print('Info: $message');
+    if (error != null) {
+      print('Info details: $error');
+    }
+    if (stackTrace != null) {
+      print('Stack trace: $stackTrace');
+    }
+    _loggerInstance.info(message);
+  }
+
+  static void logDebug(String message,
+      {Object? error, StackTrace? stackTrace}) {
+    print('Debug: $message');
+    if (error != null) {
+      print('Debug details: $error');
+    }
+    if (stackTrace != null) {
+      print('Stack trace: $stackTrace');
+    }
+    _loggerInstance.debug(message);
   }
 }

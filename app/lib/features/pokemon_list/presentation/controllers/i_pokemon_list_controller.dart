@@ -1,25 +1,62 @@
 import 'package:get/get.dart';
 
-import '../../../../core/state/i_base_state_controller.dart';
-import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../controllers/pokemon_list_state.dart';
 
-abstract class IPokemonListController extends IBaseStateController {
-  RxList<IPokemonEntity> get pokemons;
+/// Interface for PokemonListController
+abstract class IPokemonListController extends GetxController {
+  /// List of Pokemon
+  RxList<PokemonEntity> get pokemons;
+
+  /// Whether more Pokemon are being loaded
   bool get isLoadingMore;
-  @override
-  String? get error;
+
+  /// Current page number
   int get currentPage;
+
+  /// Whether there are more Pokemon to load
   bool get hasMore;
+
+  /// Current search query
   String get searchQuery;
+
+  /// Current filter type
   String get filterType;
+
+  /// Current filter ability
   String get filterAbility;
 
+  /// State of the controller
+  PokemonListState get state;
+
+  /// Whether there is an error
+  bool get hasError;
+
+  /// Error message
+  @override
+  String? get error;
+
+  /// Fetches the initial list of Pokemon
   Future<void> fetchPokemonList();
-  Future<void> loadMorePokemons();
-  Future<void> search(String query);
-  Future<void> loadPokemonsByType(String type);
-  Future<void> loadPokemonsByAbility(String ability);
+
+  /// Loads more Pokemon
+  Future<void> loadMore();
+
+  /// Searches for Pokemon
+  void search(String query);
+
+  /// Filters Pokemon by type
+  Future<void> filterByType(String type);
+
+  /// Filters Pokemon by ability
+  Future<void> filterByAbility(String ability);
+
+  /// Clears all filters
   void clearFilters();
+
+  /// Clears the search query
   void clearSearch();
-  void navigateToDetail(IPokemonEntity pokemon);
+
+  /// Navigates to the Pokemon detail page
+  void navigateToDetail(PokemonEntity pokemon);
 }

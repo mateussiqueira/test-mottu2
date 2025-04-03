@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import 'features/pokemon/domain/entities/i_pokemon_entity.dart';
+import 'features/pokemon/domain/entities/pokemon_entity.dart';
 import 'features/pokemon_detail/presentation/bindings/pokemon_detail_binding.dart';
 import 'features/pokemon_detail/presentation/pages/pokemon_detail_page.dart';
 import 'features/pokemon_list/presentation/pages/pokemon_list_page.dart';
@@ -19,7 +19,7 @@ abstract class AppRouter {
     ),
     GetPage(
       name: pokemonList,
-      page: () => PokemonListPage(),
+      page: () => const PokemonListPage(),
     ),
     GetPage(
       name: pokemonDetail,
@@ -27,7 +27,7 @@ abstract class AppRouter {
       page: () {
         final args = Get.arguments as Map<String, dynamic>;
         return PokemonDetailPage(
-          pokemon: args['pokemon'] as IPokemonEntity,
+          pokemon: args['pokemon'] as PokemonEntity,
           fromSearch: args['fromSearch'] as bool? ?? false,
         );
       },

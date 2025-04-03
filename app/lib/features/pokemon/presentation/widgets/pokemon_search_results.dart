@@ -1,72 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/pokemon_list_controller.dart';
-import 'pokemon_grid_item.dart';
+import '../../domain/entities/i_pokemon_entity.dart';
+import '../../domain/entities/pokemon_entity.dart';
+import '../providers/pokemon_provider.dart';
+import 'pokemon_card_widget.dart';
 
 /// Widget that displays Pokemon search results
-class PokemonSearchResults extends StatelessWidget {
-  final PokemonListController controller;
+class PokemonSearchResults extends ConsumerWidget {
   final String query;
 
   const PokemonSearchResults({
     super.key,
-    required this.controller,
     required this.query,
   });
 
   @override
-  Widget build(BuildContext context) {
-    if (query.isEmpty) {
-      return const Center(
-        child: Text('Enter a Pokemon name to search'),
-      );
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchResults = ref.watch(searchPokemonProvider(query));
 
-    return Obx(() {
-      if (controller.isLoading) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
+    return searchResults.when(
+      data: (List<PokemonEntity> pokemons) {
+        if (pokemons.isEmpty) {
+          return const Center(
+            child: Text('No Pokémon found'),
+          );
+        }
 
-      final error = controller.error;
-      if (error != null) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(error),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => controller.searchPokemon(query),
-                child: const Text('Try again'),
-              ),
-            ],
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
           ),
+          itemCount: pokemons.length,
+          itemBuilder: (context, index) {
+            final pokemon = pokemons[index] as IPokemonEntity;
+            return PokemonCardWidget(pokemon: pokemon);
+          },
         );
-      }
-
-      if (controller.pokemons.isEmpty) {
-        return const Center(
-          child: Text('No Pokemon found'),
-        );
-      }
-
-      return GridView.builder(
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
-        ),
-        itemCount: controller.pokemons.length,
-        itemBuilder: (context, index) {
-          final pokemon = controller.pokemons[index];
-          return PokemonGridItem(pokemon: pokemon);
-        },
-      );
-    });
+      },
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (error, stackTrace) => Center(
+        child: Text('Error: $error'),
+      ),
+    );
   }
 }

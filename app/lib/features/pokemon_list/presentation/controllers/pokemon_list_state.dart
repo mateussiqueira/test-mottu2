@@ -1,10 +1,11 @@
 import 'package:get/get.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 
 /// State class for PokemonListController
 class PokemonListState {
-  static const int limit = 10;
+  static const int limit = AppConstants.pokemonPerPage;
 
   final pokemons = RxList<PokemonEntity>([]);
   final searchResults = RxList<PokemonEntity>([]);

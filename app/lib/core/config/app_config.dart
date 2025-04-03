@@ -1,18 +1,6 @@
 class AppConfig {
-  static const bool useBFF = bool.fromEnvironment(
-    'USE_BFF',
-    defaultValue: false,
-  );
-
-  static const String bffBaseUrl = String.fromEnvironment(
-    'BFF_BASE_URL',
-    defaultValue: 'http://localhost:3000',
-  );
-
-  static const String pokeApiBaseUrl = String.fromEnvironment(
-    'POKE_API_BASE_URL',
-    defaultValue: 'https://pokeapi.co/api/v2',
-  );
-
-  static String get baseUrl => useBFF ? bffBaseUrl : pokeApiBaseUrl;
+  static const String baseUrl = 'https://pokeapi.co/api/v2';
+  static const int defaultLimit = 20;
+  static const int defaultOffset = 0;
+  static const Duration defaultTimeout = Duration(seconds: 30);
 }

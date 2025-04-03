@@ -1,5 +1,5 @@
-import '../../../../core/domain/result.dart' as core;
-import '../entities/i_pokemon_entity.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../entities/pokemon_entity.dart';
 
 /// Interface for the GetPokemonList use case
 abstract class IGetPokemonListUseCase {
@@ -8,7 +8,7 @@ abstract class IGetPokemonListUseCase {
   /// [limit] - Maximum number of Pokemon to return
   /// [offset] - Number of Pokemon to skip
   /// Returns a [Result] containing either a list of Pokemon or an error
-  Future<core.Result<List<IPokemonEntity>>> call({
+  Future<Result<List<PokemonEntity>>> call({
     required int limit,
     required int offset,
   });

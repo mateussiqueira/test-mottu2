@@ -1,5 +1,5 @@
-import '../../../../core/domain/result.dart' as core;
-import '../entities/i_pokemon_entity.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../entities/pokemon_entity.dart';
 import '../repositories/i_pokemon_repository.dart';
 import 'i_search_pokemon_usecase.dart';
 
@@ -10,12 +10,8 @@ class SearchPokemonUseCase implements ISearchPokemonUseCase {
   SearchPokemonUseCase(this._repository);
 
   @override
-  Future<core.Result<List<IPokemonEntity>>> call(String query) async {
-    try {
-      return await _repository.searchPokemon(query);
-    } catch (e) {
-      return core.Result.failure('Failed to search Pokemon: ${e.toString()}');
-    }
+  Future<Result<List<PokemonEntity>>> call(String query) async {
+    return await _repository.searchPokemon(query);
   }
 
   @override

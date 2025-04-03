@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/route_names.dart';
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 
 class PokemonDetailHeader extends StatelessWidget
     implements PreferredSizeWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntity pokemon;
   final Color backgroundColor;
   final bool fromSearch;
 

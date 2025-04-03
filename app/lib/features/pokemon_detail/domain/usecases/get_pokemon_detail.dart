@@ -1,4 +1,6 @@
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../core/domain/errors/failure.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import 'i_get_pokemon_detail.dart';
 
@@ -9,11 +11,13 @@ class GetPokemonDetail implements IGetPokemonDetail {
   GetPokemonDetail(this.repository);
 
   @override
-  Future<IPokemonEntity> call(int id) async {
-    final result = await repository.getPokemonDetail(id);
-    if (result.isSuccess && result.data != null) {
-      return result.data!;
+  Future<Result<PokemonEntity>> call(int id) async {
+    try {
+      final result = await repository.getPokemonDetail(id);
+      return result;
+    } catch (e) {
+      return Result.failure(
+          Failure(message: 'Failed to get Pokemon detail: ${e.toString()}'));
     }
-    throw Exception(result.error?.toString() ?? 'Unknown error');
   }
 }

@@ -1,5 +1,6 @@
-import '../../../../core/domain/result.dart' as core;
-import '../entities/i_pokemon_entity.dart';
+import '../../../../core/domain/errors/failure.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../entities/pokemon_entity.dart';
 import '../repositories/i_pokemon_repository.dart';
 import 'i_get_pokemon_detail_usecase.dart';
 
@@ -10,12 +11,13 @@ class GetPokemonDetailUseCase implements IGetPokemonDetailUseCase {
   GetPokemonDetailUseCase(this._repository);
 
   @override
-  Future<core.Result<IPokemonEntity>> call(int id) async {
+  Future<Result<PokemonEntity>> call(int id) async {
     try {
-      return await _repository.getPokemonDetail(id);
+      final result = await _repository.getPokemonById(id);
+      return result;
     } catch (e) {
-      return core.Result.failure(
-          'Failed to get Pokemon details: ${e.toString()}');
+      return Result.failure(
+          Failure(message: 'Failed to get Pokemon details: ${e.toString()}'));
     }
   }
 

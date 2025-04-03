@@ -1,26 +1,24 @@
-import '../../../../core/domain/result.dart' as core;
-import '../entities/i_pokemon_entity.dart';
+import '../../../../core/domain/errors/failure.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../entities/pokemon_entity.dart';
 import '../repositories/i_pokemon_repository.dart';
 import 'i_get_pokemon_list_usecase.dart';
 
 /// Implementation of the GetPokemonList use case
-class GetPokemonListUseCase with IGetPokemonListUseCase {
+class GetPokemonListUseCase implements IGetPokemonListUseCase {
   final IPokemonRepository _repository;
 
   GetPokemonListUseCase(this._repository);
 
   @override
-  Future<core.Result<List<IPokemonEntity>>> call({
-    required int limit,
-    required int offset,
-  }) async {
+  Future<Result<List<PokemonEntity>>> call({int? limit, int? offset}) async {
     try {
-      return await _repository.getPokemonList(
-        limit: limit,
-        offset: offset,
-      );
+      final result =
+          await _repository.getPokemonList(limit: limit, offset: offset);
+      return result;
     } catch (e) {
-      return core.Result.failure('Failed to get Pokemon list: ${e.toString()}');
+      return Result.failure(
+          Failure(message: 'Failed to get Pokemon list: ${e.toString()}'));
     }
   }
 

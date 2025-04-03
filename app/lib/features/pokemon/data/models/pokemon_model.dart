@@ -1,75 +1,70 @@
-import '../../domain/entities/i_pokemon_entity.dart';
+import '../../domain/entities/pokemon_entity.dart';
 
 /// Model class for Pokemon data from the API
-class PokemonModel implements IPokemonEntity {
-  @override
-  final int id;
-  @override
-  final String name;
-  @override
-  final String imageUrl;
-  @override
-  final List<String> types;
-  @override
-  final List<String> abilities;
-  @override
-  final int height;
-  @override
-  final int weight;
-  @override
-  final Map<String, int> stats;
-  @override
-  final int baseExperience;
-  @override
-  final List<String> moves;
-  @override
-  final List<String> evolutions;
-  @override
-  final String description;
-
+class PokemonModel extends PokemonEntity {
   PokemonModel({
-    required this.id,
-    required this.name,
-    required this.imageUrl,
-    required this.types,
-    required this.abilities,
-    required this.height,
-    required this.weight,
-    required this.stats,
-    required this.baseExperience,
-    required this.moves,
-    required this.evolutions,
-    required this.description,
-  });
+    required int id,
+    required String name,
+    required int height,
+    required int weight,
+    required List<String> types,
+    required List<String> abilities,
+    required Map<String, int> stats,
+    required String imageUrl,
+    required List<String> moves,
+    required String description,
+  }) : super(
+          id: id,
+          name: name,
+          height: height,
+          weight: weight,
+          types: types,
+          abilities: abilities,
+          stats: stats,
+          imageUrl: imageUrl,
+          moves: moves,
+          description: description,
+        );
 
   /// Creates a PokemonModel from JSON data
   factory PokemonModel.fromJson(Map<String, dynamic> json) {
-    return PokemonModel(
-      id: json['id'],
-      name: json['name'],
-      imageUrl: json['sprites']['other']['official-artwork']['front_default'],
-      types: (json['types'] as List)
-          .map((type) => type['type']['name'] as String)
-          .toList(),
-      abilities: (json['abilities'] as List)
-          .map((ability) => ability['ability']['name'] as String)
-          .toList(),
-      height: json['height'],
-      weight: json['weight'],
-      baseExperience: json['base_experience'] ?? 0,
-      moves: (json['moves'] as List)
-          .map((move) => move['move']['name'] as String)
-          .toList(),
-      evolutions: (json['evolutions'] as List?)?.cast<String>() ?? [],
-      description: json['description'] ?? '',
-      stats: Map.fromEntries(
-        (json['stats'] as List).map(
-          (stat) => MapEntry(
-            stat['stat']['name'] as String,
-            stat['base_stat'] as int,
-          ),
+    final sprites = json['sprites'] as Map<String, dynamic>;
+    final officialArtwork =
+        sprites['other']?['official-artwork'] as Map<String, dynamic>;
+    final imageUrl = officialArtwork['front_default'] as String? ?? '';
+
+    final types = (json['types'] as List)
+        .map((type) => (type['type']['name'] as String))
+        .toList();
+
+    final abilities = (json['abilities'] as List)
+        .map((ability) => (ability['ability']['name'] as String))
+        .toList();
+
+    final stats = Map<String, int>.fromEntries(
+      (json['stats'] as List).map(
+        (stat) => MapEntry(
+          stat['stat']['name'] as String,
+          stat['base_stat'] as int,
         ),
       ),
+    );
+
+    final moves = (json['moves'] as List)
+        .map((move) => (move['move']['name'] as String))
+        .toList();
+
+    return PokemonModel(
+      id: json['id'] as int,
+      name: (json['name'] as String).replaceAll('-', ' '),
+      height: json['height'] as int,
+      weight: json['weight'] as int,
+      types: types,
+      abilities: abilities,
+      stats: stats,
+      imageUrl: imageUrl,
+      moves: moves,
+      description: '',
     );
   }
 
@@ -79,15 +74,34 @@ class PokemonModel implements IPokemonEntity {
     return {
       'id': id,
       'name': name,
-      'imageUrl': imageUrl,
-      'types': types,
-      'abilities': abilities,
       'height': height,
       'weight': weight,
-      'baseExperience': baseExperience,
-      'stats': stats,
-      'moves': moves,
-      'evolutions': evolutions,
+      'types': types
+          .map((type) => {
+                'type': {'name': type}
+              })
+          .toList(),
+      'abilities': abilities
+          .map((ability) => {
+                'ability': {'name': ability}
+              })
+          .toList(),
+      'stats': stats.entries
+          .map((stat) => {
+                'stat': {'name': stat.key},
+                'base_stat': stat.value,
+              })
+          .toList(),
+      'sprites': {
+        'other': {
+          'official-artwork': {'front_default': imageUrl}
+        }
+      },
+      'moves': moves
+          .map((move) => {
+                'move': {'name': move}
+              })
+          .toList(),
       'description': description,
     };
   }

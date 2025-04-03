@@ -1,28 +1,35 @@
 import 'package:get/get.dart';
 
-import '../../../../core/state/i_base_state_controller.dart';
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../core/logging/i_logger.dart';
+import '../../../../core/performance/i_performance_monitor.dart';
+import '../../../../core/state/base_state_controller.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 
-/// Interface for Pokemon detail controller
-abstract class IPokemonDetailController extends IBaseStateController {
-  /// The current Pokemon being displayed
-  IPokemonEntity? get pokemon;
+/// Interface for the Pokemon detail controller
+abstract class IPokemonDetailController extends BaseStateController {
+  IPokemonDetailController({
+    required ILogger logger,
+    required IPerformanceMonitor performanceMonitor,
+  }) : super(logger: logger, performanceMonitor: performanceMonitor);
 
-  /// Sets the current Pokemon and loads related Pokemon
-  void setPokemon(IPokemonEntity pokemon);
+  /// Gets the current Pokemon
+  PokemonEntity? get pokemon;
 
-  /// List of Pokemon with the same type as the current Pokemon
-  RxList<IPokemonEntity> get sameTypePokemons;
+  /// Sets the current Pokemon
+  void setPokemon(PokemonEntity pokemon);
 
-  /// List of Pokemon with the same ability as the current Pokemon
-  RxList<IPokemonEntity> get sameAbilityPokemons;
+  /// Gets the list of Pokemon with the same type
+  RxList<PokemonEntity> get sameTypePokemons;
 
-  /// Fetches Pokemon with the given type
+  /// Gets the list of Pokemon with the same ability
+  RxList<PokemonEntity> get sameAbilityPokemons;
+
+  /// Fetches Pokemon with the same type
   Future<void> fetchPokemonsByType(String type);
 
-  /// Fetches Pokemon with the given ability
+  /// Fetches Pokemon with the same ability
   Future<void> fetchPokemonsByAbility(String ability);
 
-  /// Navigates to a page showing related Pokemon
-  void navigateToRelatedPokemons(List<IPokemonEntity> pokemons, String title);
+  /// Navigates to the related Pokemon list page
+  void navigateToRelatedPokemons(List<PokemonEntity> pokemons, String title);
 }

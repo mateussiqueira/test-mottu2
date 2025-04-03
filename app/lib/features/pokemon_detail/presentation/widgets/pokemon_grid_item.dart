@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/app_constants.dart';
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
-import '../controllers/i_pokemon_detail_controller.dart';
+import '../../../../core/constants/route_names.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 
 class PokemonGridItem extends StatelessWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntity pokemon;
 
   const PokemonGridItem({
     super.key,
@@ -24,10 +24,12 @@ class PokemonGridItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        final controller = Get.find<IPokemonDetailController>();
-        controller.navigateToRelatedPokemons(
-          [pokemon],
-          'Pokemon Details',
+        Get.toNamed(
+          RouteNames.pokemonDetail,
+          arguments: {
+            'pokemon': pokemon,
+            'fromSearch': false,
+          },
         );
       },
       child: Container(

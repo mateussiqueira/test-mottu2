@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../../domain/entities/i_pokemon_entity.dart';
+import '../../domain/entities/pokemon_entity.dart';
 import '../../domain/usecases/i_get_pokemon_list.dart';
 import '../../domain/usecases/i_get_pokemons_by_ability.dart';
 import '../../domain/usecases/i_get_pokemons_by_type.dart';
@@ -20,16 +20,16 @@ class PokemonListController extends GetxController {
     this._getPokemonsByAbility,
   );
 
-  final RxList<IPokemonEntity> _pokemons = <IPokemonEntity>[].obs;
-  final RxList<IPokemonEntity> _filteredPokemons = <IPokemonEntity>[].obs;
+  final RxList<PokemonEntity> _pokemons = <PokemonEntity>[].obs;
+  final RxList<PokemonEntity> _filteredPokemons = <PokemonEntity>[].obs;
   final RxString _searchQuery = ''.obs;
   final RxBool _isLoading = false.obs;
   final RxBool _hasMore = true.obs;
   final RxInt _currentPage = 0.obs;
   final RxString _error = ''.obs;
 
-  List<IPokemonEntity> get pokemons => _pokemons;
-  List<IPokemonEntity> get filteredPokemons => _filteredPokemons;
+  List<PokemonEntity> get pokemons => _pokemons;
+  List<PokemonEntity> get filteredPokemons => _filteredPokemons;
   String get searchQuery => _searchQuery.value;
   bool get isLoading => _isLoading.value;
   bool get hasMore => _hasMore.value;
@@ -48,10 +48,11 @@ class PokemonListController extends GetxController {
     _error.value = '';
     try {
       final result = await _getPokemonList(limit: 151, offset: 0);
-      result.fold(
-        (pokemons) => _pokemons.value = pokemons,
-        (error) => _error.value = error,
-      );
+      if (result.isSuccess && result.data != null) {
+        _pokemons.value = result.data!;
+      } else {
+        _error.value = result.error?.message ?? 'Unknown error';
+      }
     } catch (e) {
       _error.value = 'Failed to load Pokemon: $e';
     } finally {
@@ -70,10 +71,11 @@ class PokemonListController extends GetxController {
     _error.value = '';
     try {
       final result = await _searchPokemon(query);
-      result.fold(
-        (pokemons) => _pokemons.value = pokemons,
-        (error) => _error.value = error,
-      );
+      if (result.isSuccess && result.data != null) {
+        _pokemons.value = result.data!;
+      } else {
+        _error.value = result.error?.message ?? 'Unknown error';
+      }
     } catch (e) {
       _error.value = 'Failed to search Pokemon: $e';
     } finally {
@@ -87,10 +89,11 @@ class PokemonListController extends GetxController {
     _error.value = '';
     try {
       final result = await _getPokemonsByType(type);
-      result.fold(
-        (pokemons) => _pokemons.value = pokemons,
-        (error) => _error.value = error,
-      );
+      if (result.isSuccess && result.data != null) {
+        _pokemons.value = result.data!;
+      } else {
+        _error.value = result.error?.message ?? 'Unknown error';
+      }
     } catch (e) {
       _error.value = 'Failed to filter Pokemon by type: $e';
     } finally {
@@ -104,10 +107,11 @@ class PokemonListController extends GetxController {
     _error.value = '';
     try {
       final result = await _getPokemonsByAbility(ability);
-      result.fold(
-        (pokemons) => _pokemons.value = pokemons,
-        (error) => _error.value = error,
-      );
+      if (result.isSuccess && result.data != null) {
+        _pokemons.value = result.data!;
+      } else {
+        _error.value = result.error?.message ?? 'Unknown error';
+      }
     } catch (e) {
       _error.value = 'Failed to filter Pokemon by ability: $e';
     } finally {
@@ -126,7 +130,7 @@ class PokemonListController extends GetxController {
     _hasMore.value = true;
   }
 
-  void navigateToDetail(IPokemonEntity pokemon) {
+  void navigateToDetail(PokemonEntity pokemon) {
     Get.toNamed(
       '/pokemon/detail',
       arguments: pokemon,

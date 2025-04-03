@@ -1,204 +1,84 @@
-# PokeAPI Mobile App
+# PokeAPI Flutter App
 
-Um aplicativo Flutter que consome a PokeAPI, permitindo visualizar uma lista de Pokémon e seus detalhes. O projeto pode ser executado de duas maneiras:
+A Flutter application that consumes the PokeAPI to display information about Pokemon.
 
-1. Com BFF (Backend for Frontend)
-2. Com API direta (consumindo a PokeAPI diretamente)
+## Features
 
-## Pré-requisitos
+- List all Pokemon with pagination
+- Search Pokemon by name
+- Filter Pokemon by type
+- Filter Pokemon by ability
+- Filter Pokemon by move
+- Filter Pokemon by evolution chain
+- Filter Pokemon by stats
+- Filter Pokemon by description
+- View detailed information about each Pokemon
 
-- Flutter SDK
-- Node.js (para rodar o BFF)
-- Git
+## Getting Started
 
-## Configuração
+### Prerequisites
 
-1. Clone o repositório:
+- Flutter SDK (>=3.0.0)
+- Dart SDK (>=3.0.0)
+
+### Installation
+
+1. Clone the repository:
+
 ```bash
-git clone https://github.com/seu-usuario/pokeapi.git
+git clone https://github.com/yourusername/pokeapi.git
+```
+
+2. Navigate to the project directory:
+
+```bash
 cd pokeapi
 ```
 
-2. Instale as dependências do Flutter:
+3. Install dependencies:
+
 ```bash
-cd app
 flutter pub get
 ```
 
-3. Se for usar o BFF, instale as dependências do Node.js:
-```bash
-cd ../bff
-npm install
-```
-
-## Executando o Projeto
-
-O projeto possui um script de execução que facilita o processo. Na raiz do projeto, execute:
+4. Run the app:
 
 ```bash
-./run.sh
+flutter run
 ```
 
-Você terá as seguintes opções:
+## Architecture
 
-1. **Executar com BFF**
-   - Instala as dependências do BFF
-   - Inicia o servidor BFF
-   - Executa o aplicativo Flutter
+This project follows Clean Architecture principles and is organized into the following layers:
 
-2. **Executar com API direta**
-   - Executa o aplicativo Flutter consumindo a PokeAPI diretamente
+- **Domain**: Contains business logic and entities
+- **Data**: Implements repositories and data sources
+- **Presentation**: Contains UI components and state management
 
-3. **Instalar dependências**
-   - Instala todas as dependências necessárias (Flutter e BFF)
+## Dependencies
 
-4. **Sair**
-   - Encerra o script
+- **flutter_bloc**: State management
+- **get_it**: Dependency injection
+- **injectable**: Dependency injection code generation
+- **http**: HTTP client for API requests
+- **json_annotation**: JSON serialization
+- **freezed**: Code generation for data classes
+- **cached_network_image**: Image caching
+- **equatable**: Value equality
 
-## Estrutura do Projeto
+## Contributing
 
-O projeto segue a arquitetura Clean Architecture e está organizado da seguinte forma:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-```
-app/
-├── lib/
-│   ├── core/           # Configurações e utilitários
-│   ├── features/       # Módulos da aplicação
-│   │   ├── pokemon/    # Feature de listagem de Pokémon
-│   │   └── pokemon_detail/  # Feature de detalhes do Pokémon
-│   └── main.dart       # Ponto de entrada da aplicação
-bff/
-├── src/               # Código fonte do BFF
-└── package.json       # Dependências do BFF
-```
+## License
 
-## Tecnologias Utilizadas
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- Flutter
-- GetX (Gerenciamento de Estado e Navegação)
-- Clean Architecture
-- Node.js (BFF)
-- PokeAPI
+## Acknowledgments
 
-## Funcionalidades
-
-- Listagem de Pokémon com paginação
-- Busca de Pokémon por nome
-- Visualização detalhada de cada Pokémon
-- Lista de Pokémon relacionados por tipo e habilidade
-- Suporte a modo offline (quando usando BFF)
-
-## 🚀 Funcionalidades Implementadas
-
-### Nível 1
-- [x] Listagem de Pokémons com:
-  - Imagem
-  - Nome
-- [x] Tela de detalhes com:
-  - Imagem
-  - Nome
-  - Altura
-  - Peso
-
-### Nível 2
-- [x] Cache local das consultas à API
-- [x] Filtro por nome na listagem
-- [x] Tela de detalhes expandida com:
-  - Tipos
-  - Habilidades
-
-### Nível 3
-- [x] Splash screen customizada
-- [x] Limpeza do cache ao fechar o app
-- [x] Paginação na listagem
-- [x] Pokémons relacionados por tipo e habilidade
-- [x] Navegação para detalhes de pokémons relacionados
-- [x] Testes de unidade para regras de negócio
-
-### Pontos Extras
-- [x] Uso do GetX para gerenciamento de estado e navegação
-- [x] Arquitetura Clean Architecture com:
-  - Domain (entities, repositories, use cases)
-  - Data (repositories, data sources)
-  - Presentation (controllers, pages, widgets)
-
-## 🏗️ Arquitetura
-
-O projeto utiliza Clean Architecture com as seguintes camadas:
-
-```
-lib/
-├── core/
-│   ├── domain/
-│   │   ├── entities/
-│   │   ├── errors/
-│   │   ├── repositories/
-│   │   ├── result.dart
-│   │   └── validators/
-│   ├── presentation/
-│   │   ├── adapters/
-│   │   ├── constants/
-│   │   └── routes/
-│   └── config/
-├── features/
-│   ├── pokemon/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   ├── pokemon_list/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   └── pokemon_detail/
-│       ├── data/
-│       ├── domain/
-│       └── presentation/
-└── main.dart
-```
-
-## 🧪 Testes
-
-O projeto inclui testes de unidade para as regras de negócio. Para executar os testes:
-
-```bash
-cd app
-flutter test
-```
-
-## 📱 Plataformas Suportadas
-
-- iOS
-- Android
-
-## 🔧 Configuração do Ambiente
-
-### iOS
-1. Instale o Xcode
-2. Configure o CocoaPods:
-```bash
-cd ios
-pod install
-```
-
-### Android
-1. Instale o Android Studio
-2. Configure um emulador Android ou conecte um dispositivo físico
-
-## 📦 Dependências Principais
-
-- GetX: Gerenciamento de estado e navegação
-- Dio: Cliente HTTP
-- SharedPreferences: Cache local
-- Mockito: Testes
-
-## 🤝 Contribuindo
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+- [PokeAPI](https://pokeapi.co/) for providing the Pokemon data
+- The Flutter and Dart teams for their amazing frameworks

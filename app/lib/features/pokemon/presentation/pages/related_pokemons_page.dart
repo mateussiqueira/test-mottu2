@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/route_names.dart';
-import '../../domain/entities/pokemon_entity.dart';
+import '../../domain/entities/i_pokemon_entity.dart';
 import '../widgets/pokemon_grid_item.dart';
 
 class RelatedPokemonsPage extends StatelessWidget {
   final String title;
-  final List<PokemonEntity> pokemons;
+  final List<IPokemonEntity> pokemons;
 
   const RelatedPokemonsPage({
     super.key,

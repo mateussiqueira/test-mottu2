@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/logging/i_logger.dart';
 import '../../../../core/performance/i_performance_monitor.dart';
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import '../../domain/usecases/get_pokemon_detail.dart';
 import '../../domain/usecases/get_pokemons_by_ability.dart';
@@ -36,8 +36,8 @@ abstract class BasePokemonDetailController {
 
     final arguments = Get.arguments;
     if (arguments is Map<String, dynamic> &&
-        arguments['pokemon'] is IPokemonEntity) {
-      controller.setPokemon(arguments['pokemon'] as IPokemonEntity);
+        arguments['pokemon'] is PokemonEntity) {
+      controller.setPokemon(arguments['pokemon'] as PokemonEntity);
     }
 
     return controller;

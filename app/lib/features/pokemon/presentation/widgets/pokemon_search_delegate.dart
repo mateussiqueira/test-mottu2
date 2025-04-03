@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/pokemon_list_controller.dart';
 import 'pokemon_search_results.dart';
 
 /// Search delegate for Pokemon list
 class PokemonSearchDelegate extends SearchDelegate<String> {
-  final PokemonListController controller = Get.find<PokemonListController>();
+  final WidgetRef ref;
+
+  PokemonSearchDelegate(this.ref);
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -32,17 +33,11 @@ class PokemonSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return PokemonSearchResults(
-      controller: controller,
-      query: query,
-    );
+    return PokemonSearchResults(query: query);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return PokemonSearchResults(
-      controller: controller,
-      query: query,
-    );
+    return PokemonSearchResults(query: query);
   }
 }

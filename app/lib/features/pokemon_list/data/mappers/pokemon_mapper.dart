@@ -12,9 +12,10 @@ class PokemonMapper {
       abilities: pokemon.abilities,
       height: pokemon.height,
       weight: pokemon.weight,
-      baseExperience: pokemon.baseExperience,
       imageUrl: pokemon.imageUrl,
       stats: pokemon.stats,
+      moves: pokemon.moves,
+      description: pokemon.description,
     );
   }
 

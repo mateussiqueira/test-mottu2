@@ -1,11 +1,14 @@
 import 'package:get/get.dart';
 
-import '../../../../core/state/i_base_state_controller.dart';
-import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 
-abstract class IPokemonSearchController extends IBaseStateController {
-  RxList<IPokemonEntity> get searchResults;
+abstract class IPokemonSearchController {
+  RxList<PokemonEntity> get searchResults;
+  RxBool get isLoading;
+  RxString get error;
+  RxString get lastQuery;
+
   Future<void> search(String query);
   void clearSearch();
-  void navigateToDetail(IPokemonEntity pokemon);
+  void navigateToDetail(PokemonEntity pokemon);
 }

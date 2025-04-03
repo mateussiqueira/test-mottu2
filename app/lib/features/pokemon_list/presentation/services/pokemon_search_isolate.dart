@@ -1,54 +1,82 @@
+import 'dart:convert';
 import 'dart:isolate';
 
-import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
-import '../../domain/entities/i_pokemon_entity.dart';
-import '../../domain/repositories/i_pokemon_repository.dart';
+import '../../../../core/domain/errors/i_logger.dart';
+import '../../../../core/domain/errors/i_performance_monitor.dart';
+import '../../../../core/domain/errors/logger.dart';
+import '../../../../core/domain/errors/performance_monitor.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 
 class PokemonSearchIsolate {
-  static Future<List<IPokemonEntity>> searchPokemons(
-    String query,
-    IPokemonRepository repository,
-  ) async {
-    final receivePort = ReceivePort();
-    final isolate = await Isolate.spawn(
-      _searchInIsolate,
-      _SearchParams(
-        query: query,
-        repository: repository,
-        sendPort: receivePort.sendPort,
-      ),
-    );
+  static final ILogger _logger = Logger();
+  static final IPerformanceMonitor _performanceMonitor = PerformanceMonitor();
 
-    final result = await receivePort.first;
-    receivePort.close();
-    isolate.kill();
-
-    return result;
-  }
-
-  static Future<void> _searchInIsolate(_SearchParams params) async {
+  static Future<List<PokemonEntity>> searchPokemons(String query) async {
+    final startTime = DateTime.now();
     try {
-      final result = await params.repository.searchPokemons(params.query);
-      if (result.isSuccess) {
-        params.sendPort.send(result.data ?? []);
+      final response = await http.get(
+        Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=1118'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final results = data['results'] as List;
+        final pokemons = <PokemonEntity>[];
+
+        for (final result in results) {
+          if (result['name']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
+            final id = int.parse(result['url'].split('/')[6]);
+            final pokemon = await _getPokemonById(id);
+            pokemons.add(pokemon);
+          }
+        }
+
+        _performanceMonitor.end('searchPokemons');
+        return pokemons;
       } else {
-        params.sendPort.send([]);
+        throw Exception('Failed to search Pokemon');
       }
     } catch (e) {
-      params.sendPort.send([]);
+      _performanceMonitor.end('searchPokemons');
+      rethrow;
     }
   }
-}
 
-class _SearchParams {
-  final String query;
-  final IPokemonRepository repository;
-  final SendPort sendPort;
+  static Future<PokemonEntity> _getPokemonById(int id) async {
+    final response = await http.get(
+      Uri.parse('https://pokeapi.co/api/v2/pokemon/$id'),
+    );
 
-  _SearchParams({
-    required this.query,
-    required this.repository,
-    required this.sendPort,
-  });
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return PokemonEntity.fromJson(data);
+    } else {
+      throw Exception('Failed to load Pokemon details');
+    }
+  }
+
+  static Future<void> searchInIsolate(SendPort sendPort) async {
+    final receivePort = ReceivePort();
+
+    sendPort.send(receivePort.sendPort);
+
+    await for (final message in receivePort) {
+      if (message is String) {
+        try {
+          final pokemons = await searchPokemons(message);
+          sendPort.send(pokemons);
+        } catch (e, stackTrace) {
+          _logger.error('Error searching Pokemon in isolate', e, stackTrace);
+          sendPort.send(e);
+        }
+      }
+    }
+
+    receivePort.close();
+  }
 }

@@ -1,30 +1,13 @@
-import 'i_pokemon_entity.dart';
-
-/// Implementation of IPokemonEntity
-class PokemonEntity implements IPokemonEntity {
-  @override
+class PokemonEntity {
   final int id;
-  @override
   final String name;
-  @override
   final List<String> types;
-  @override
   final List<String> abilities;
-  @override
   final int height;
-  @override
   final int weight;
-  @override
-  final int baseExperience;
-  @override
   final String imageUrl;
-  @override
   final Map<String, int> stats;
-  @override
   final List<String> moves;
-  @override
-  final List<String> evolutions;
-  @override
   final String description;
 
   PokemonEntity({
@@ -34,70 +17,88 @@ class PokemonEntity implements IPokemonEntity {
     required this.abilities,
     required this.height,
     required this.weight,
-    required this.baseExperience,
     required this.imageUrl,
     required this.stats,
     required this.moves,
-    required this.evolutions,
     required this.description,
   });
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PokemonEntity &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          imageUrl == other.imageUrl &&
-          types == other.types &&
-          abilities == other.abilities &&
-          stats == other.stats &&
-          height == other.height &&
-          weight == other.weight &&
-          baseExperience == other.baseExperience &&
-          moves == other.moves &&
-          evolutions == other.evolutions &&
-          description == other.description;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      name.hashCode ^
-      imageUrl.hashCode ^
-      types.hashCode ^
-      abilities.hashCode ^
-      stats.hashCode ^
-      height.hashCode ^
-      weight.hashCode ^
-      baseExperience.hashCode ^
-      moves.hashCode ^
-      evolutions.hashCode ^
-      description.hashCode;
-
-  @override
   String toString() {
-    return 'PokemonEntity{id: $id, name: $name, imageUrl: $imageUrl, types: $types, abilities: $abilities, stats: $stats, height: $height, weight: $weight, baseExperience: $baseExperience, moves: $moves, evolutions: $evolutions, description: $description}';
+    return 'PokemonEntity{id: $id, name: $name, types: $types}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PokemonEntity &&
+        other.id == id &&
+        other.name == name &&
+        other.imageUrl == imageUrl &&
+        other.types.toString() == types.toString() &&
+        other.height == height &&
+        other.weight == weight &&
+        other.abilities.toString() == abilities.toString() &&
+        other.stats.toString() == stats.toString() &&
+        other.moves.toString() == moves.toString() &&
+        other.description == description;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        imageUrl.hashCode ^
+        types.hashCode ^
+        height.hashCode ^
+        weight.hashCode ^
+        abilities.hashCode ^
+        stats.hashCode ^
+        moves.hashCode ^
+        description.hashCode;
   }
 
   factory PokemonEntity.fromJson(Map<String, dynamic> json) {
+    final sprites = json['sprites'] as Map<String, dynamic>;
+    final officialArtwork =
+        sprites['other']?['official-artwork'] as Map<String, dynamic>;
+    final imageUrl = officialArtwork['front_default'] as String? ?? '';
+
+    final types = (json['types'] as List)
+        .map((type) => (type['type']['name'] as String))
+        .toList();
+
+    final abilities = (json['abilities'] as List)
+        .map((ability) => (ability['ability']['name'] as String))
+        .toList();
+
+    final stats = Map<String, int>.fromEntries(
+      (json['stats'] as List).map(
+        (stat) => MapEntry(
+          stat['stat']['name'] as String,
+          stat['base_stat'] as int,
+        ),
+      ),
+    );
+
+    final moves = (json['moves'] as List)
+        .map((move) => (move['move']['name'] as String))
+        .toList();
+
     return PokemonEntity(
       id: json['id'] as int,
-      name: json['name'] as String,
-      imageUrl: json['imageUrl'] as String,
-      types: List<String>.from(json['types'] as List),
-      abilities: List<String>.from(json['abilities'] as List),
-      stats: Map<String, int>.from(json['stats'] as Map),
+      name: (json['name'] as String).replaceAll('-', ' '),
+      imageUrl: imageUrl,
+      types: types,
+      abilities: abilities,
+      stats: stats,
       height: json['height'] as int,
       weight: json['weight'] as int,
-      baseExperience: json['base_experience'] as int,
-      moves: List<String>.from(json['moves'] as List),
-      evolutions: List<String>.from(json['evolutions'] as List),
-      description: json['description'] as String,
+      moves: moves,
+      description: '', // We need to fetch this separately
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -106,11 +107,9 @@ class PokemonEntity implements IPokemonEntity {
       'abilities': abilities,
       'height': height,
       'weight': weight,
-      'base_experience': baseExperience,
       'imageUrl': imageUrl,
       'stats': stats,
       'moves': moves,
-      'evolutions': evolutions,
       'description': description,
     };
   }
@@ -118,15 +117,13 @@ class PokemonEntity implements IPokemonEntity {
   PokemonEntity copyWith({
     int? id,
     String? name,
-    String? imageUrl,
     List<String>? types,
     List<String>? abilities,
-    Map<String, int>? stats,
     int? height,
     int? weight,
-    int? baseExperience,
+    String? imageUrl,
+    Map<String, int>? stats,
     List<String>? moves,
-    List<String>? evolutions,
     String? description,
   }) {
     return PokemonEntity(
@@ -138,9 +135,7 @@ class PokemonEntity implements IPokemonEntity {
       stats: stats ?? this.stats,
       height: height ?? this.height,
       weight: weight ?? this.weight,
-      baseExperience: baseExperience ?? this.baseExperience,
       moves: moves ?? this.moves,
-      evolutions: evolutions ?? this.evolutions,
       description: description ?? this.description,
     );
   }

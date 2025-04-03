@@ -1,14 +1,19 @@
-import 'package:mobile/features/pokemon/domain/entities/pokemon_entity.dart';
-import 'package:mobile/features/pokemon_detail/domain/repositories/pokemon_detail_repository.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../repositories/pokemon_detail_repository.dart';
 
 class GetPokemonById {
-  final PokemonDetailRepository repository;
+  final PokemonDetailRepository _repository;
 
   GetPokemonById({
-    required this.repository,
-  });
+    required PokemonDetailRepository repository,
+  }) : _repository = repository;
 
-  Future<PokemonEntity> call(int id) async {
-    return await repository.getPokemonById(id);
+  Future<Result<IPokemonEntity>> call(int id) async {
+    try {
+      return await _repository.getPokemonById(id);
+    } catch (e) {
+      return Result.failure(e);
+    }
   }
 }

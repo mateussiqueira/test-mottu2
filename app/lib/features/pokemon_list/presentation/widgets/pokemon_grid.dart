@@ -1,79 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../../../features/pokemon/domain/entities/i_pokemon_entity.dart';
-import 'pokemon_grid_item.dart';
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../../../../features/pokemon/presentation/routes/pokemon_router.dart';
+import 'pokemon_card.dart';
 
 /// Widget for displaying a grid of Pokemon
-class PokemonGrid extends StatefulWidget {
-  final List<IPokemonEntity> pokemons;
+class PokemonGrid extends StatelessWidget {
+  final RxList<PokemonEntity> pokemons;
   final bool hasMore;
-  final bool isLoading;
-  final VoidCallback? onLoadMore;
+  final VoidCallback onLoadMore;
+  final bool fromSearch;
 
   const PokemonGrid({
     super.key,
     required this.pokemons,
     required this.hasMore,
-    this.isLoading = false,
-    this.onLoadMore,
+    required this.onLoadMore,
+    this.fromSearch = false,
   });
 
-  @override
-  State<PokemonGrid> createState() => _PokemonGridState();
-}
-
-class _PokemonGridState extends State<PokemonGrid> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.hasMore) {
-      _scrollController.addListener(_onScroll);
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      widget.onLoadMore?.call();
-    }
+  void _navigateToDetail(PokemonEntity pokemon) {
+    Get.toNamed(
+      PokemonRouter.pokemonDetail.replaceAll(':id', pokemon.id.toString()),
+      arguments: {
+        'pokemon': pokemon,
+        'fromSearch': fromSearch,
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      controller: widget.hasMore ? _scrollController : null,
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount:
-          widget.pokemons.length + (widget.hasMore && widget.isLoading ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == widget.pokemons.length) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-            ),
-          );
-        }
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (!hasMore || scrollInfo is! ScrollUpdateNotification) return false;
 
-        final pokemon = widget.pokemons[index];
-        return Hero(
-          tag: 'pokemon-${pokemon.id}',
-          child: PokemonGridItem(pokemon: pokemon),
-        );
+        const threshold = 0.8;
+        final currentPosition = scrollInfo.metrics.pixels;
+        final maxPosition = scrollInfo.metrics.maxScrollExtent;
+
+        if (currentPosition >= maxPosition * threshold) {
+          onLoadMore();
+        }
+        return false;
       },
+      child: Obx(
+        () => GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 0.75,
+          ),
+          itemCount: pokemons.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index < pokemons.length) {
+              final pokemon = pokemons[index];
+              return PokemonCard(
+                pokemon: pokemon,
+                onTap: () => _navigateToDetail(pokemon),
+              );
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+        ),
+      ),
     );
   }
 }

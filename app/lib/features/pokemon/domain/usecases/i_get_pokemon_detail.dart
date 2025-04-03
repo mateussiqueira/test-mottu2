@@ -1,6 +1,6 @@
-import '../../../../core/domain/result.dart' as core;
-import '../entities/i_pokemon_entity.dart';
+import '../../../../core/domain/errors/result.dart';
+import '../entities/pokemon_entity.dart';
 
 abstract class IGetPokemonDetail {
-  Future<core.Result<IPokemonEntity>> call(int id);
+  Future<Result<PokemonEntity>> call(int id);
 }

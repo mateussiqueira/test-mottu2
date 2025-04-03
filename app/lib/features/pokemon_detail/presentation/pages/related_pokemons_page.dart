@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../pokemon/domain/entities/i_pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../widgets/pokemon_grid_item.dart';
 
 class RelatedPokemonsPage extends StatelessWidget {
   final String title;
-  final List<IPokemonEntity> pokemons;
+  final List<PokemonEntity> pokemons;
 
   const RelatedPokemonsPage({
     super.key,

@@ -47,7 +47,9 @@ class PokemonCacheManager implements IPokemonCacheManager {
       }
 
       final jsonList = jsonDecode(jsonString) as List;
-      return jsonList.map((json) => PokemonModel.fromJson(json)).toList();
+      return jsonList
+          .map((json) => PokemonModel.fromJson(json) as IPokemonEntity)
+          .toList();
     } catch (e) {
       throw CacheError();
     }
@@ -85,7 +87,7 @@ class PokemonCacheManager implements IPokemonCacheManager {
       }
 
       final json = jsonDecode(jsonString);
-      return PokemonModel.fromJson(json);
+      return PokemonModel.fromJson(json) as IPokemonEntity;
     } catch (e) {
       throw CacheError();
     }

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
-import 'core/bindings/initial_binding.dart';
-import 'core/config/di.dart';
-import 'core/constants/app_constants.dart';
-import 'core/constants/route_names.dart';
-import 'core/presentation/localization/i_localization_manager.dart';
-import 'core/presentation/routes/i_router.dart';
-import 'core/presentation/theme/i_theme_manager.dart';
+import 'core/config/app_routes.dart';
+import 'core/config/app_theme.dart';
+import 'core/domain/errors/logger.dart';
+import 'core/domain/errors/performance_monitor.dart';
+import 'features/pokemon/data/datasources/pokemon_remote_datasource_impl.dart';
+import 'features/pokemon/data/repositories/pokemon_repository_impl.dart';
+import 'features/pokemon/presentation/bloc/pokemon_bloc.dart';
+import 'features/pokemon_detail/presentation/controllers/i_pokemon_detail_controller.dart';
+import 'features/pokemon_detail/presentation/controllers/pokemon_detail_controller.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await setupDependencies();
+void main() {
   runApp(const MyApp());
 }
 
@@ -20,38 +22,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeManager = getIt<IThemeManager>();
-    final localizationManager = getIt<ILocalizationManager>();
-    final router = getIt<IRouter>();
-    final initialBinding = getIt<InitialBinding>();
+    final httpClient = http.Client();
+    final remoteDataSource = PokemonRemoteDataSourceImpl(httpClient);
+    final repository = PokemonRepositoryImpl(remoteDataSource);
+    final logger = LoggingLogger();
+    final performanceMonitor = PerformanceMonitor();
 
-    return GetMaterialApp(
-      title: AppConstants.appName,
-      theme: themeManager.lightTheme,
-      darkTheme: themeManager.darkTheme,
-      themeMode: themeManager.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      initialRoute: RouteNames.pokemonList,
-      getPages: router.routes,
-      locale: Locale(localizationManager.currentLocale),
-      supportedLocales: localizationManager.supportedLocales
-          .map((locale) => Locale(locale))
-          .toList(),
-      translations: GetxTranslations(localizationManager),
-      initialBinding: initialBinding,
+    return MultiProvider(
+      providers: [
+        Provider<PokemonBloc>(
+          create: (_) => PokemonBloc(repository),
+        ),
+      ],
+      child: GetMaterialApp(
+        title: 'Pokemon App',
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: ThemeMode.system,
+        onGenerateRoute: AppRoutes.onGenerateRoute,
+        initialRoute: AppRoutes.home,
+        initialBinding: BindingsBuilder(() {
+          Get.lazyPut<IPokemonDetailController>(
+            () => PokemonDetailController(
+              repository: repository,
+              logger: logger,
+              performanceMonitor: performanceMonitor,
+            ),
+          );
+        }),
+      ),
     );
-  }
-}
-
-class GetxTranslations extends Translations {
-  final ILocalizationManager _localizationManager;
-
-  GetxTranslations(this._localizationManager);
-
-  @override
-  Map<String, Map<String, String>> get keys => {};
-
-  @override
-  String get(String key, {String? locale}) {
-    return _localizationManager.translate(key);
   }
 }
