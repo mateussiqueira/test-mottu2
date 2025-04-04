@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-import '../../data/datasources/pokemon_remote_datasource_impl.dart';
+import '../../data/datasources/pokemon_remote_data_source_impl.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../../domain/entities/pokemon_entity.dart';
 import '../../domain/usecases/get_pokemon_by_id_usecase.dart';
@@ -116,7 +116,7 @@ final pokemonRepositoryProvider = Provider<PokemonRepositoryImpl>((ref) {
 final pokemonRemoteDataSourceProvider =
     Provider<PokemonRemoteDataSourceImpl>((ref) {
   final client = ref.watch(httpClientProvider);
-  return PokemonRemoteDataSourceImpl(client);
+  return PokemonRemoteDataSourceImpl(client: client);
 });
 
 final httpClientProvider = Provider<http.Client>((ref) {

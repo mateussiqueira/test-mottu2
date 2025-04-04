@@ -16,6 +16,8 @@ class PokemonMapper {
       stats: pokemon.stats,
       moves: pokemon.moves,
       description: pokemon.description,
+      baseExperience: pokemon.baseExperience,
+      evolutions: pokemon.evolutions,
     );
   }
 

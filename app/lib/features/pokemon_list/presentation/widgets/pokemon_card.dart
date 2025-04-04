@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pokemon_list/features/pokemon_list/domain/entities/pokemon_entity.dart';
+
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
 
 /// Widget for displaying a Pokemon card
 class PokemonCard extends StatelessWidget {
@@ -57,7 +58,7 @@ class PokemonCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              if (pokemon.typeRelations.value != null) ...[
+              if (pokemon.typeRelations != null) ...[
                 Text(
                   'Type Relations:',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -73,7 +74,9 @@ class PokemonCard extends StatelessWidget {
   }
 
   Widget _buildTypeRelations(BuildContext context) {
-    final relations = pokemon.typeRelations.value!;
+    final relations = pokemon.typeRelations;
+    if (relations == null) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -101,54 +104,6 @@ class PokemonCard extends StatelessWidget {
                 .toList(),
           ),
         ],
-        if (relations.halfDamageTo.isNotEmpty) ...[
-          const Text('Half Damage To:'),
-          Wrap(
-            spacing: 8,
-            children: relations.halfDamageTo
-                .map((type) => Chip(
-                      label: Text(type.capitalizeFirst!),
-                      backgroundColor: _getTypeColor(type),
-                    ))
-                .toList(),
-          ),
-        ],
-        if (relations.halfDamageFrom.isNotEmpty) ...[
-          const Text('Half Damage From:'),
-          Wrap(
-            spacing: 8,
-            children: relations.halfDamageFrom
-                .map((type) => Chip(
-                      label: Text(type.capitalizeFirst!),
-                      backgroundColor: _getTypeColor(type),
-                    ))
-                .toList(),
-          ),
-        ],
-        if (relations.noDamageTo.isNotEmpty) ...[
-          const Text('No Damage To:'),
-          Wrap(
-            spacing: 8,
-            children: relations.noDamageTo
-                .map((type) => Chip(
-                      label: Text(type.capitalizeFirst!),
-                      backgroundColor: _getTypeColor(type),
-                    ))
-                .toList(),
-          ),
-        ],
-        if (relations.noDamageFrom.isNotEmpty) ...[
-          const Text('No Damage From:'),
-          Wrap(
-            spacing: 8,
-            children: relations.noDamageFrom
-                .map((type) => Chip(
-                      label: Text(type.capitalizeFirst!),
-                      backgroundColor: _getTypeColor(type),
-                    ))
-                .toList(),
-          ),
-        ],
       ],
     );
   }
@@ -156,43 +111,43 @@ class PokemonCard extends StatelessWidget {
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'normal':
-        return Colors.grey;
+        return const Color(0xFFA8A878);
       case 'fire':
-        return Colors.red;
+        return const Color(0xFFF08030);
       case 'water':
-        return Colors.blue;
+        return const Color(0xFF6890F0);
       case 'electric':
-        return Colors.yellow;
+        return const Color(0xFFF8D030);
       case 'grass':
-        return Colors.green;
+        return const Color(0xFF78C850);
       case 'ice':
-        return Colors.lightBlue;
+        return const Color(0xFF98D8D8);
       case 'fighting':
-        return Colors.orange;
+        return const Color(0xFFC03028);
       case 'poison':
-        return Colors.purple;
+        return const Color(0xFFA040A0);
       case 'ground':
-        return Colors.brown;
+        return const Color(0xFFE0C068);
       case 'flying':
-        return Colors.lightBlueAccent;
+        return const Color(0xFFA890F0);
       case 'psychic':
-        return Colors.pink;
+        return const Color(0xFFF85888);
       case 'bug':
-        return Colors.lightGreen;
+        return const Color(0xFFA8B820);
       case 'rock':
-        return Colors.brown.shade300;
+        return const Color(0xFFB8A038);
       case 'ghost':
-        return Colors.purple.shade300;
+        return const Color(0xFF705898);
       case 'dragon':
-        return Colors.indigo;
+        return const Color(0xFF7038F8);
       case 'dark':
-        return Colors.black54;
+        return const Color(0xFF705848);
       case 'steel':
-        return Colors.grey.shade400;
+        return const Color(0xFFB8B8D0);
       case 'fairy':
-        return Colors.pink.shade200;
+        return const Color(0xFFEE99AC);
       default:
-        return Colors.grey;
+        return const Color(0xFFA8A878);
     }
   }
 }

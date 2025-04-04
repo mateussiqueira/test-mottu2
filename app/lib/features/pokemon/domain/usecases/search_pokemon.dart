@@ -1,9 +1,12 @@
-import '../../../../core/domain/errors/failure.dart';
-import '../../../../core/domain/errors/result.dart';
-import '../entities/pokemon_entity.dart';
-import '../repositories/i_pokemon_repository.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../core/error/failure.dart';
+import '../../../core/result/result.dart';
+import '../../entities/pokemon_entity.dart';
+import '../../repositories/i_pokemon_repository.dart';
 import 'i_search_pokemon.dart';
 
+/// Use case to search Pokemon
 class SearchPokemon implements ISearchPokemon {
   final IPokemonRepository _repository;
 
@@ -15,8 +18,7 @@ class SearchPokemon implements ISearchPokemon {
       final result = await _repository.searchPokemon(query);
       return result;
     } catch (e) {
-      return Result.failure(
-          Failure(message: 'Failed to search Pokemon: ${e.toString()}'));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

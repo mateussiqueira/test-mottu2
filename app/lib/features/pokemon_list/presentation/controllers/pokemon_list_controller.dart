@@ -5,7 +5,6 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:json_annotation/json_annotation.dart';
 import 'package:pokemon_list/features/pokemon_list/domain/services/type_service.dart';
 
 import '../../../../core/constants/route_names.dart';
@@ -35,6 +34,30 @@ class PokemonListController extends GetxController
 
   @override
   PokemonListState get state => _state;
+
+  @override
+  RxList<PokemonEntity> get pokemons => _state.pokemons;
+
+  @override
+  bool get isLoadingMore => _isLoadingMore;
+
+  @override
+  int get currentPage => _currentPage;
+
+  @override
+  bool get hasMore => _hasMore;
+
+  @override
+  String get searchQuery => _state.searchQuery.value;
+
+  @override
+  String get filterType => _state.filterType.value;
+
+  @override
+  String get filterAbility => _state.filterAbility.value;
+
+  @override
+  bool get hasError => _state.error.value.isNotEmpty;
 
   @override
   final RxList<PokemonEntity> searchResults = <PokemonEntity>[].obs;
@@ -67,11 +90,12 @@ class PokemonListController extends GetxController
             scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore &&
         _hasMore) {
-      loadMorePokemons();
+      loadMore();
     }
   }
 
-  Future<void> loadMorePokemons() async {
+  @override
+  Future<void> loadMore() async {
     if (_isLoadingMore || !_hasMore) return;
 
     _isLoadingMore = true;
@@ -125,7 +149,7 @@ class PokemonListController extends GetxController
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final pokemon = PokemonEntity.fromJson(data);
-      await _typeService.loadTypeRelationsForPokemon(pokemon);
+      // Since typeRelations is final, we need to handle this in the repository
       return pokemon;
     } else {
       throw Exception('Failed to load Pokemon details');

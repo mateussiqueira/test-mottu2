@@ -13,6 +13,8 @@ class PokemonFactory {
     required Map<String, int> stats,
     required List<String> moves,
     required String description,
+    required int baseExperience,
+    required List<String> evolutions,
   }) {
     return PokemonEntity(
       id: id,
@@ -25,6 +27,8 @@ class PokemonFactory {
       stats: stats,
       moves: moves,
       description: description,
+      baseExperience: baseExperience,
+      evolutions: evolutions,
     ) as IPokemonEntity;
   }
 
@@ -66,6 +70,8 @@ class PokemonFactory {
       stats: stats,
       moves: moves,
       description: '', // We need to fetch this separately
+      baseExperience: json['base_experience'] as int? ?? 0,
+      evolutions: [], // This will be filled when needed from evolution-chain endpoint
     );
   }
 }

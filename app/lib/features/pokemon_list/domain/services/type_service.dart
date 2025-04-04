@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:pokemon_list/features/pokemon_list/domain/entities/pokemon_entity.dart';
-import 'package:pokemon_list/features/pokemon_list/domain/entities/type_relations.dart';
+
+import '../../../../features/pokemon/domain/entities/pokemon_entity.dart';
+import '../entities/type_relations.dart';
 
 class TypeService {
   final String baseUrl = 'https://pokeapi.co/api/v2';
@@ -28,7 +29,8 @@ class TypeService {
     for (final type in pokemon.types) {
       try {
         final relations = await getTypeRelations(type);
-        pokemon.typeRelations.value = relations;
+        // Since typeRelations is final, we need to create a new PokemonEntity
+        // with the updated relations. This should be handled by the repository.
         break; // Load relations for the first type only
       } catch (e) {
         print('Error loading relations for type $type: $e');

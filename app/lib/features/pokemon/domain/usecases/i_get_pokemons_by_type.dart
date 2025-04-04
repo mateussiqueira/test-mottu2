@@ -1,11 +1,8 @@
-import '../../../../core/domain/errors/result.dart';
-import '../entities/pokemon_entity.dart';
+import '../../../core/result/result.dart';
+import '../../entities/pokemon_entity.dart';
 
-/// Interface for the GetPokemonsByType use case
+/// Interface for getting Pokemon by type
 abstract class IGetPokemonsByType {
-  /// Fetches a list of Pokemon that have a specific type
-  ///
-  /// [type] - The type to search for
-  /// Returns a [Result] containing either a list of Pokemon or an error
+  /// Get Pokemon by type
   Future<Result<List<PokemonEntity>>> call(String type);
 }

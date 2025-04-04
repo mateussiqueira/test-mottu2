@@ -1,9 +1,12 @@
-import '../../../../core/domain/errors/failure.dart';
-import '../../../../core/domain/errors/result.dart';
-import '../entities/pokemon_entity.dart';
-import '../repositories/i_pokemon_repository.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../core/error/failure.dart';
+import '../../../core/result/result.dart';
+import '../../entities/pokemon_entity.dart';
+import '../../repositories/i_pokemon_repository.dart';
 import 'i_get_pokemons_by_type.dart';
 
+/// Use case to get Pokemon by type
 class GetPokemonsByType implements IGetPokemonsByType {
   final IPokemonRepository _repository;
 
@@ -15,8 +18,7 @@ class GetPokemonsByType implements IGetPokemonsByType {
       final result = await _repository.getPokemonsByType(type);
       return result;
     } catch (e) {
-      return Result.failure(
-          Failure(message: 'Failed to get Pokemon by type: ${e.toString()}'));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

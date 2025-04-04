@@ -119,7 +119,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
     Emitter<PokemonState> emit,
   ) async {
     emit(PokemonLoading());
-    final result = await _repository.getPokemonDetail(event.id);
+    final result = await _repository.getPokemonById(event.id);
     result.isSuccess
         ? emit(PokemonDetailLoaded(result.data!))
         : emit(PokemonError(result.error.toString()));

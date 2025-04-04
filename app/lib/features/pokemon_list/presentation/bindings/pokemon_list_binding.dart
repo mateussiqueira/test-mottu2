@@ -20,17 +20,16 @@ class PokemonListBinding extends Bindings {
     final repository = getIt<IPokemonRepository>();
     final logger = Logger();
     final performanceMonitor = PerformanceMonitor();
+    final errorHandler = ErrorHandler();
 
     final getPokemonList = GetPokemonList(repository);
     final searchPokemon = SearchPokemon(repository);
 
     Get.put<PokemonListController>(
       PokemonListController(
-        getPokemonList: getPokemonList,
-        searchPokemon: searchPokemon,
-        repository: repository,
-        logger: logger,
+        errorHandler: errorHandler,
         performanceMonitor: performanceMonitor,
+        logger: logger,
       ),
     );
 
@@ -42,14 +41,18 @@ class PokemonListBinding extends Bindings {
       () => searchPokemon,
     );
 
-    registerSearchController(logger);
+    registerSearchController(logger, errorHandler, performanceMonitor);
   }
 
-  void registerSearchController(ILogger logger) {
+  void registerSearchController(
+    ILogger logger,
+    ErrorHandler errorHandler,
+    PerformanceMonitor performanceMonitor,
+  ) {
     Get.lazyPut<IPokemonSearchController>(
       () => PokemonSearchController(
-        errorHandler: ErrorHandler(),
-        performanceMonitor: PerformanceMonitor(),
+        errorHandler: errorHandler,
+        performanceMonitor: performanceMonitor,
         logger: logger,
       ),
     );

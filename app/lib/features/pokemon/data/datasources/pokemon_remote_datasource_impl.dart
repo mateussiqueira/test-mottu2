@@ -268,6 +268,7 @@ class PokemonRemoteDataSourceImpl implements IPokemonRemoteDataSource {
           .toList(),
       height: data['height'],
       weight: data['weight'],
+      baseExperience: data['base_experience'] ?? 0,
       abilities: (data['abilities'] as List)
           .map((ability) => ability['ability']['name'].toString())
           .toList(),
@@ -282,6 +283,7 @@ class PokemonRemoteDataSourceImpl implements IPokemonRemoteDataSource {
       moves: (data['moves'] as List)
           .map((move) => move['move']['name'].toString())
           .toList(),
+      evolutions: [], // This will be filled when needed from evolution-chain endpoint
       description: '', // This will be filled when needed from species endpoint
     );
   }

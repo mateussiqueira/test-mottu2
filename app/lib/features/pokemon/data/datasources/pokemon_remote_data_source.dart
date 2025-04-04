@@ -4,12 +4,44 @@ import 'package:http/http.dart' as http;
 
 import '../../../../core/config/app_config.dart';
 import '../../domain/entities/pokemon_entity.dart';
-import 'i_pokemon_remote_datasource.dart';
 
-class PokemonRemoteDataSource implements IPokemonRemoteDataSource {
+/// Interface for Pokemon remote data source
+abstract class PokemonRemoteDataSource {
+  /// Get a list of Pokemon
+  Future<List<PokemonEntity>> getPokemonList({
+    int? limit,
+    int? offset,
+  });
+
+  /// Get a Pokemon by ID
+  Future<PokemonEntity> getPokemonById(int id);
+
+  /// Search Pokemon by name
+  Future<List<PokemonEntity>> searchPokemon(String query);
+
+  /// Get Pokemon by type
+  Future<List<PokemonEntity>> getPokemonsByType(String type);
+
+  /// Get Pokemon by ability
+  Future<List<PokemonEntity>> getPokemonsByAbility(String ability);
+
+  /// Get Pokemon by move
+  Future<List<PokemonEntity>> getPokemonsByMove(String move);
+
+  /// Get Pokemon by evolution
+  Future<List<PokemonEntity>> getPokemonsByEvolution(String evolution);
+
+  /// Get Pokemon by stat
+  Future<List<PokemonEntity>> getPokemonsByStat(String stat, int value);
+
+  /// Get Pokemon by description
+  Future<List<PokemonEntity>> getPokemonsByDescription(String description);
+}
+
+class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   final http.Client _client;
 
-  PokemonRemoteDataSource({required http.Client client}) : _client = client;
+  PokemonRemoteDataSourceImpl({required http.Client client}) : _client = client;
 
   @override
   Future<List<PokemonEntity>> getPokemonList({int? limit, int? offset}) async {
@@ -51,6 +83,23 @@ class PokemonRemoteDataSource implements IPokemonRemoteDataSource {
       throw Exception('Failed to load pokemon details: ${response.statusCode}');
     } catch (e) {
       throw Exception('Network error while fetching pokemon details: $e');
+    }
+  }
+
+  @override
+  Future<List<PokemonEntity>> searchPokemon(String query) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('${AppConfig.baseUrl}/pokemon/$query'),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return [PokemonEntity.fromJson(json)];
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 
@@ -203,23 +252,6 @@ class PokemonRemoteDataSource implements IPokemonRemoteDataSource {
       return pokemons;
     } else {
       throw Exception('Failed to load pokemons by description');
-    }
-  }
-
-  @override
-  Future<List<PokemonEntity>> searchPokemons(String query) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('${AppConfig.baseUrl}/pokemon/$query'),
-      );
-
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        return [PokemonEntity.fromJson(json)];
-      }
-      return [];
-    } catch (e) {
-      return [];
     }
   }
 }

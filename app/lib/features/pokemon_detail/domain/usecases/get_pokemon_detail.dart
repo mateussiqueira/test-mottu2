@@ -13,7 +13,7 @@ class GetPokemonDetail implements IGetPokemonDetail {
   @override
   Future<Result<PokemonEntity>> call(int id) async {
     try {
-      final result = await repository.getPokemonDetail(id);
+      final result = await repository.getPokemonById(id);
       return result;
     } catch (e) {
       return Result.failure(

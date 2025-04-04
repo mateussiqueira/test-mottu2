@@ -61,6 +61,7 @@ class PokemonMapper {
       name: json['name'] as String,
       height: json['height'] as int,
       weight: json['weight'] as int,
+      baseExperience: json['base_experience'] as int? ?? 0,
       types: (json['types'] as List)
           .map((type) => type['type']['name'] as String)
           .toList(),
@@ -74,6 +75,7 @@ class PokemonMapper {
       moves: (json['moves'] as List)
           .map((move) => move['move']['name'] as String)
           .toList(),
+      evolutions: [], // This will be filled when needed from evolution-chain endpoint
       description: '',
     );
   }

@@ -1,11 +1,8 @@
-import '../../../../core/domain/errors/result.dart';
-import '../entities/pokemon_entity.dart';
+import '../../../core/result/result.dart';
+import '../../entities/pokemon_entity.dart';
 
-/// Interface for the SearchPokemon use case
+/// Interface for searching Pokemon
 abstract class ISearchPokemon {
-  /// Searches for Pokemon based on a query
-  ///
-  /// [query] - The search query
-  /// Returns a [Result] containing either a list of Pokemon or an error
+  /// Search Pokemon by query
   Future<Result<List<PokemonEntity>>> call(String query);
 }

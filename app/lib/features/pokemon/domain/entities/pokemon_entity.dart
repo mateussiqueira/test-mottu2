@@ -1,27 +1,59 @@
-class PokemonEntity {
+import 'package:json_annotation/json_annotation.dart';
+
+import 'i_pokemon_entity.dart';
+
+part 'pokemon_entity.g.dart';
+
+@JsonSerializable()
+class PokemonEntity implements IPokemonEntity {
+  @override
   final int id;
+  @override
   final String name;
-  final List<String> types;
-  final List<String> abilities;
-  final int height;
-  final int weight;
+  @override
   final String imageUrl;
+  @override
+  final List<String> types;
+  @override
+  final List<String> abilities;
+  @override
+  final int height;
+  @override
+  final int weight;
+  @override
+  final int baseExperience;
+  @override
   final Map<String, int> stats;
-  final List<String> moves;
+  @override
   final String description;
+  @override
+  final TypeRelations? typeRelations;
+  @override
+  final List<String> moves;
+  @override
+  final List<String> evolutions;
 
   PokemonEntity({
     required this.id,
     required this.name,
+    required this.imageUrl,
     required this.types,
     required this.abilities,
     required this.height,
     required this.weight,
-    required this.imageUrl,
+    required this.baseExperience,
     required this.stats,
-    required this.moves,
     required this.description,
+    required this.moves,
+    required this.evolutions,
+    this.typeRelations,
   });
+
+  factory PokemonEntity.fromJson(Map<String, dynamic> json) =>
+      _$PokemonEntityFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$PokemonEntityToJson(this);
 
   @override
   String toString() {
@@ -36,95 +68,39 @@ class PokemonEntity {
         other.name == name &&
         other.imageUrl == imageUrl &&
         other.types.toString() == types.toString() &&
-        other.height == height &&
-        other.weight == weight &&
         other.abilities.toString() == abilities.toString() &&
         other.stats.toString() == stats.toString() &&
         other.moves.toString() == moves.toString() &&
+        other.evolutions.toString() == evolutions.toString() &&
         other.description == description;
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
-        imageUrl.hashCode ^
-        types.hashCode ^
-        height.hashCode ^
-        weight.hashCode ^
-        abilities.hashCode ^
-        stats.hashCode ^
-        moves.hashCode ^
-        description.hashCode;
-  }
-
-  factory PokemonEntity.fromJson(Map<String, dynamic> json) {
-    final sprites = json['sprites'] as Map<String, dynamic>;
-    final officialArtwork =
-        sprites['other']?['official-artwork'] as Map<String, dynamic>;
-    final imageUrl = officialArtwork['front_default'] as String? ?? '';
-
-    final types = (json['types'] as List)
-        .map((type) => (type['type']['name'] as String))
-        .toList();
-
-    final abilities = (json['abilities'] as List)
-        .map((ability) => (ability['ability']['name'] as String))
-        .toList();
-
-    final stats = Map<String, int>.fromEntries(
-      (json['stats'] as List).map(
-        (stat) => MapEntry(
-          stat['stat']['name'] as String,
-          stat['base_stat'] as int,
-        ),
-      ),
-    );
-
-    final moves = (json['moves'] as List)
-        .map((move) => (move['move']['name'] as String))
-        .toList();
-
-    return PokemonEntity(
-      id: json['id'] as int,
-      name: (json['name'] as String).replaceAll('-', ' '),
-      imageUrl: imageUrl,
-      types: types,
-      abilities: abilities,
-      stats: stats,
-      height: json['height'] as int,
-      weight: json['weight'] as int,
-      moves: moves,
-      description: '', // We need to fetch this separately
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'types': types,
-      'abilities': abilities,
-      'height': height,
-      'weight': weight,
-      'imageUrl': imageUrl,
-      'stats': stats,
-      'moves': moves,
-      'description': description,
-    };
-  }
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      imageUrl.hashCode ^
+      types.hashCode ^
+      abilities.hashCode ^
+      stats.hashCode ^
+      moves.hashCode ^
+      evolutions.hashCode ^
+      description.hashCode;
 
   PokemonEntity copyWith({
     int? id,
     String? name,
+    String? imageUrl,
     List<String>? types,
     List<String>? abilities,
     int? height,
     int? weight,
-    String? imageUrl,
+    int? baseExperience,
     Map<String, int>? stats,
-    List<String>? moves,
     String? description,
+    List<String>? moves,
+    List<String>? evolutions,
+    TypeRelations? typeRelations,
   }) {
     return PokemonEntity(
       id: id ?? this.id,
@@ -132,11 +108,14 @@ class PokemonEntity {
       imageUrl: imageUrl ?? this.imageUrl,
       types: types ?? this.types,
       abilities: abilities ?? this.abilities,
-      stats: stats ?? this.stats,
       height: height ?? this.height,
       weight: weight ?? this.weight,
-      moves: moves ?? this.moves,
+      baseExperience: baseExperience ?? this.baseExperience,
+      stats: stats ?? this.stats,
       description: description ?? this.description,
+      moves: moves ?? this.moves,
+      evolutions: evolutions ?? this.evolutions,
+      typeRelations: typeRelations ?? this.typeRelations,
     );
   }
 }
