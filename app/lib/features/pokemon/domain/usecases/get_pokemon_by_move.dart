@@ -1,16 +1,22 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
-import '../../domain/entities/pokemon_entity.dart';
-import '../../domain/repositories/pokemon_repository.dart';
+import '../entities/pokemon_entity.dart';
+import '../repositories/i_pokemon_repository.dart';
+import 'i_get_pokemons_by_move.dart';
 
 /// Use case for getting Pokemon by move
-class GetPokemonsByMove {
-  final PokemonRepository repository;
+class GetPokemonsByMove implements IGetPokemonsByMove {
+  final IPokemonRepository repository;
 
   GetPokemonsByMove(this.repository);
 
+  @override
   Future<Either<Failure, List<PokemonEntity>>> call(String move) async {
-    return await repository.getPokemonsByMove(move);
+    try {
+      return await repository.getPokemonsByMove(move);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
   }
 }

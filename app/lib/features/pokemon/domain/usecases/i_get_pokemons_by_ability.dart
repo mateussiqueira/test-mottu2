@@ -1,8 +1,12 @@
-import '../../../core/result/result.dart';
-import '../../entities/pokemon_entity.dart';
+import 'package:dartz/dartz.dart';
+
+import '../entities/pokemon_entity_impl.dart';
+import '../failures/pokemon_failure.dart';
 
 /// Interface for getting Pokemon by ability
 abstract class IGetPokemonsByAbility {
   /// Get Pokemon by ability
-  Future<Result<List<PokemonEntity>>> call(String ability);
+  Future<Either<PokemonFailure, List<PokemonEntityImpl>>> call({
+    required String ability,
+  });
 }

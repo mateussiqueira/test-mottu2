@@ -1,110 +1,56 @@
-import '../../domain/entities/pokemon_entity.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-/// Model class for Pokemon data from the API
-class PokemonModel extends PokemonEntity {
-  PokemonModel({
-    required int id,
-    required String name,
-    required int height,
-    required int weight,
-    required List<String> types,
-    required List<String> abilities,
-    required Map<String, int> stats,
-    required String imageUrl,
-    required List<String> moves,
-    required String description,
-  }) : super(
-          id: id,
-          name: name,
-          height: height,
-          weight: weight,
-          types: types,
-          abilities: abilities,
-          stats: stats,
-          imageUrl: imageUrl,
-          moves: moves,
-          description: description,
-        );
+part 'pokemon_model.g.dart';
 
-  /// Creates a PokemonModel from JSON data
-  factory PokemonModel.fromJson(Map<String, dynamic> json) {
-    final sprites = json['sprites'] as Map<String, dynamic>;
-    final officialArtwork =
-        sprites['other']?['official-artwork'] as Map<String, dynamic>;
-    final imageUrl = officialArtwork['front_default'] as String? ?? '';
+/// Model for Pokemon data
+@JsonSerializable()
+class PokemonModel {
+  final int id;
+  final String name;
+  final List<String> types;
+  final List<String> abilities;
+  final int height;
+  final int weight;
+  final Map<String, int> stats;
+  final Map<String, String> sprites;
+  final int baseExperience;
+  final List<String> moves;
+  final List<String> evolutions;
+  final String description;
+  final bool isDefault;
+  final int order;
+  final List<String> forms;
+  final List<String> gameIndices;
+  final List<String> heldItems;
+  final String locationAreaEncounters;
+  final String species;
 
-    final types = (json['types'] as List)
-        .map((type) => (type['type']['name'] as String))
-        .toList();
+  const PokemonModel({
+    required this.id,
+    required this.name,
+    required this.types,
+    required this.abilities,
+    required this.height,
+    required this.weight,
+    required this.stats,
+    required this.sprites,
+    required this.baseExperience,
+    required this.moves,
+    required this.evolutions,
+    required this.description,
+    required this.isDefault,
+    required this.order,
+    required this.forms,
+    required this.gameIndices,
+    required this.heldItems,
+    required this.locationAreaEncounters,
+    required this.species,
+  });
 
-    final abilities = (json['abilities'] as List)
-        .map((ability) => (ability['ability']['name'] as String))
-        .toList();
+  factory PokemonModel.fromJson(Map<String, dynamic> json) =>
+      _$PokemonModelFromJson(json);
 
-    final stats = Map<String, int>.fromEntries(
-      (json['stats'] as List).map(
-        (stat) => MapEntry(
-          stat['stat']['name'] as String,
-          stat['base_stat'] as int,
-        ),
-      ),
-    );
-
-    final moves = (json['moves'] as List)
-        .map((move) => (move['move']['name'] as String))
-        .toList();
-
-    return PokemonModel(
-      id: json['id'] as int,
-      name: (json['name'] as String).replaceAll('-', ' '),
-      height: json['height'] as int,
-      weight: json['weight'] as int,
-      types: types,
-      abilities: abilities,
-      stats: stats,
-      imageUrl: imageUrl,
-      moves: moves,
-      description: '',
-    );
-  }
-
-  /// Converts the PokemonModel to JSON
-  @override
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'height': height,
-      'weight': weight,
-      'types': types
-          .map((type) => {
-                'type': {'name': type}
-              })
-          .toList(),
-      'abilities': abilities
-          .map((ability) => {
-                'ability': {'name': ability}
-              })
-          .toList(),
-      'stats': stats.entries
-          .map((stat) => {
-                'stat': {'name': stat.key},
-                'base_stat': stat.value,
-              })
-          .toList(),
-      'sprites': {
-        'other': {
-          'official-artwork': {'front_default': imageUrl}
-        }
-      },
-      'moves': moves
-          .map((move) => {
-                'move': {'name': move}
-              })
-          .toList(),
-      'description': description,
-    };
-  }
+  Map<String, dynamic> toJson() => _$PokemonModelToJson(this);
 
   @override
   String toString() {

@@ -2,380 +2,252 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../../../core/domain/errors/failure.dart';
-import '../../../../core/domain/errors/result.dart';
-import '../../domain/entities/pokemon_entity.dart';
-import '../validators/pokemon_response_validator.dart';
+import '../models/pokemon_model.dart';
+import '../models/pokemon_response.dart';
 
-/// Client for making Pokemon API requests
+/// Client for interacting with the Pokemon API
 class PokemonApiClient {
-  final String baseUrl;
   final http.Client _client;
+  final String _baseUrl = 'https://pokeapi.co/api/v2';
 
-  PokemonApiClient({
-    required this.baseUrl,
-    required http.Client client,
-  }) : _client = client;
+  PokemonApiClient(this._client);
 
-  Future<Result<List<PokemonEntity>>> getPokemonList({
-    required int limit,
-    required int offset,
+  /// Get a list of Pokemon with pagination
+  Future<PokemonResponse> getPokemonList({
+    int? offset,
+    int? limit,
   }) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/pokemon?limit=$limit&offset=$offset'),
-      );
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/pokemon?limit=${limit ?? 20}&offset=${offset ?? 0}'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!PokemonResponseValidator.isValidListResponse(data)) {
-          return Result.failure(Failure(message: 'Invalid response format'));
-        }
-
-        final results = data['results'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidUrl(result)) {
-            continue;
-          }
-          final url = result['url'] as String;
-          final segments = url.split('/');
-          final id = int.parse(segments[segments.length - 2]);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(Failure(message: 'Failed to fetch pokemon list'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon list: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return PokemonResponse.fromJson(data);
+    } else {
+      throw Exception('Failed to load pokemon list');
     }
   }
 
-  Future<Result<PokemonEntity>> getPokemonDetail(int id) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/pokemon/$id'),
-      );
+  /// Get a Pokemon by ID
+  Future<PokemonModel> getPokemonById(int id) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/pokemon/$id'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return Result.success(PokemonEntity.fromJson(data));
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon details'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon details: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return PokemonModel.fromJson(data);
+    } else {
+      throw Exception('Failed to load pokemon');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> searchPokemon(String query) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/pokemon?limit=1118'),
-      );
+  /// Search Pokemon by query
+  Future<PokemonResponse> searchPokemon(String query) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/pokemon?limit=1000'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!PokemonResponseValidator.isValidListResponse(data)) {
-          return Result.failure(Failure(message: 'Invalid response format'));
-        }
-
-        final results = data['results'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidUrl(result)) {
-            continue;
-          }
-          final name = result['name'] as String;
-          if (name.toLowerCase().contains(query.toLowerCase())) {
-            final id =
-                int.parse(result['url'].split('/').reversed.skip(1).first);
-            futures.add(getPokemonDetail(id));
-          }
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(Failure(message: 'Failed to search pokemon'));
-    } catch (e) {
-      return Result.failure(Failure(message: 'Error searching pokemon: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = (data['results'] as List)
+          .where((pokemon) => pokemon['name']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
+          .toList();
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to search pokemons');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> getPokemonsByType(String type) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/type/$type'),
-      );
+  /// Get Pokemon by type
+  Future<PokemonResponse> getPokemonsByType(String type) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/type/$type'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!PokemonResponseValidator.isValidTypeResponse(data)) {
-          return Result.failure(Failure(message: 'Invalid response format'));
-        }
-
-        final results = data['pokemon'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidTypeUrl(result)) {
-            continue;
-          }
-          final id = int.parse(
-              result['pokemon']['url'].split('/').reversed.skip(1).first);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon by type'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon by type: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results =
+          (data['pokemon'] as List).map((p) => p['pokemon']).toList();
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to load pokemons by type');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> getPokemonsByAbility(
-      String ability) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/ability/$ability'),
-      );
+  /// Get Pokemon by ability
+  Future<PokemonResponse> getPokemonsByAbility(String ability) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/ability/$ability'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!PokemonResponseValidator.isValidAbilityResponse(data)) {
-          return Result.failure(Failure(message: 'Invalid response format'));
-        }
-
-        final results = data['pokemon'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidTypeUrl(result)) {
-            continue;
-          }
-          final id = int.parse(
-              result['pokemon']['url'].split('/').reversed.skip(1).first);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon by ability'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon by ability: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results =
+          (data['pokemon'] as List).map((p) => p['pokemon']).toList();
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to load pokemons by ability');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> getPokemonsByMove(String move) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/move/$move'),
-      );
+  /// Get Pokemon by move
+  Future<PokemonResponse> getPokemonsByMove(String move) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/move/$move'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final results = data['learned_by_pokemon'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidUrl(result)) {
-            continue;
-          }
-          final id = int.parse(result['url'].split('/')[6]);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon by move'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon by move: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = (data['learned_by_pokemon'] as List).toList();
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to load pokemons by move');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> getPokemonsByEvolution(
-      String evolution) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/evolution-chain/$evolution'),
-      );
+  /// Get Pokemon by evolution
+  Future<PokemonResponse> getPokemonsByEvolution(String evolution) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/evolution-chain/$evolution'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final results = data['chain']['evolves_to'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          final species = result['species'];
-          if (!PokemonResponseValidator.hasValidUrl(species)) {
-            continue;
-          }
-          final id = int.parse(species['url'].split('/')[6]);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon by evolution'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon by evolution: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = await _processEvolutionChain(data['chain']);
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to load pokemons by evolution');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> getPokemonsByStat(
-      String stat, int value) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/pokemon?limit=1118'),
-      );
+  /// Get Pokemon by stat
+  Future<PokemonResponse> getPokemonsByStat(String stat, int value) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/pokemon?limit=1000'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!PokemonResponseValidator.isValidListResponse(data)) {
-          return Result.failure(Failure(message: 'Invalid response format'));
-        }
-
-        final results = data['results'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidUrl(result)) {
-            continue;
-          }
-          final id = int.parse(result['url'].split('/')[6]);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess && result.data!.stats[stat] == value) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon by stat'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon by stat: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results = await _filterPokemonsByStat(data['results'], stat, value);
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to load pokemons by stat');
     }
   }
 
-  Future<Result<List<PokemonEntity>>> getPokemonsByDescription(
-      String description) async {
-    try {
-      final response = await _client.get(
-        Uri.parse('$baseUrl/pokemon-species?limit=1118'),
-      );
+  /// Get Pokemon by description
+  Future<PokemonResponse> getPokemonsByDescription(String description) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/pokemon-species?limit=1000'),
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!PokemonResponseValidator.isValidListResponse(data)) {
-          return Result.failure(Failure(message: 'Invalid response format'));
-        }
-
-        final results = data['results'] as List;
-        final futures = <Future<Result<PokemonEntity>>>[];
-
-        for (final result in results) {
-          if (!PokemonResponseValidator.hasValidUrl(result)) {
-            continue;
-          }
-          final id = int.parse(result['url'].split('/')[6]);
-          futures.add(getPokemonDetail(id));
-        }
-
-        final detailResults = await Future.wait(futures);
-        final pokemons = <PokemonEntity>[];
-
-        for (final result in detailResults) {
-          if (result.isSuccess &&
-              result.data!.description
-                  .toLowerCase()
-                  .contains(description.toLowerCase())) {
-            pokemons.add(result.data!);
-          }
-        }
-
-        return Result.success(pokemons);
-      }
-      return Result.failure(
-          Failure(message: 'Failed to fetch pokemon by description'));
-    } catch (e) {
-      return Result.failure(
-          Failure(message: 'Error fetching pokemon by description: $e'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final results =
+          await _filterPokemonsByDescription(data['results'], description);
+      return PokemonResponse(results: results);
+    } else {
+      throw Exception('Failed to load pokemons by description');
     }
+  }
+
+  /// Get Pokemon by name
+  Future<PokemonModel> getPokemonByName(String name) async {
+    final response = await _client.get(
+      Uri.parse('$_baseUrl/pokemon/$name'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return PokemonModel.fromJson(data);
+    } else {
+      throw Exception('Failed to load pokemon');
+    }
+  }
+
+  Future<List<dynamic>> _processEvolutionChain(
+      Map<String, dynamic> chain) async {
+    final List<dynamic> results = [];
+    final speciesUrl = chain['species']['url'];
+    final speciesResponse = await _client.get(Uri.parse(speciesUrl));
+
+    if (speciesResponse.statusCode == 200) {
+      final speciesData = json.decode(speciesResponse.body);
+      results.add(speciesData);
+    }
+
+    if (chain['evolves_to'] != null && chain['evolves_to'].isNotEmpty) {
+      for (var evolution in chain['evolves_to']) {
+        results.addAll(await _processEvolutionChain(evolution));
+      }
+    }
+
+    return results;
+  }
+
+  Future<List<dynamic>> _filterPokemonsByStat(
+    List<dynamic> pokemons,
+    String stat,
+    int value,
+  ) async {
+    final List<dynamic> results = [];
+
+    for (var pokemon in pokemons) {
+      final detailResponse = await _client.get(Uri.parse(pokemon['url']));
+      if (detailResponse.statusCode == 200) {
+        final pokemonData = json.decode(detailResponse.body);
+        final stats = pokemonData['stats'];
+        final matchingStat = stats.firstWhere(
+          (s) => s['stat']['name'] == stat,
+          orElse: () => null,
+        );
+
+        if (matchingStat != null && matchingStat['base_stat'] >= value) {
+          results.add(pokemonData);
+        }
+      }
+    }
+
+    return results;
+  }
+
+  Future<List<dynamic>> _filterPokemonsByDescription(
+    List<dynamic> species,
+    String description,
+  ) async {
+    final List<dynamic> results = [];
+
+    for (var s in species) {
+      final speciesResponse = await _client.get(Uri.parse(s['url']));
+      if (speciesResponse.statusCode == 200) {
+        final speciesData = json.decode(speciesResponse.body);
+        final flavorTextEntries = speciesData['flavor_text_entries'];
+        final englishDescription = flavorTextEntries.firstWhere(
+          (entry) => entry['language']['name'] == 'en',
+          orElse: () => null,
+        );
+
+        if (englishDescription != null &&
+            englishDescription['flavor_text']
+                .toString()
+                .toLowerCase()
+                .contains(description.toLowerCase())) {
+          final pokemonResponse = await _client.get(
+            Uri.parse('$_baseUrl/pokemon/${speciesData['id']}'),
+          );
+          if (pokemonResponse.statusCode == 200) {
+            final pokemonData = json.decode(pokemonResponse.body);
+            results.add(pokemonData);
+          }
+        }
+      }
+    }
+
+    return results;
   }
 }

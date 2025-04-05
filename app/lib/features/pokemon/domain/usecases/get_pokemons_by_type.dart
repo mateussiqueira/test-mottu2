@@ -1,24 +1,24 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../core/error/failure.dart';
-import '../../../core/result/result.dart';
-import '../../entities/pokemon_entity.dart';
-import '../../repositories/i_pokemon_repository.dart';
+import '../entities/pokemon_entity_impl.dart';
+import '../failures/pokemon_failure.dart';
+import '../repositories/i_pokemon_repository.dart';
 import 'i_get_pokemons_by_type.dart';
 
-/// Use case to get Pokemon by type
+/// Use case for getting Pokemon by type
 class GetPokemonsByType implements IGetPokemonsByType {
-  final IPokemonRepository _repository;
+  final IPokemonRepository repository;
 
-  GetPokemonsByType(this._repository);
+  GetPokemonsByType(this.repository);
 
   @override
-  Future<Result<List<PokemonEntity>>> call(String type) async {
+  Future<Either<PokemonFailure, List<PokemonEntityImpl>>> call({
+    required String type,
+  }) async {
     try {
-      final result = await _repository.getPokemonsByType(type);
-      return result;
+      return await repository.getPokemonsByType(type: type);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(PokemonFailure.api(message: e.toString()));
     }
   }
 }

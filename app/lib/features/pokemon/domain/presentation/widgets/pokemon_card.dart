@@ -1,45 +1,48 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-import '../../../../core/config/app_routes.dart';
-import '../../domain/entities/i_pokemon_entity.dart';
+import 'package:pokemon_list/features/pokemon/domain/entities/pokemon_entity_impl.dart';
 
 class PokemonCard extends StatelessWidget {
-  final IPokemonEntity pokemon;
+  final PokemonEntityImpl pokemon;
+  final VoidCallback onTap;
 
-  const PokemonCard({super.key, required this.pokemon});
+  const PokemonCard({
+    super.key,
+    required this.pokemon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      clipBehavior: Clip.antiAlias,
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: InkWell(
-        onTap: () => Navigator.pushNamed(
-          context,
-          AppRoutes.pokemonDetail,
-          arguments: pokemon,
-        ),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: CachedNetworkImage(
-                imageUrl: pokemon.imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
+              child: Hero(
+                tag: 'pokemon-${pokemon.id}',
+                child: Image.network(
+                  pokemon.imageUrl,
+                  fit: BoxFit.contain,
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     pokemon.name,
                     style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Wrap(
@@ -47,9 +50,17 @@ class PokemonCard extends StatelessWidget {
                     children: pokemon.types
                         .map(
                           (type) => Chip(
-                            label: Text(type),
+                            label: Text(
+                              type,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
                             backgroundColor: _getTypeColor(type),
-                            labelStyle: const TextStyle(color: Colors.white),
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                           ),
                         )
                         .toList(),

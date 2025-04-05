@@ -1,13 +1,9 @@
-import '../../../../core/domain/errors/result.dart';
+import '../../../../core/result/result.dart';
 import '../entities/pokemon_entity.dart';
 
-/// Interface for the GetPokemonList use case
+/// Interface for getting a list of Pokemon
 abstract class IGetPokemonListUseCase {
-  /// Fetches a list of Pokemon with pagination support
-  ///
-  /// [limit] - Maximum number of Pokemon to return
-  /// [offset] - Number of Pokemon to skip
-  /// Returns a [Result] containing either a list of Pokemon or an error
+  /// Get a list of Pokemon
   Future<Result<List<PokemonEntity>>> call({
     required int limit,
     required int offset,

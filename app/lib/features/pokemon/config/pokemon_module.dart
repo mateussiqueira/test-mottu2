@@ -1,60 +1,78 @@
-import 'package:get_it/get_it.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import '../data/datasources/i_pokemon_remote_datasource.dart';
 import '../data/datasources/pokemon_remote_data_source_impl.dart';
 import '../data/repositories/pokemon_repository_impl.dart';
 import '../domain/repositories/i_pokemon_repository.dart';
-import '../domain/usecases/get_pokemon_detail.dart';
-import '../domain/usecases/get_pokemon_list.dart';
-import '../domain/usecases/get_pokemons_by_ability.dart';
-import '../domain/usecases/get_pokemons_by_type.dart';
-import '../domain/usecases/search_pokemon.dart';
+import '../domain/usecases/get_pokemon_by_ability.dart' as ability;
+import '../domain/usecases/get_pokemon_by_description.dart' as description;
+import '../domain/usecases/get_pokemon_by_evolution.dart' as evolution;
+import '../domain/usecases/get_pokemon_by_id.dart' as id;
+import '../domain/usecases/get_pokemon_by_move.dart' as move;
+import '../domain/usecases/get_pokemon_by_stat.dart' as stat;
+import '../domain/usecases/get_pokemon_by_type.dart' as type;
+import '../domain/usecases/get_pokemon_list.dart' as list;
+import '../domain/usecases/search_pokemon.dart' as search;
+import '../presentation/bloc/pokemon_bloc.dart';
 
-/// Module for Pokemon feature dependency injection
-class PokemonModule {
-  /// Sets up all dependencies for the Pokemon feature
-  static void init() {
-    final getIt = GetIt.instance;
+/// Module for Pokemon feature dependencies
+class PokemonModule extends GetxService {
+  @override
+  void onInit() {
+    super.onInit();
 
     // External
-    getIt.registerLazySingleton<http.Client>(
+    Get.lazyPut<http.Client>(
       () => http.Client(),
     );
 
     // Data Sources
-    getIt.registerLazySingleton<IPokemonRemoteDataSource>(
+    Get.lazyPut<PokemonRemoteDataSourceImpl>(
       () => PokemonRemoteDataSourceImpl(
-        client: getIt<http.Client>(),
+        client: Get.find<http.Client>(),
       ),
     );
 
     // Repositories
-    getIt.registerLazySingleton<IPokemonRepository>(
+    Get.lazyPut<IPokemonRepository>(
       () => PokemonRepositoryImpl(
-        getIt<PokemonRemoteDataSourceImpl>(),
+        remoteDataSource: Get.find<PokemonRemoteDataSourceImpl>(),
       ),
     );
 
     // Use Cases
-    getIt.registerLazySingleton<GetPokemonList>(
-      () => GetPokemonList(getIt<IPokemonRepository>()),
+    Get.lazyPut<list.GetPokemonList>(
+      () => list.GetPokemonList(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<id.GetPokemonById>(
+      () => id.GetPokemonById(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<search.SearchPokemon>(
+      () => search.SearchPokemon(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<type.GetPokemonsByType>(
+      () => type.GetPokemonsByType(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<ability.GetPokemonsByAbility>(
+      () => ability.GetPokemonsByAbility(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<move.GetPokemonsByMove>(
+      () => move.GetPokemonsByMove(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<evolution.GetPokemonsByEvolution>(
+      () => evolution.GetPokemonsByEvolution(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<stat.GetPokemonsByStat>(
+      () => stat.GetPokemonsByStat(Get.find<IPokemonRepository>()),
+    );
+    Get.lazyPut<description.GetPokemonsByDescription>(
+      () =>
+          description.GetPokemonsByDescription(Get.find<IPokemonRepository>()),
     );
 
-    getIt.registerLazySingleton<GetPokemonDetail>(
-      () => GetPokemonDetail(getIt<IPokemonRepository>()),
-    );
-
-    getIt.registerLazySingleton<GetPokemonsByType>(
-      () => GetPokemonsByType(getIt<IPokemonRepository>()),
-    );
-
-    getIt.registerLazySingleton<GetPokemonsByAbility>(
-      () => GetPokemonsByAbility(getIt<IPokemonRepository>()),
-    );
-
-    getIt.registerLazySingleton<SearchPokemon>(
-      () => SearchPokemon(getIt<IPokemonRepository>()),
+    // Bloc
+    Get.lazyPut<PokemonBloc>(
+      () => PokemonBloc(Get.find<IPokemonRepository>()),
     );
   }
 }

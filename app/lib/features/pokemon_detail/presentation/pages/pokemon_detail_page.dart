@@ -112,12 +112,12 @@ class PokemonDetailPage extends StatelessWidget {
                             children: [
                               PokemonInfoCard(
                                 title: 'Height',
-                                value: '${pokemon.height}m',
+                                value: '${pokemon.height / 10}m',
                                 icon: Icons.height,
                               ),
                               PokemonInfoCard(
                                 title: 'Weight',
-                                value: '${pokemon.weight}kg',
+                                value: '${pokemon.weight / 10}kg',
                                 icon: Icons.monitor_weight,
                               ),
                             ],

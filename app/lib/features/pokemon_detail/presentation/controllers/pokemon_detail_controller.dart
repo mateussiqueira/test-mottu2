@@ -49,15 +49,20 @@ class PokemonDetailController extends BaseStateController
     try {
       logger.info('Fetching Pokemon by type', data: {'type': type});
       final result = await repository.getPokemonsByType(type);
-      if (result.isSuccess) {
-        _sameTypePokemons.value = result.data ?? [];
-        logger.info(
-          'Successfully fetched Pokemon by type',
-          data: {'type': type, 'count': _sameTypePokemons.length},
-        );
-      } else {
-        setError(result.error?.message ?? 'Failed to fetch Pokemon by type');
-      }
+      result.fold(
+        (failure) {
+          setError(failure.message);
+          logger.error('Failed to fetch Pokemon by type',
+              error: failure, data: {'type': type});
+        },
+        (pokemons) {
+          _sameTypePokemons.value = pokemons;
+          logger.info(
+            'Successfully fetched Pokemon by type',
+            data: {'type': type, 'count': pokemons.length},
+          );
+        },
+      );
     } catch (e, stackTrace) {
       logger.error('Error fetching Pokemon by type',
           error: e, stackTrace: stackTrace);
@@ -73,15 +78,20 @@ class PokemonDetailController extends BaseStateController
     try {
       logger.info('Fetching Pokemon by ability', data: {'ability': ability});
       final result = await repository.getPokemonsByAbility(ability);
-      if (result.isSuccess) {
-        _sameAbilityPokemons.value = result.data ?? [];
-        logger.info(
-          'Successfully fetched Pokemon by ability',
-          data: {'ability': ability, 'count': _sameAbilityPokemons.length},
-        );
-      } else {
-        setError(result.error?.message ?? 'Failed to fetch Pokemon by ability');
-      }
+      result.fold(
+        (failure) {
+          setError(failure.message);
+          logger.error('Failed to fetch Pokemon by ability',
+              error: failure, data: {'ability': ability});
+        },
+        (pokemons) {
+          _sameAbilityPokemons.value = pokemons;
+          logger.info(
+            'Successfully fetched Pokemon by ability',
+            data: {'ability': ability, 'count': pokemons.length},
+          );
+        },
+      );
     } catch (e, stackTrace) {
       logger.error('Error fetching Pokemon by ability',
           error: e, stackTrace: stackTrace);

@@ -1,21 +1,20 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../core/error/failure.dart';
-import '../../../core/result/result.dart';
-import '../../entities/pokemon_entity.dart';
-import '../../repositories/i_pokemon_repository.dart';
+import '../../../../core/error/failure.dart';
+import '../entities/pokemon_entity.dart';
+import '../repositories/i_pokemon_repository.dart';
+import 'i_get_pokemons_by_description.dart';
 
 /// Use case to get Pokemon by description
-class GetPokemonsByDescription {
-  final IPokemonRepository _repository;
+class GetPokemonsByDescription implements IGetPokemonsByDescription {
+  final IPokemonRepository repository;
 
-  GetPokemonsByDescription(this._repository);
+  GetPokemonsByDescription(this.repository);
 
-  /// Call method to execute the use case
-  Future<Result<List<PokemonEntity>>> call(String description) async {
+  @override
+  Future<Either<Failure, List<PokemonEntity>>> call(String description) async {
     try {
-      final result = await _repository.getPokemonsByDescription(description);
-      return result;
+      return await repository.getPokemonsByDescription(description);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

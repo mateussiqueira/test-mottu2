@@ -1,5 +1,6 @@
-import '../../../../core/domain/errors/failure.dart';
-import '../../../../core/domain/errors/result.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../../core/error/failure.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import 'i_get_pokemon_detail.dart';
@@ -11,13 +12,11 @@ class GetPokemonDetail implements IGetPokemonDetail {
   GetPokemonDetail(this.repository);
 
   @override
-  Future<Result<PokemonEntity>> call(int id) async {
+  Future<Either<Failure, PokemonEntity>> call(int id) async {
     try {
-      final result = await repository.getPokemonById(id);
-      return result;
+      return await repository.getPokemonById(id);
     } catch (e) {
-      return Result.failure(
-          Failure(message: 'Failed to get Pokemon detail: ${e.toString()}'));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

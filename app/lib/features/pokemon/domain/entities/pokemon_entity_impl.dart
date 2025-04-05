@@ -1,99 +1,40 @@
+import 'package:json_annotation/json_annotation.dart';
+
 import 'i_pokemon_entity.dart';
 
+part 'pokemon_entity_impl.g.dart';
+
 /// Implementation of the Pokemon entity
-class PokemonEntityImpl implements IPokemonEntity {
-  final int _id;
-  final String _name;
-  final int _height;
-  final int _weight;
-  final List<String> _types;
-  final List<String> _abilities;
-  final Map<String, int> _stats;
-  final Map<String, String?> _sprites;
-  final int _baseExperience;
-  final List<String> _moves;
-  final List<String> _evolutions;
-  final String _description;
+@JsonSerializable()
+class PokemonEntityImpl extends IPokemonEntity {
+  const PokemonEntityImpl({
+    required super.id,
+    required super.name,
+    required super.types,
+    required super.abilities,
+    required super.height,
+    required super.weight,
+    required super.imageUrl,
+    required super.stats,
+    required super.moves,
+    required super.description,
+    required super.baseExperience,
+    required super.evolutions,
+    required super.isDefault,
+    required super.order,
+    required super.forms,
+    required super.gameIndices,
+    required super.heldItems,
+    required super.locationAreaEncounters,
+    required super.species,
+    required super.sprites,
+  });
 
-  PokemonEntityImpl({
-    required int id,
-    required String name,
-    required int height,
-    required int weight,
-    required List<String> types,
-    required List<String> abilities,
-    required Map<String, int> stats,
-    required Map<String, String?> sprites,
-    required int baseExperience,
-    required List<String> moves,
-    required List<String> evolutions,
-    required String description,
-  })  : _id = id,
-        _name = name,
-        _height = height,
-        _weight = weight,
-        _types = types,
-        _abilities = abilities,
-        _stats = stats,
-        _sprites = sprites,
-        _baseExperience = baseExperience,
-        _moves = moves,
-        _evolutions = evolutions,
-        _description = description;
+  factory PokemonEntityImpl.fromJson(Map<String, dynamic> json) =>
+      _$PokemonEntityImplFromJson(json);
 
   @override
-  int get id => _id;
-
-  @override
-  String get name => _name;
-
-  @override
-  String get imageUrl => _sprites['front_default'] ?? '';
-
-  @override
-  List<String> get types => _types;
-
-  @override
-  List<String> get abilities => _abilities;
-
-  @override
-  int get height => _height;
-
-  @override
-  int get weight => _weight;
-
-  @override
-  Map<String, int> get stats => _stats;
-
-  @override
-  int get baseExperience => _baseExperience;
-
-  @override
-  List<String> get moves => _moves;
-
-  @override
-  List<String> get evolutions => _evolutions;
-
-  @override
-  String get description => _description;
-
-  @override
-  Map<String, dynamic> toJson() {
-    return {
-      'id': _id,
-      'name': _name,
-      'height': _height,
-      'weight': _weight,
-      'types': _types,
-      'abilities': _abilities,
-      'stats': _stats,
-      'sprites': _sprites,
-      'baseExperience': _baseExperience,
-      'moves': _moves,
-      'evolutions': _evolutions,
-      'description': _description,
-    };
-  }
+  Map<String, dynamic> toJson() => _$PokemonEntityImplToJson(this);
 
   @override
   String toString() {
@@ -103,11 +44,9 @@ class PokemonEntityImpl implements IPokemonEntity {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is PokemonEntityImpl &&
-        other._id == _id &&
-        other._name == _name;
+    return other is PokemonEntityImpl && other.id == id && other.name == name;
   }
 
   @override
-  int get hashCode => Object.hash(_id, _name);
+  int get hashCode => Object.hash(id, name);
 }

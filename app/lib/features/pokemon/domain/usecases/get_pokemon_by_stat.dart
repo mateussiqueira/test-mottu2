@@ -1,16 +1,23 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
-import '../../domain/entities/pokemon_entity.dart';
-import '../../domain/repositories/pokemon_repository.dart';
+import '../entities/pokemon_entity.dart';
+import '../repositories/i_pokemon_repository.dart';
+import 'i_get_pokemons_by_stat.dart';
 
 /// Use case for getting Pokemon by stat
-class GetPokemonsByStat {
-  final PokemonRepository repository;
+class GetPokemonsByStat implements IGetPokemonsByStat {
+  final IPokemonRepository repository;
 
   GetPokemonsByStat(this.repository);
 
-  Future<Either<Failure, List<PokemonEntity>>> call(String stat) async {
-    return await repository.getPokemonsByStat(stat);
+  @override
+  Future<Either<Failure, List<PokemonEntity>>> call(
+      String stat, int value) async {
+    try {
+      return await repository.getPokemonsByStat(stat, value);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
   }
 }

@@ -1,22 +1,20 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../core/error/failure.dart';
-import '../../../core/result/result.dart';
-import '../../entities/pokemon_entity.dart';
-import '../../repositories/i_pokemon_repository.dart';
+import '../../../../core/error/failure.dart';
+import '../entities/pokemon_entity.dart';
+import '../repositories/i_pokemon_repository.dart';
 import 'i_get_pokemons_by_ability.dart';
 
 /// Use case to get Pokemon by ability
 class GetPokemonsByAbility implements IGetPokemonsByAbility {
-  final IPokemonRepository _repository;
+  final IPokemonRepository repository;
 
-  GetPokemonsByAbility(this._repository);
+  GetPokemonsByAbility(this.repository);
 
   @override
-  Future<Result<List<PokemonEntity>>> call(String ability) async {
+  Future<Either<Failure, List<PokemonEntity>>> call(String ability) async {
     try {
-      final result = await _repository.getPokemonsByAbility(ability);
-      return result;
+      return await repository.getPokemonsByAbility(ability);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

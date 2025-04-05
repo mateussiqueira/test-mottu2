@@ -12,6 +12,8 @@ class PokemonEntityImpl extends PokemonEntity {
     required super.stats,
     required super.moves,
     required super.description,
+    required super.baseExperience,
+    required super.evolutions,
   });
 
   factory PokemonEntityImpl.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,8 @@ class PokemonEntityImpl extends PokemonEntity {
       stats: stats,
       moves: moves,
       description: '', // We need to fetch this separately
+      baseExperience: json['base_experience'] as int? ?? 0,
+      evolutions: [], // We need to fetch this separately
     );
   }
 
@@ -68,6 +72,8 @@ class PokemonEntityImpl extends PokemonEntity {
       'stats': stats,
       'moves': moves,
       'description': description,
+      'base_experience': baseExperience,
+      'evolutions': evolutions,
     };
   }
 }

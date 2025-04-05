@@ -1,49 +1,41 @@
 /// Base class for all failures in the application
-abstract class Failure {
-  final String? message;
-  final String? code;
+class Failure {
+  /// Error message
+  final String message;
 
-  Failure({this.message, this.code});
+  /// Creates a new failure with the given [message]
+  const Failure({required this.message});
+
+  @override
+  String toString() => message;
 }
 
-/// Server failure
+/// Failure that occurs when there is a server error
 class ServerFailure extends Failure {
-  ServerFailure({String? message, String? code})
-      : super(message: message, code: code);
+  /// Creates a new server failure with the given [message]
+  const ServerFailure({required String message}) : super(message: message);
 }
 
-/// Cache failure
+/// Failure that occurs when there is a cache error
 class CacheFailure extends Failure {
-  CacheFailure({String? message, String? code})
-      : super(message: message, code: code);
+  /// Creates a new cache failure with the given [message]
+  const CacheFailure({required String message}) : super(message: message);
 }
 
-/// Network failure
+/// Failure that occurs when there is a network error
 class NetworkFailure extends Failure {
-  NetworkFailure({String? message, String? code})
-      : super(message: message, code: code);
+  /// Creates a new network failure with the given [message]
+  const NetworkFailure({required String message}) : super(message: message);
 }
 
-/// Validation failure
+/// Failure that occurs when there is a validation error
 class ValidationFailure extends Failure {
-  ValidationFailure({String? message, String? code})
-      : super(message: message, code: code);
+  /// Creates a new validation failure with the given [message]
+  const ValidationFailure({required String message}) : super(message: message);
 }
 
-/// Authentication failure
-class AuthenticationFailure extends Failure {
-  AuthenticationFailure({String? message, String? code})
-      : super(message: message, code: code);
-}
-
-/// Authorization failure
-class AuthorizationFailure extends Failure {
-  AuthorizationFailure({String? message, String? code})
-      : super(message: message, code: code);
-}
-
-/// Unknown failure
+/// Failure that occurs when there is an unknown error
 class UnknownFailure extends Failure {
-  UnknownFailure({String? message, String? code})
-      : super(message: message, code: code);
+  /// Creates a new unknown failure with the given [message]
+  const UnknownFailure({required String message}) : super(message: message);
 }

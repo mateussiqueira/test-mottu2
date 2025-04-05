@@ -1,0 +1,97 @@
+graph TD
+    %% Frontend (App)
+    subgraph Frontend["Frontend (App)"]
+        subgraph Presentation["Camada de Apresentação"]
+            PLP[PokemonListPage]
+            PDP[PokemonDetailPage]
+            PLC[PokemonListController]
+            PDC[PokemonDetailController]
+            PB[PokemonBinding]
+            
+            %% Widgets
+            PC[PokemonCard]
+            PLE[PokemonListError]
+            PLL[PokemonListLoading]
+            PDE[PokemonDetailError]
+            PDL[PokemonDetailLoading]
+            PDI[PokemonDetailInfo]
+            PDS[PokemonDetailStats]
+            PTA[PokemonTypeAbilitySection]
+            RP[RelatedPokemons]
+        end
+
+        subgraph Domain["Camada de Domínio"]
+            IPR[IPokemonRepository]
+            PEI[PokemonEntityImpl]
+            IPE[IPokemonEntity]
+            PF[PokemonFailure]
+        end
+
+        subgraph Data["Camada de Dados"]
+            PR[PokemonRepositoryImpl]
+            PRDS[PokemonRemoteDataSource]
+            PM[PokemonModel]
+            PMR[PokemonMapper]
+            PRV[PokemonResponseValidator]
+        end
+    end
+
+    %% BFF (Backend for Frontend)
+    subgraph BFF["Backend for Frontend"]
+        subgraph Controllers["Controllers"]
+            PCtrl[PokemonController]
+            SCtrl[SearchController]
+            FCtrl[FilterController]
+        end
+
+        subgraph Services["Services"]
+            PSvc[PokemonService]
+            CSvc[CacheService]
+            VSvc[ValidationService]
+        end
+
+        subgraph Repositories["Repositories"]
+            PRepo[PokemonRepository]
+            CRepo[CacheRepository]
+        end
+
+        subgraph Models["Models"]
+            PModel[PokemonModel]
+            SModel[SearchModel]
+            FModel[FilterModel]
+        end
+
+        subgraph External["External APIs"]
+            PokeAPI[PokéAPI]
+            CacheDB[(Cache Database)]
+        end
+    end
+
+    %% Conexões Frontend -> BFF
+    PRDS --> PCtrl
+    PRDS --> SCtrl
+    PRDS --> FCtrl
+
+    %% Conexões BFF Internas
+    PCtrl --> PSvc
+    SCtrl --> PSvc
+    FCtrl --> PSvc
+    
+    PSvc --> PRepo
+    PSvc --> CRepo
+    
+    PRepo --> PokeAPI
+    CRepo --> CacheDB
+    
+    VSvc --> PCtrl
+    VSvc --> SCtrl
+    VSvc --> FCtrl
+
+    %% Estilos
+    classDef frontend fill:#f9f,stroke:#333,stroke-width:2px
+    classDef bff fill:#bbf,stroke:#333,stroke-width:2px
+    classDef external fill:#bfb,stroke:#333,stroke-width:2px
+    
+    class PLP,PDP,PLC,PDC,PB,PC,PLE,PLL,PDE,PDL,PDI,PDS,PTA,RP,IPR,PEI,IPE,PF,PR,PRDS,PM,PMR,PRV frontend
+    class PCtrl,SCtrl,FCtrl,PSvc,CSvc,VSvc,PRepo,CRepo,PModel,SModel,FModel bff
+    class PokeAPI,CacheDB external

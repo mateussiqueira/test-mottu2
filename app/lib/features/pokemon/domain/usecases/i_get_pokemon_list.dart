@@ -1,11 +1,17 @@
-import '../../../core/result/result.dart';
-import '../../entities/pokemon_entity.dart';
+import 'package:dartz/dartz.dart';
 
-/// Interface for getting Pokemon list
+import '../entities/pokemon_entity_impl.dart';
+import '../failures/pokemon_failure.dart';
+
+/// Interface for the GetPokemonList use case
 abstract class IGetPokemonList {
-  /// Get Pokemon list with pagination
-  Future<Result<List<PokemonEntity>>> call({
-    int? limit,
-    int? offset,
+  /// Fetches a list of Pokemon with pagination
+  ///
+  /// [offset] - The starting point for pagination (default: 0)
+  /// [limit] - The maximum number of Pokemon to fetch (default: 20)
+  /// Returns an [Either] containing a list of [PokemonEntityImpl] or a [PokemonFailure]
+  Future<Either<PokemonFailure, List<PokemonEntityImpl>>> call({
+    required int offset,
+    required int limit,
   });
 }

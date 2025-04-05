@@ -1,53 +1,40 @@
 import 'package:get/get.dart';
-
-import '../../data/repositories/pokemon_repository_impl.dart';
-import '../../domain/repositories/i_pokemon_repository.dart';
-import '../../domain/usecases/get_pokemon_detail.dart';
-import '../../domain/usecases/get_pokemon_list.dart';
-import '../../domain/usecases/get_pokemons_by_ability.dart';
-import '../../domain/usecases/get_pokemons_by_type.dart';
-import '../../domain/usecases/search_pokemon.dart';
-import '../controllers/pokemon_detail_controller.dart';
-import '../controllers/pokemon_list_controller.dart';
+import 'package:http/http.dart' as http;
+import 'package:pokemon_list/features/pokemon/data/datasources/pokemon_remote_datasource_impl.dart';
+import 'package:pokemon_list/features/pokemon/data/repositories/pokemon_repository_impl.dart';
+import 'package:pokemon_list/features/pokemon/domain/presentation/controllers/pokemon_detail_controller.dart';
+import 'package:pokemon_list/features/pokemon/domain/presentation/controllers/pokemon_list_controller.dart';
+import 'package:pokemon_list/features/pokemon/domain/repositories/i_pokemon_repository.dart';
 
 /// Binding class for Pokemon feature dependencies
 class PokemonBinding extends Bindings {
   @override
   void dependencies() {
-    // Repositories
+    final httpClient = http.Client();
+    const baseUrl = 'https://pokeapi.co/api/v2';
+
+    final dataSource = PokemonRemoteDataSourceImpl(
+      client: httpClient,
+      baseUrl: baseUrl,
+    );
+
+    final repository = PokemonRepositoryImpl(
+      remoteDataSource: dataSource,
+    );
+
     Get.lazyPut<IPokemonRepository>(
-      () => PokemonRepositoryImpl(Get.find()),
+      () => repository,
     );
 
-    // Use Cases
-    Get.lazyPut<GetPokemonList>(
-      () => GetPokemonList(Get.find()),
-    );
-    Get.lazyPut<GetPokemonDetail>(
-      () => GetPokemonDetail(Get.find()),
-    );
-    Get.lazyPut<SearchPokemon>(
-      () => SearchPokemon(Get.find()),
-    );
-    Get.lazyPut<GetPokemonsByType>(
-      () => GetPokemonsByType(Get.find()),
-    );
-    Get.lazyPut<GetPokemonsByAbility>(
-      () => GetPokemonsByAbility(Get.find()),
-    );
-
-    // Controllers
     Get.lazyPut<PokemonListController>(
       () => PokemonListController(
-        Get.find<GetPokemonList>(),
-        Get.find<SearchPokemon>(),
-        Get.find<GetPokemonsByType>(),
-        Get.find<GetPokemonsByAbility>(),
+        repository: Get.find<IPokemonRepository>(),
       ),
     );
+
     Get.lazyPut<PokemonDetailController>(
       () => PokemonDetailController(
-        Get.find<GetPokemonDetail>(),
+        repository: Get.find<IPokemonRepository>(),
       ),
     );
   }
