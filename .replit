@@ -1,0 +1,4 @@
+modules = ["ruby-3.2", "dart-3.5"]
+
+[nix]
+channel = "stable-24_05"
