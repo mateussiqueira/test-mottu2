@@ -1,42 +1,51 @@
+
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/pokemon_list/data/adapters/poke_api_adapter.dart';
-import '../../features/pokemon_list/data/repositories/pokemon_repository_impl.dart';
-import '../../features/pokemon_list/presentation/bloc/pokemon_list_bloc.dart';
-import '../domain/repositories/pokemon_repository.dart';
 import '../services/cache_service.dart';
-import '../services/connectivity_service.dart';
+import '../services/http_client.dart';
 import '../services/image_cache_service.dart';
+import '../data/repositories/pokemon_repository_impl.dart';
+import '../domain/repositories/pokemon_repository.dart';
+import '../../features/pokemon_list/domain/usecases/get_pokemons_use_case.dart';
+import '../../features/pokemon_list/domain/usecases/search_pokemons_use_case.dart';
 
-class ServiceLocator {
-  static final GetIt getIt = GetIt.instance;
+final serviceLocator = GetIt.instance;
 
-  static Future<void> init() async {
-    // Serviços
-    final prefs = await SharedPreferences.getInstance();
-    getIt.registerSingleton<CacheService>(CacheService(prefs));
-    getIt.registerSingleton<ConnectivityService>(ConnectivityService());
-    getIt.registerSingleton<ImageCacheService>(ImageCacheService());
-    getIt.registerSingleton<http.Client>(http.Client());
+Future<void> initDependencies() async {
+  // Services
+  final sharedPrefs = await SharedPreferences.getInstance();
+  serviceLocator.registerLazySingleton<SharedPreferences>(() => sharedPrefs);
+  
+  serviceLocator.registerLazySingleton<CacheService>(
+    () => CacheService(serviceLocator<SharedPreferences>()),
+  );
+  
+  serviceLocator.registerLazySingleton<http.Client>(() => http.Client());
+  
+  serviceLocator.registerLazySingleton<HttpClient>(
+    () => HttpClient(serviceLocator<http.Client>()),
+  );
+  
+  serviceLocator.registerLazySingleton<ImageCacheService>(
+    () => ImageCacheService(),
+  );
 
-    // Adapters
-    getIt.registerSingleton<PokeApiAdapter>(
-      PokeApiAdapter(
-        client: getIt<http.Client>(),
-        prefs: prefs,
-      ),
-    );
+  // Repositories
+  serviceLocator.registerLazySingleton<PokemonRepository>(
+    () => PokemonRepositoryImpl(
+      httpClient: serviceLocator<HttpClient>(),
+      cacheService: serviceLocator<CacheService>(),
+    ),
+  );
 
-    // Repositories
-    getIt.registerSingleton<PokemonRepository>(
-      PokemonRepositoryImpl(getIt<PokeApiAdapter>()),
-    );
-
-    // Blocs
-    getIt.registerFactory<PokemonListBloc>(
-      () => PokemonListBloc(repository: getIt<PokemonRepository>()),
-    );
-  }
+  // Use cases
+  serviceLocator.registerLazySingleton<GetPokemonsUseCase>(
+    () => GetPokemonsUseCase(serviceLocator<PokemonRepository>()),
+  );
+  
+  serviceLocator.registerLazySingleton<SearchPokemonsUseCase>(
+    () => SearchPokemonsUseCase(serviceLocator<PokemonRepository>()),
+  );
 }

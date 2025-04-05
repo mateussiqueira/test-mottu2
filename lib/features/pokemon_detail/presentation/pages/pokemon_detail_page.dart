@@ -1,78 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/domain/entities/pokemon.dart';
-import '../widgets/pokemon_abilities.dart';
 import '../widgets/pokemon_image.dart';
 import '../widgets/pokemon_info.dart';
 import '../widgets/pokemon_stats.dart';
 import '../widgets/pokemon_types.dart';
+import '../widgets/pokemon_abilities.dart';
 
-class PokemonDetailPage extends StatelessWidget {
+class PokemonDetailPage extends StatefulWidget {
   const PokemonDetailPage({super.key});
 
-  String _getImageUrl(Pokemon pokemon) =>
-      pokemon.sprites.other.officialArtwork.frontDefault ?? '';
+  @override
+  State<PokemonDetailPage> createState() => _PokemonDetailPageState();
+}
 
-  List<String> _getTypes(Pokemon pokemon) => pokemon.types
-      .map((type) => type.type.name)
-      .where((type) => type.isNotEmpty)
-      .toList();
+class _PokemonDetailPageState extends State<PokemonDetailPage> {
+  late Pokemon pokemon;
 
-  List<String> _getAbilities(Pokemon pokemon) => pokemon.abilities
-      .map((ability) => ability.ability.name)
-      .where((ability) => ability.isNotEmpty)
-      .toList();
-
-  Map<String, int> _getStats(Pokemon pokemon) => Map.fromEntries(
-        pokemon.stats.map(
-          (stat) => MapEntry(
-            stat.stat.name,
-            stat.baseStat,
-          ),
-        ),
-      );
+  @override
+  void initState() {
+    super.initState();
+    pokemon = Get.arguments as Pokemon;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final pokemon = Get.arguments as Pokemon;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          pokemon.name,
-          style: const TextStyle(
-            fontSize: AppConstants.titleLargeSize,
-            fontWeight: FontWeight.w700,
-          ),
+          pokemon.name.toUpperCase(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        elevation: AppConstants.appBarElevation,
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PokemonImage(imageUrl: _getImageUrl(pokemon)),
-            Padding(
-              padding: const EdgeInsets.all(AppConstants.spacingLarge),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PokemonInfo(
-                    name: pokemon.name,
-                    height: pokemon.height / 10.0,
-                    weight: pokemon.weight / 10.0,
-                  ),
-                  const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonTypes(types: _getTypes(pokemon)),
-                  const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonAbilities(abilities: _getAbilities(pokemon)),
-                  const SizedBox(height: AppConstants.spacingLarge),
-                  PokemonStats(stats: _getStats(pokemon)),
-                ],
-              ),
-            ),
+            PokemonImage(pokemon: pokemon),
+            const SizedBox(height: 16),
+            PokemonInfo(pokemon: pokemon),
+            const SizedBox(height: 16),
+            PokemonTypes(pokemon: pokemon),
+            const SizedBox(height: 16),
+            PokemonAbilities(pokemon: pokemon),
+            const SizedBox(height: 16),
+            PokemonStats(pokemon: pokemon),
           ],
         ),
       ),

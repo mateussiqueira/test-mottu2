@@ -1,31 +1,31 @@
-import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../core/domain/entities/pokemon.dart';
 
 class PokemonImage extends StatelessWidget {
-  final String imageUrl;
+  final Pokemon pokemon;
 
-  const PokemonImage({
-    super.key,
-    required this.imageUrl,
-  });
+  const PokemonImage({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Container(
-        padding: const EdgeInsets.all(AppConstants.spacingLarge),
-        child: Image.network(
-          imageUrl,
+        width: double.infinity,
+        height: 200,
+        padding: const EdgeInsets.all(16),
+        child: CachedNetworkImage(
+          imageUrl: pokemon.imageUrl,
+          placeholder: (context, url) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(
-              Icons.error_outline,
-              size: AppConstants.iconSizeLarge,
-              color: Colors.red,
-            );
-          },
         ),
       ),
     );

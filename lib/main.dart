@@ -3,9 +3,14 @@ import 'package:get/get.dart';
 
 import 'app_router.dart';
 import 'core/services/connectivity_service.dart';
+import 'core/di/service_locator.dart';
+import 'core/presentation/theme/app_theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar as dependências
+  await initDependencies();
 
   // Registra o serviço de conectividade
   Get.put(ConnectivityService());
@@ -20,12 +25,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Pokédex',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-        useMaterial3: true,
-      ),
-      initialRoute: '/pokemon-list',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      initialRoute: '/',  // Começando pela splash page
       getPages: AppRouter.routes,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

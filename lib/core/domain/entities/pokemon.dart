@@ -1,158 +1,53 @@
-class Pokemon {
-  final List<Ability> abilities;
-  final int baseExperience;
-  final Cries cries;
-  final List<Species> forms;
-  final List<GameIndex> gameIndices;
-  final int height;
-  final List<HeldItem> heldItems;
-  final int id;
-  final bool isDefault;
-  final String locationAreaEncounters;
-  final List<Move> moves;
-  final String name;
-  final int order;
-  final List<dynamic> pastAbilities;
-  final List<dynamic> pastTypes;
-  final Species species;
-  final Sprites sprites;
-  final List<Stat> stats;
-  final List<Type> types;
-  final int weight;
+import 'package:equatable/equatable.dart';
 
-  Pokemon({
-    required this.abilities,
-    required this.baseExperience,
-    required this.cries,
-    required this.forms,
-    required this.gameIndices,
-    required this.height,
-    required this.heldItems,
+class Pokemon extends Equatable {
+  final int id;
+  final String name;
+  final int height;
+  final int weight;
+  final int baseExperience;
+  final List<String> types;
+  final List<String> abilities;
+  final List<Stat> stats;
+  final String imageUrl;
+
+  const Pokemon({
     required this.id,
-    required this.isDefault,
-    required this.locationAreaEncounters,
-    required this.moves,
     required this.name,
-    required this.order,
-    required this.pastAbilities,
-    required this.pastTypes,
-    required this.species,
-    required this.sprites,
-    required this.stats,
-    required this.types,
+    required this.height,
     required this.weight,
+    required this.baseExperience,
+    required this.types,
+    required this.abilities,
+    required this.stats,
+    required this.imageUrl,
   });
 
-  factory Pokemon.fromJson(Map<String, dynamic> json) {
-    return Pokemon(
-      abilities: (json['abilities'] as List<dynamic>)
-          .map((ability) => Ability.fromJson(ability as Map<String, dynamic>))
-          .toList(),
-      baseExperience: json['base_experience'] ?? 0,
-      cries: Cries.fromJson(json['cries'] as Map<String, dynamic>),
-      forms: (json['forms'] as List<dynamic>)
-          .map((form) => Species.fromJson(form as Map<String, dynamic>))
-          .toList(),
-      gameIndices: (json['game_indices'] as List<dynamic>)
-          .map((index) => GameIndex.fromJson(index as Map<String, dynamic>))
-          .toList(),
-      height: json['height'] ?? 0,
-      heldItems: (json['held_items'] as List<dynamic>)
-          .map((item) => HeldItem.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      id: json['id'] ?? 0,
-      isDefault: json['is_default'] ?? false,
-      locationAreaEncounters: json['location_area_encounters'] ?? '',
-      moves: (json['moves'] as List<dynamic>)
-          .map((move) => Move.fromJson(move as Map<String, dynamic>))
-          .toList(),
-      name: json['name'] ?? '',
-      order: json['order'] ?? 0,
-      pastAbilities: json['past_abilities'] ?? [],
-      pastTypes: json['past_types'] ?? [],
-      species: Species.fromJson(json['species'] as Map<String, dynamic>),
-      sprites: Sprites.fromJson(json['sprites'] as Map<String, dynamic>),
-      stats: (json['stats'] as List<dynamic>)
-          .map((stat) => Stat.fromJson(stat as Map<String, dynamic>))
-          .toList(),
-      types: (json['types'] as List<dynamic>)
-          .map((type) => Type.fromJson(type as Map<String, dynamic>))
-          .toList(),
-      weight: json['weight'] ?? 0,
-    );
-  }
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        height,
+        weight,
+        baseExperience,
+        types,
+        abilities,
+        stats,
+        imageUrl,
+      ];
+}
 
-  Pokemon copyWith({
-    List<Ability>? abilities,
-    int? baseExperience,
-    Cries? cries,
-    List<Species>? forms,
-    List<GameIndex>? gameIndices,
-    int? height,
-    List<HeldItem>? heldItems,
-    int? id,
-    bool? isDefault,
-    String? locationAreaEncounters,
-    List<Move>? moves,
-    String? name,
-    int? order,
-    List<dynamic>? pastAbilities,
-    List<dynamic>? pastTypes,
-    Species? species,
-    Sprites? sprites,
-    List<Stat>? stats,
-    List<Type>? types,
-    int? weight,
-  }) {
-    return Pokemon(
-      abilities: abilities ?? this.abilities,
-      baseExperience: baseExperience ?? this.baseExperience,
-      cries: cries ?? this.cries,
-      forms: forms ?? this.forms,
-      gameIndices: gameIndices ?? this.gameIndices,
-      height: height ?? this.height,
-      heldItems: heldItems ?? this.heldItems,
-      id: id ?? this.id,
-      isDefault: isDefault ?? this.isDefault,
-      locationAreaEncounters:
-          locationAreaEncounters ?? this.locationAreaEncounters,
-      moves: moves ?? this.moves,
-      name: name ?? this.name,
-      order: order ?? this.order,
-      pastAbilities: pastAbilities ?? this.pastAbilities,
-      pastTypes: pastTypes ?? this.pastTypes,
-      species: species ?? this.species,
-      sprites: sprites ?? this.sprites,
-      stats: stats ?? this.stats,
-      types: types ?? this.types,
-      weight: weight ?? this.weight,
-    );
-  }
+class Stat extends Equatable {
+  final String name;
+  final int baseStat;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'abilities': abilities.map((e) => e.toJson()).toList(),
-      'base_experience': baseExperience,
-      'cries': cries.toJson(),
-      'forms': forms.map((e) => e.toJson()).toList(),
-      'game_indices': gameIndices.map((e) => e.toJson()).toList(),
-      'height': height,
-      'held_items': heldItems.map((e) => e.toJson()).toList(),
-      'id': id,
-      'is_default': isDefault,
-      'location_area_encounters': locationAreaEncounters,
-      'moves': moves.map((e) => e.toJson()).toList(),
-      'name': name,
-      'order': order,
-      'past_abilities': pastAbilities,
-      'past_types': pastTypes,
-      'species': species.toJson(),
-      'sprites': sprites.toJson(),
-      'stats': stats.map((e) => e.toJson()).toList(),
-      'types': types.map((e) => e.toJson()).toList(),
-      'weight': weight,
-    };
-  }
+  const Stat({
+    required this.name,
+    required this.baseStat,
+  });
+
+  @override
+  List<Object?> get props => [name, baseStat];
 }
 
 class Ability {
@@ -430,7 +325,6 @@ class VersionGroupDetail {
       };
 }
 
-// Continuação das classes auxiliares
 
 class Stat {
   final int baseStat;

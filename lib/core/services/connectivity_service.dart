@@ -1,30 +1,43 @@
-import 'package:flutter/services.dart';
 
-class ConnectivityService {
-  final EventChannel _connectivityChannel =
-      const EventChannel('com.mateussiqueira.pokeapi/connectivity');
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+enum ConnectivityStatus { online, offline }
+
+class ConnectivityService extends GetxService {
+  final _connectionStatus = ConnectivityStatus.online.obs;
+
+  ConnectivityStatus get status => _connectionStatus.value;
+  Stream<ConnectivityStatus> get statusStream => _connectionStatus.stream;
+
+  // Método simulado para verificar conectividade
   Future<bool> checkConnectivity() async {
     try {
-      return await _connectivityChannel.receiveBroadcastStream().first as bool;
-    } catch (e) {
-      print('Error checking connectivity: $e');
+      // Em uma aplicação real, usaríamos o package connectivity_plus
       return true;
+    } catch (e) {
+      return false;
     }
   }
 
-  Stream<bool> get onConnectivityChanged {
-    try {
-      return _connectivityChannel
-          .receiveBroadcastStream()
-          .map((dynamic isConnected) => isConnected as bool)
-          .handleError((error) {
-        print('Error in connectivity stream: $error');
-        return true;
-      }, test: (error) => true);
-    } catch (e) {
-      print('Error setting up connectivity stream: $e');
-      return Stream.value(true);
-    }
+  Future<void> updateConnectionStatus() async {
+    final isConnected = await checkConnectivity();
+    _connectionStatus.value = isConnected 
+        ? ConnectivityStatus.online 
+        : ConnectivityStatus.offline;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    
+    // Verificar a cada 30 segundos
+    Timer.periodic(const Duration(seconds: 30), (_) {
+      updateConnectionStatus();
+    });
+    
+    // Verificação inicial
+    updateConnectionStatus();
   }
 }

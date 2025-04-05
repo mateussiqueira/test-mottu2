@@ -1,52 +1,92 @@
-import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/domain/entities/pokemon.dart';
 
 class PokemonTypes extends StatelessWidget {
-  final List<String> types;
+  final Pokemon pokemon;
 
-  const PokemonTypes({
-    super.key,
-    required this.types,
-  });
+  const PokemonTypes({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          AppConstants.statsLabel,
-          style: TextStyle(
-            fontSize: AppConstants.titleMediumSize,
-            fontWeight: FontWeight.w600,
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tipos',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: pokemon.types.isNotEmpty
+                  ? pokemon.types
+                      .map((type) => buildTypeChip(context, type))
+                      .toList()
+                  : [
+                      Text(
+                        'Nenhum tipo disponível',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      )
+                    ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildTypeChip(BuildContext context, String type) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/related-pokemons/$type',
+        );
+      },
+      child: Chip(
+        backgroundColor: _getTypeColor(type),
+        label: Text(
+          type.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: AppConstants.spacingMedium),
-        Wrap(
-          spacing: AppConstants.spacingSmall,
-          runSpacing: AppConstants.spacingSmall,
-          children: types.map((type) {
-            return Container(
-              padding: AppConstants.chipPadding,
-              decoration: BoxDecoration(
-                color:
-                    AppConstants.typeColors[type.toLowerCase()] ?? Colors.grey,
-                borderRadius:
-                    BorderRadius.circular(AppConstants.chipBorderRadius),
-              ),
-              child: Text(
-                type,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: AppConstants.chipFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
+      ),
     );
+  }
+
+  Color _getTypeColor(String type) {
+    final typeColors = {
+      'normal': Colors.brown[400],
+      'fire': Colors.red,
+      'water': Colors.blue,
+      'electric': Colors.amber,
+      'grass': Colors.green,
+      'ice': Colors.cyan,
+      'fighting': Colors.orange[800],
+      'poison': Colors.purple,
+      'ground': Colors.brown,
+      'flying': Colors.indigo[200],
+      'psychic': Colors.pink,
+      'bug': Colors.lightGreen,
+      'rock': Colors.grey,
+      'ghost': Colors.deepPurple,
+      'dragon': Colors.indigo,
+      'dark': Colors.grey[800],
+      'steel': Colors.blueGrey,
+      'fairy': Colors.pinkAccent[100],
+    };
+
+    return typeColors[type.toLowerCase()] ?? Colors.grey;
   }
 }

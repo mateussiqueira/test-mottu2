@@ -1,89 +1,93 @@
-import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/domain/entities/pokemon.dart';
 
 class PokemonStats extends StatelessWidget {
-  final Map<String, int> stats;
+  final Pokemon pokemon;
 
-  const PokemonStats({
-    super.key,
-    required this.stats,
-  });
+  const PokemonStats({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          AppConstants.statsLabel,
-          style: TextStyle(
-            fontSize: AppConstants.titleMediumSize,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingMedium),
-        ...stats.entries.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppConstants.spacingMedium),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      entry.key,
-                      style: const TextStyle(
-                        fontSize: AppConstants.bodyMediumSize,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      entry.value.toString(),
-                      style: const TextStyle(
-                        fontSize: AppConstants.bodyMediumSize,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppConstants.spacingSmall),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4.0),
-                  child: LinearProgressIndicator(
-                    value: entry.value / AppConstants.maxStatValue,
-                    minHeight: AppConstants.statsBarHeight,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _getStatColor(entry.key),
-                    ),
-                  ),
-                ),
-              ],
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Estatísticas',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          );
-        }).toList(),
-      ],
+            const SizedBox(height: 16),
+            if (pokemon.stats.isNotEmpty) ...[
+              for (var stat in pokemon.stats)
+                statBar(
+                  context,
+                  stat.name.toUpperCase().replaceAll('-', ' '),
+                  stat.baseStat,
+                ),
+            ] else
+              Text(
+                'Nenhuma estatística disponível',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
-  Color _getStatColor(String stat) {
-    switch (stat.toLowerCase()) {
-      case 'hp':
-        return Colors.red;
-      case 'attack':
-        return Colors.orange;
-      case 'defense':
-        return Colors.yellow[700]!;
-      case 'special-attack':
-        return Colors.purple;
-      case 'special-defense':
-        return Colors.blue;
-      case 'speed':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
+  Widget statBar(BuildContext context, String statName, int baseStat) {
+    final double percentage = baseStat / 255; // Máximo possível em Pokémon
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  statName,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              Text(
+                '$baseStat',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: percentage,
+              minHeight: 10,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                _getColorForStat(baseStat),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getColorForStat(int value) {
+    if (value < 50) return Colors.red;
+    if (value < 90) return Colors.orange;
+    if (value < 120) return Colors.yellow;
+    if (value < 150) return Colors.lightGreen;
+    return Colors.green;
   }
 }

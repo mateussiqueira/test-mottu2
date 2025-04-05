@@ -2,3 +2,15 @@ modules = ["ruby-3.2", "dart-3.5"]
 
 [nix]
 channel = "stable-24_05"
+
+[workflows]
+runButton = "Flutter Run"
+
+[[workflows.workflow]]
+name = "Flutter Run"
+author = 30692913
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flutter run -d web-server --web-hostname=0.0.0.0 --web-port=5000"

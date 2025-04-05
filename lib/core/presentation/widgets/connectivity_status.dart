@@ -1,42 +1,38 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../constants/app_constants.dart';
 import '../../services/connectivity_service.dart';
 
-class ConnectivityStatus extends StatelessWidget {
-  final ConnectivityService _connectivityService =
-      Get.find<ConnectivityService>();
-
-  ConnectivityStatus({super.key});
+class ConnectivityStatusWidget extends StatelessWidget {
+  const ConnectivityStatusWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: _connectivityService.onConnectivityChanged,
-      initialData: true,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          print('Error in connectivity status: ${snapshot.error}');
-        }
-
-        final isConnected = snapshot.data ?? true;
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: isConnected ? 0 : 40,
-          color: Colors.red,
-          child: const Center(
-            child: Text(
-              AppConstants.errorNoInternet,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: AppConstants.bodyMediumSize,
+    final connectivityService = Get.find<ConnectivityService>();
+    
+    return Obx(() {
+      return connectivityService.status == ConnectivityStatus.offline
+          ? Container(
+              width: double.infinity,
+              color: Colors.red,
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.wifi_off,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Você está offline. Alguns recursos podem não funcionar.',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
               ),
-            ),
-          ),
-        );
-      },
-    );
+            )
+          : const SizedBox.shrink();
+    });
   }
 }

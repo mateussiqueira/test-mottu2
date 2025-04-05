@@ -1,50 +1,59 @@
-import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_constants.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/domain/entities/pokemon.dart';
 
 class PokemonAbilities extends StatelessWidget {
-  final List<String> abilities;
+  final Pokemon pokemon;
 
-  const PokemonAbilities({
-    super.key,
-    required this.abilities,
-  });
+  const PokemonAbilities({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          AppConstants.abilitiesLabel,
-          style: TextStyle(
-            fontSize: AppConstants.titleMediumSize,
-            fontWeight: FontWeight.w600,
-          ),
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Habilidades',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: pokemon.abilities.isNotEmpty
+                  ? pokemon.abilities
+                      .map((ability) => buildAbilityChip(context, ability))
+                      .toList()
+                  : [
+                      Text(
+                        'Nenhuma habilidade disponível',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      )
+                    ],
+            ),
+          ],
         ),
-        const SizedBox(height: AppConstants.spacingMedium),
-        Wrap(
-          spacing: AppConstants.spacingSmall,
-          runSpacing: AppConstants.spacingSmall,
-          children: abilities.map((ability) {
-            return Container(
-              padding: AppConstants.chipPadding,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius:
-                    BorderRadius.circular(AppConstants.chipBorderRadius),
-              ),
-              child: Text(
-                ability,
-                style: const TextStyle(
-                  fontSize: AppConstants.chipFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            );
-          }).toList(),
+      ),
+    );
+  }
+
+  Widget buildAbilityChip(BuildContext context, String ability) {
+    return Chip(
+      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+      label: Text(
+        ability.toUpperCase().replaceAll('-', ' '),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
         ),
-      ],
+      ),
     );
   }
 }

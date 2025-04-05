@@ -1,62 +1,40 @@
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CacheService {
-  static const String _pokemonListKey = 'pokemon_list';
-  static const String _pokemonDetailKey = 'pokemon_detail_';
-  static const Duration _cacheDuration = Duration(hours: 24);
-
   final SharedPreferences _prefs;
+  final Duration _cacheDuration = const Duration(hours: 24);
 
   CacheService(this._prefs);
 
-  Future<void> cachePokemonList(List<dynamic> pokemons) async {
-    final data = {
-      'timestamp': DateTime.now().toIso8601String(),
-      'data': pokemons,
+  Future<bool> saveData(String key, Map<String, dynamic> data) async {
+    final cacheData = {
+      'data': data,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
-    await _prefs.setString(_pokemonListKey, jsonEncode(data));
+    return await _prefs.setString(key, json.encode(cacheData));
   }
 
-  Future<List<dynamic>?> getCachedPokemonList() async {
-    final jsonString = _prefs.getString(_pokemonListKey);
-    if (jsonString == null) return null;
-
-    final data = jsonDecode(jsonString);
-    final timestamp = DateTime.parse(data['timestamp']);
-    if (DateTime.now().difference(timestamp) > _cacheDuration) {
-      await _prefs.remove(_pokemonListKey);
+  Future<Map<String, dynamic>?> getData(String key) async {
+    final cachedData = _prefs.getString(key);
+    if (cachedData == null) {
       return null;
     }
 
-    return data['data'];
-  }
+    final Map<String, dynamic> decodedCache = json.decode(cachedData);
+    final timestamp = decodedCache['timestamp'] as int;
+    final cacheDateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
-  Future<void> cachePokemonDetail(
-      String id, Map<String, dynamic> pokemon) async {
-    final data = {
-      'timestamp': DateTime.now().toIso8601String(),
-      'data': pokemon,
-    };
-    await _prefs.setString('$_pokemonDetailKey$id', jsonEncode(data));
-  }
-
-  Future<Map<String, dynamic>?> getCachedPokemonDetail(String id) async {
-    final jsonString = _prefs.getString('$_pokemonDetailKey$id');
-    if (jsonString == null) return null;
-
-    final data = jsonDecode(jsonString);
-    final timestamp = DateTime.parse(data['timestamp']);
-    if (DateTime.now().difference(timestamp) > _cacheDuration) {
-      await _prefs.remove('$_pokemonDetailKey$id');
+    if (DateTime.now().difference(cacheDateTime) > _cacheDuration) {
+      // Cache expirado
+      await _prefs.remove(key);
       return null;
     }
 
-    return data['data'];
+    return decodedCache['data'];
   }
 
-  Future<void> clearCache() async {
-    await _prefs.clear();
+  Future<bool> clearCache() async {
+    return await _prefs.clear();
   }
 }

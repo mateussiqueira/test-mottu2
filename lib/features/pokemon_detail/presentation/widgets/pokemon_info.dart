@@ -1,69 +1,54 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/domain/entities/pokemon.dart';
 
 class PokemonInfo extends StatelessWidget {
-  final String name;
-  final double height;
-  final double weight;
+  final Pokemon pokemon;
 
-  const PokemonInfo({
-    super.key,
-    required this.name,
-    required this.height,
-    required this.weight,
-  });
+  const PokemonInfo({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(
-            fontSize: AppConstants.titleLargeSize,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: AppConstants.spacingMedium),
-        Row(
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoItem(
-              'Height',
-              '${height.toStringAsFixed(1)} ${AppConstants.metersUnit}',
+            Text(
+              'Informações Básicas',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(width: AppConstants.spacingLarge),
-            _buildInfoItem(
-              'Weight',
-              '${weight.toStringAsFixed(1)} ${AppConstants.kilogramsUnit}',
-            ),
+            const SizedBox(height: 8),
+            infoRow(context, 'ID', '${pokemon.id}'),
+            infoRow(context, 'Altura', '${pokemon.height / 10} m'),
+            infoRow(context, 'Peso', '${pokemon.weight / 10} kg'),
+            infoRow(context, 'Experiência Base', '${pokemon.baseExperience}'),
           ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildInfoItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: AppConstants.bodyMediumSize,
-            color: Colors.grey[600],
+  Widget infoRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-        ),
-        const SizedBox(height: AppConstants.spacingSmall),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: AppConstants.bodyLargeSize,
-            fontWeight: FontWeight.w500,
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
