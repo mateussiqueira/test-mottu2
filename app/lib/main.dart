@@ -16,15 +16,20 @@ import 'presentation/pages/pokemon_list_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializar Firebase
-  await Firebase.initializeApp();
-  
-  // Configurar Firebase Crashlytics
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  // Inicializar Firebase (apenas se não estiver em modo web ou se tiver configuração)
+  try {
+    await Firebase.initializeApp();
+    
+    // Configurar Firebase Crashlytics
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  } catch (e) {
+    // Ignorar erros de inicialização do Firebase
+    debugPrint('Firebase não inicializado: $e');
+  }
   
   setupLocator();
   
@@ -48,6 +53,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      initialRoute: RouteNames.pokemonList,
+      getPages: locator<AppRouter>().routes,
+      defaultTransition: Transition.cupertino,
       home: ConnectivityWrapper(
         child: BlocProvider(
           create: (context) => PokemonBloc(locator<PokemonRepository>()),
