@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../../../../core/constants/route_names.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
 import '../widgets/pokemon_grid_item.dart';
 
@@ -32,9 +34,20 @@ class RelatedPokemonsPage extends StatelessWidget {
         itemCount: pokemons.length,
         itemBuilder: (context, index) {
           final pokemon = pokemons[index];
-          return Hero(
-            tag: 'pokemon-${pokemon.id}',
-            child: PokemonGridItem(pokemon: pokemon),
+          return GestureDetector(
+            onTap: () {
+              Get.toNamed(
+                RouteNames.pokemonDetail,
+                arguments: {
+                  'pokemon': pokemon,
+                  'fromSearch': false,
+                },
+              );
+            },
+            child: Hero(
+              tag: 'pokemon-${pokemon.id}',
+              child: PokemonGridItem(pokemon: pokemon),
+            ),
           );
         },
       ),

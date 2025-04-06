@@ -22,30 +22,32 @@ class PokemonTypeAbilitySection extends StatelessWidget {
         Wrap(
           spacing: 8,
           children: pokemon.types.map((type) {
-            return GestureDetector(
-              onTap: () async {
+            return ElevatedButton(
+              onPressed: () async {
+                print('Clicando no tipo: $type');
                 await controller.fetchPokemonsByType(type);
                 controller.navigateToRelatedPokemons(
                   controller.sameTypePokemons,
                   'Pokémons of type $type',
                 );
               },
-              child: Container(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white.withOpacity(0.2),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  type,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+              ),
+              child: Text(
+                type,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             );
@@ -64,30 +66,32 @@ class PokemonTypeAbilitySection extends StatelessWidget {
         Wrap(
           spacing: 8,
           children: pokemon.abilities.map((ability) {
-            return GestureDetector(
-              onTap: () async {
+            return ElevatedButton(
+              onPressed: () async {
+                print('Clicando na habilidade: $ability');
                 await controller.fetchPokemonsByAbility(ability);
                 controller.navigateToRelatedPokemons(
                   controller.sameAbilityPokemons,
                   'Pokémons with ability $ability',
                 );
               },
-              child: Container(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white.withOpacity(0.2),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  ability,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+              ),
+              child: Text(
+                ability,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             );
