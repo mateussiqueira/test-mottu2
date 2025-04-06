@@ -1,6 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'app_lifecycle_observer.dart';
 
 class CacheService {
   final SharedPreferences preferences;
@@ -53,5 +56,12 @@ class CacheService {
 
   Future<void> clearAll() async {
     await preferences.clear();
+  }
+  
+  Future<void> setupCacheClearOnAppClose() async {
+    WidgetsBinding.instance.addObserver(AppLifecycleObserver(
+      onDetach: () async => await clearCache(),
+      onHidden: () async => await clearCache(),
+    ));
   }
 }

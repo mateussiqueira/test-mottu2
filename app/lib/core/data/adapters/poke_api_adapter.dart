@@ -11,15 +11,32 @@ import 'poke_api_urls.dart';
 class PokeApiAdapter implements IPokeApiAdapter {
   final http.Client client;
   final SharedPreferences prefs;
+  final String baseUrl;
+  final Duration cacheDuration;
 
   PokeApiAdapter({
     required this.client,
     required this.prefs,
+    this.baseUrl = 'https://pokeapi.co/api/v2',
+    this.cacheDuration = const Duration(hours: 1),
   });
 
   @override
   Future<List<IPokemonEntity>> getPokemons(
       {int offset = 0, int limit = 20}) async {
+    final cacheKey = 'pokemon_list_${offset}_$limit';
+    
+    // Tentar obter do cache primeiro
+    final cachedData = await _getFromCache(cacheKey);
+    if (cachedData != null) {
+      final List<IPokemonEntity> pokemons = [];
+      for (final item in cachedData) {
+        pokemons.add(PokemonModel.fromJson(item) as IPokemonEntity);
+      }
+      return pokemons;
+    }
+    
+    // Se não estiver em cache, buscar da API
     final response = await client
         .get(Uri.parse(PokeApiUrls.getPokemons(offset: offset, limit: limit)));
 
@@ -29,6 +46,16 @@ class PokeApiAdapter implements IPokeApiAdapter {
       final pokemons = await Future.wait(
         results.map((result) => getPokemonByName(result['name'])),
       );
+      
+      // Salvar em cache
+      final List<Map<String, dynamic>> pokemonsJson = [];
+      for (final pokemon in pokemons) {
+        if (pokemon is PokemonModel) {
+          pokemonsJson.add(pokemon.toJson());
+        }
+      }
+      await _saveToCache(cacheKey, pokemonsJson);
+      
       return pokemons;
     } else {
       throw Exception('Failed to load pokemons');
@@ -118,6 +145,36 @@ class PokeApiAdapter implements IPokeApiAdapter {
 
   @override
   Future<void> clearCache() async {
-    await prefs.clear();
+    final keys = prefs.getKeys();
+    for (final key in keys) {
+      if (key.startsWith('pokemon_')) {
+        await prefs.remove(key);
+      }
+    }
+  }
+  
+  // Método auxiliar para salvar dados em cache
+  Future<void> _saveToCache(String key, dynamic data) async {
+    final jsonData = json.encode(data);
+    await prefs.setString(key, jsonData);
+    await prefs.setInt('${key}_timestamp', DateTime.now().millisecondsSinceEpoch);
+  }
+  
+  // Método auxiliar para recuperar dados do cache
+  Future<dynamic> _getFromCache(String key) async {
+    final timestamp = prefs.getInt('${key}_timestamp');
+    if (timestamp == null) return null;
+    
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - timestamp > cacheDuration.inMilliseconds) {
+      await prefs.remove(key);
+      await prefs.remove('${key}_timestamp');
+      return null;
+    }
+    
+    final jsonData = prefs.getString(key);
+    if (jsonData == null) return null;
+    
+    return json.decode(jsonData);
   }
 }
