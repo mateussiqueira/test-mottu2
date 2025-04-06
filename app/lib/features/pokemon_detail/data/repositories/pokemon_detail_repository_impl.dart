@@ -1,6 +1,8 @@
-import '../../../../core/domain/result.dart';
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/logging/i_logger.dart';
-import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity_impl.dart';
+import '../../../pokemon/domain/errors/failures.dart';
 import '../../domain/repositories/i_pokemon_detail_repository.dart';
 import '../datasources/pokemon_detail_remote_datasource.dart';
 
@@ -14,26 +16,29 @@ class PokemonDetailRepositoryImpl implements IPokemonDetailRepository {
   });
 
   @override
-  Future<Result<List<PokemonEntity>>> getPokemonsByType(String type) async {
+  Future<Either<PokemonFailure, List<PokemonEntityImpl>>> getPokemonsByType({
+    required String type,
+  }) async {
     try {
       final pokemons = await remoteDataSource.getPokemonsByType(type);
-      return Result.success(pokemons);
+      return Right(pokemons);
     } catch (e, s) {
       logger.error('Error getting pokemons by type', error: e, stackTrace: s);
-      return Result.failure(e.toString());
+      return Left(PokemonApiFailure(e.toString()));
     }
   }
 
   @override
-  Future<Result<List<PokemonEntity>>> getPokemonsByAbility(
-      String ability) async {
+  Future<Either<PokemonFailure, List<PokemonEntityImpl>>> getPokemonsByAbility({
+    required String ability,
+  }) async {
     try {
       final pokemons = await remoteDataSource.getPokemonsByAbility(ability);
-      return Result.success(pokemons);
+      return Right(pokemons);
     } catch (e, s) {
       logger.error('Error getting pokemons by ability',
           error: e, stackTrace: s);
-      return Result.failure(e.toString());
+      return Left(PokemonApiFailure(e.toString()));
     }
   }
 }

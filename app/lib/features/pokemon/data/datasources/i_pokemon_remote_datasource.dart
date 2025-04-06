@@ -1,37 +1,40 @@
-import '../../domain/entities/pokemon_entity.dart';
+import '../../domain/entities/pokemon_entity_impl.dart';
 
 /// Interface for remote data source
 abstract class IPokemonRemoteDataSource {
   /// Get a list of Pokemon with pagination
-  Future<List<PokemonEntity>> getPokemonList({
-    int? offset,
-    int? limit,
+  Future<List<PokemonEntityImpl>> getPokemonList({
+    required int offset,
+    required int limit,
   });
 
   /// Get a Pokemon by ID
-  Future<PokemonEntity> getPokemonById(int id);
+  Future<PokemonEntityImpl> getPokemonById(int id);
 
   /// Search Pokemon by query
-  Future<List<PokemonEntity>> searchPokemon(String query);
+  Future<List<PokemonEntityImpl>> searchPokemon(String query);
+  
+  /// Search Pokemon by query (alias for searchPokemon)
+  Future<List<PokemonEntityImpl>> searchPokemons(String query);
 
   /// Get Pokemon by type
-  Future<List<PokemonEntity>> getPokemonsByType(String type);
+  Future<List<PokemonEntityImpl>> getPokemonsByType(String type);
 
   /// Get Pokemon by ability
-  Future<List<PokemonEntity>> getPokemonsByAbility(String ability);
+  Future<List<PokemonEntityImpl>> getPokemonsByAbility(String ability);
 
   /// Get Pokemon by move
-  Future<List<PokemonEntity>> getPokemonsByMove(String move);
+  Future<List<PokemonEntityImpl>> getPokemonsByMove(String move);
 
   /// Get Pokemon by evolution
-  Future<List<PokemonEntity>> getPokemonsByEvolution(String evolution);
+  Future<List<PokemonEntityImpl>> getPokemonsByEvolution(String evolution);
 
   /// Get Pokemon by stat
-  Future<List<PokemonEntity>> getPokemonsByStat(String stat, int value);
+  Future<List<PokemonEntityImpl>> getPokemonsByStat(String stat, int value);
 
   /// Get Pokemon by description
-  Future<List<PokemonEntity>> getPokemonsByDescription(String description);
+  Future<List<PokemonEntityImpl>> getPokemonsByDescription(String description);
 
   /// Get Pokemon by name
-  Future<PokemonEntity> getPokemonByName(String name);
+  Future<PokemonEntityImpl> getPokemonByName(String name);
 }

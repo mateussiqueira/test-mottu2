@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../core/di/service_locator.dart';
+import '../data/datasources/i_pokemon_remote_datasource.dart';
 import '../data/datasources/pokemon_remote_data_source_impl.dart';
 import '../data/repositories/pokemon_repository_impl.dart';
 import '../domain/repositories/i_pokemon_repository.dart';
@@ -74,5 +76,37 @@ class PokemonModule extends GetxService {
     Get.lazyPut<PokemonBloc>(
       () => PokemonBloc(Get.find<IPokemonRepository>()),
     );
+  }
+  
+  /// Setup method for registering dependencies with the service locator
+  void setup() {
+    final remoteDataSource = locator<IPokemonRemoteDataSource>();
+    final repository = PokemonRepositoryImpl(remoteDataSource);
+    
+    locator.registerLazySingleton<IPokemonRepository>(() => repository);
+    
+    // Register use cases
+    locator.registerFactory<list.GetPokemonList>(
+        () => list.GetPokemonList(locator()));
+    locator.registerFactory<id.GetPokemonById>(
+        () => id.GetPokemonById(locator()));
+    locator.registerFactory<search.SearchPokemon>(
+        () => search.SearchPokemon(locator()));
+    locator.registerFactory<type.GetPokemonsByType>(
+        () => type.GetPokemonsByType(locator()));
+    locator.registerFactory<ability.GetPokemonsByAbility>(
+        () => ability.GetPokemonsByAbility(locator()));
+    locator.registerFactory<move.GetPokemonsByMove>(
+        () => move.GetPokemonsByMove(locator()));
+    locator.registerFactory<evolution.GetPokemonsByEvolution>(
+        () => evolution.GetPokemonsByEvolution(locator()));
+    locator.registerFactory<stat.GetPokemonsByStat>(
+        () => stat.GetPokemonsByStat(locator()));
+    locator.registerFactory<description.GetPokemonsByDescription>(
+        () => description.GetPokemonsByDescription(locator()));
+        
+    // Register bloc
+    locator.registerFactory<PokemonBloc>(
+        () => PokemonBloc(locator()));
   }
 }

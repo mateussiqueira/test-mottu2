@@ -5,6 +5,7 @@ import '../../../../core/logging/i_logger.dart';
 import '../../../../core/performance/i_performance_monitor.dart';
 import '../../../../core/state/base_state_controller.dart';
 import '../../../pokemon/domain/entities/pokemon_entity.dart';
+import '../../../pokemon/domain/entities/pokemon_entity_impl.dart';
 import '../../../pokemon/domain/repositories/i_pokemon_repository.dart';
 import 'i_pokemon_detail_controller.dart';
 
@@ -56,7 +57,8 @@ class PokemonDetailController extends BaseStateController
               error: failure, data: {'type': type});
         },
         (pokemons) {
-          _sameTypePokemons.value = pokemons;
+          final List<PokemonEntity> typedPokemons = pokemons.cast<PokemonEntity>();
+          _sameTypePokemons.value = typedPokemons;
           logger.info(
             'Successfully fetched Pokemon by type',
             data: {'type': type, 'count': pokemons.length},
@@ -85,7 +87,8 @@ class PokemonDetailController extends BaseStateController
               error: failure, data: {'ability': ability});
         },
         (pokemons) {
-          _sameAbilityPokemons.value = pokemons;
+          final List<PokemonEntity> typedPokemons = pokemons.cast<PokemonEntity>();
+          _sameAbilityPokemons.value = typedPokemons;
           logger.info(
             'Successfully fetched Pokemon by ability',
             data: {'ability': ability, 'count': pokemons.length},
