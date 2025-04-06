@@ -57,7 +57,10 @@ class PokemonApiClient {
               .toLowerCase()
               .contains(query.toLowerCase()))
           .toList();
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to search pokemons');
     }
@@ -73,7 +76,10 @@ class PokemonApiClient {
       final data = json.decode(response.body);
       final results =
           (data['pokemon'] as List).map((p) => p['pokemon']).toList();
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to load pokemons by type');
     }
@@ -89,7 +95,10 @@ class PokemonApiClient {
       final data = json.decode(response.body);
       final results =
           (data['pokemon'] as List).map((p) => p['pokemon']).toList();
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to load pokemons by ability');
     }
@@ -104,7 +113,10 @@ class PokemonApiClient {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final results = (data['learned_by_pokemon'] as List).toList();
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to load pokemons by move');
     }
@@ -119,7 +131,10 @@ class PokemonApiClient {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final results = await _processEvolutionChain(data['chain']);
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to load pokemons by evolution');
     }
@@ -134,7 +149,10 @@ class PokemonApiClient {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final results = await _filterPokemonsByStat(data['results'], stat, value);
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to load pokemons by stat');
     }
@@ -150,7 +168,10 @@ class PokemonApiClient {
       final data = json.decode(response.body);
       final results =
           await _filterPokemonsByDescription(data['results'], description);
-      return PokemonResponse(results: results);
+      return PokemonResponse(
+        count: data['count'] as int? ?? results.length,
+        results: results
+      );
     } else {
       throw Exception('Failed to load pokemons by description');
     }
